@@ -1,8 +1,9 @@
 Arquivo só para nao nos perdermos no que estamos fazendo. Depois dá para organizar num arquivo bonitinho.
 
-No site https://www.ogimet.com/ podemos pegar dados de 31 dias.
+No site https://www.ogimet.com/ podemos pegar dados de 31 dias. (Dados: https://www.ogimet.com/metars.phtml)
 
 Peguei 4 arquivos de meses diferentes (para termos, por exemplo, diferentes temperaturas no modelo).
+Os dados estao na pasta dados_treino.
 
 **Primavera:** 22 de outubro a 21 de novembro (2024)
 **Verão:** 20 de janeiro a 19 de fevereiro (2025)
