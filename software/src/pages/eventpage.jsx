@@ -35,7 +35,7 @@ function EventPage() {
           <p className="text-white">
             {description
               .slice(3, -5)
-              .replace(regex, (match) => mapa(match) | match)}
+              .replace(regex, (match) => mapa[match] | match)}
           </p>
         </div>
       </div>
