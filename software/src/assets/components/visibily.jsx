@@ -3,14 +3,25 @@ import React from "react";
 function Visibility() {
   let data = new Date();
 
+  const level = 100;
+
   return (
-    <div className="p-4 bg-purple-800 rounded-2xl shadow-md text-slate-200 hover:shadow-lg transition">
-      <h1 className="text-lg font-bold mb-2">
-        {" "}
-        {data.toString().slice(0, 15)}
-      </h1>
-      /*aqui temos que chamar alguma função que verifica a nossa saida (nível de
-      visilibidade) e associar a uma imagem*/
+    <div className="bg-purple-800 rounded-lg p-4 mt-6 shadow w-full max-w-3xl mx-auto">
+      <div className="flex justify-between text-white mb-2">
+        <span className="font-bold">Today</span>
+        <span>{data.toString().slice(0, 11)}</span>
+      </div>
+      <div className="w-80 bg-purple-900 h-4 rounded-md">
+        <div
+          className="h-4 bg-gradient-to-r from-red-500 via-yellow-400 to-green-500 rounded-full"
+          style={{ width: `${level}%` }}
+        />
+      </div>
+      <div className="flex justify-between text-slate-300 w-80 text-sm mt-1">
+        <span>Poor</span>
+        <span>Moderate</span>
+        <span>Excellent</span>
+      </div>
     </div>
   );
 }
