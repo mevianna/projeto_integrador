@@ -1,8 +1,8 @@
-import React from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 function Info() {
   const navigate = useNavigate();
+  const [cloudiness, setCloudiness] = useState();
 
   navigator.geolocation.getCurrentPosition((pos) => {
     const lat = pos.coords.latitude;
