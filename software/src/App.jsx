@@ -4,6 +4,7 @@ import StarsBackground from "./assets/components/stars";
 import "./index.css";
 import Visibility from "./assets/components/visibily";
 import Info from "./assets/components/info";
+import CloudInfo from "./components/CloudInfo"; // Linha adicionada
 
 function App() {
   const [events, setEvents] = useState(
@@ -14,7 +15,6 @@ function App() {
     localStorage.setItem("events", JSON.stringify(events));
   }, [events]);
 
-  // quando passado a lista vazia ele chama apenas uma vez
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -53,6 +53,7 @@ function App() {
           <h1 className="text-3xl text-slate-200 font-bold text-center">
             Sky Visibility
           </h1>
+          <CloudInfo /> {/* Tag do componente adicionada */}
           <Visibility />
           <Info />
         </div>
