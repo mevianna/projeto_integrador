@@ -5,6 +5,7 @@ function Events(props) {
   const mapa = {
     "&deg;": "°",
     "&#39;": "'",
+    "&ndash": "-",
   };
 
   const regex = new RegExp(Object.keys(mapa).join("|"), "g");
@@ -20,7 +21,7 @@ function Events(props) {
   const filteredEvents = props.events.filter(
     (event) =>
       event.title.toLowerCase().includes("away") ||
-      event.description?.toLowerCase().includes("away")
+      event.title.toLowerCase().includes("tomorrow")
   );
 
   return (
