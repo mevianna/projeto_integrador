@@ -1,12 +1,29 @@
-import React from "react";
+import { useEffect, useState } from "react";
+import { getCloudCover } from "/home/beatriz/react/projeto_integrador/software/src/services/cloudService.jsx";
 
 function Visibility() {
+  const [cloud, setCloud] = useState({ value: null, time: null });
+  const [loading, setLoading] = useState(true);
+
+  async function fetchCloud() {
+    setLoading(true);
+    const data = await getCloudCover();
+    setCloud(data);
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    fetchCloud();
+    const timer = setInterval(fetchCloud, 10 * 60 * 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   let data = new Date();
 
-  const level = 70;
+  const level = -(cloud.value - 100);
 
   return (
-    <div className="bg-purple-800 rounded-lg p-4 mt-6 shadow w-full max-w-3xl mx-auto">
+    <div className="bg-purple-800 rounded-lg p-4 mt-6 shadow w-full max-w-3xl mx-auto space-y-4">
       <div className="flex justify-between text-white mb-2">
         <span className="font-bold">Today</span>
         <span>{data.toString().slice(0, 11)}</span>
@@ -21,6 +38,14 @@ function Visibility() {
         <span>Poor</span>
         <span>Moderate</span>
         <span>Excellent</span>
+      </div>
+      <div className="flex justify-between text-white mb-2">
+        <small className="text-sm text-slate-400">
+          Updated: {new Date(cloud.time).toLocaleTimeString()}
+        </small>
+        <small className="text-sm font-bold text-slate-200">
+          {cloud.value}% cloud cover
+        </small>
       </div>
     </div>
   );
