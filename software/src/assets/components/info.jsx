@@ -1,14 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 function Info() {
   const navigate = useNavigate();
-  const [cloudiness, setCloudiness] = useState();
-
-  navigator.geolocation.getCurrentPosition((pos) => {
-    const lat = pos.coords.latitude;
-    const lon = pos.coords.longitude;
-    console.log(lat, lon);
-  });
 
   function ViewHistory() {
     const query = new URLSearchParams();
