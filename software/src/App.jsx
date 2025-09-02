@@ -69,7 +69,7 @@ function App() {
       <div>
         <button
           onClick={() => ViewAbout()}
-          className="absolute top-4 right-4 p-3 z-50 mt-3 px-3 py-3 text-sm bg-purple-600 hover:bg-purple-700 rounded-lg"
+          className="absolute top-3 right-2 sm:top-5 sm:right-3 md:top-10 md:right-6 p-2 sm:p-2 md:p-3 z-50 mt-3 text-sm bg-purple-600 hover:bg-purple-700 rounded-lg"
         >
           <InfoIcon />
         </button>
