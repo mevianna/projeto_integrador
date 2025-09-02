@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Info() {
@@ -10,8 +9,8 @@ function Info() {
   }
 
   return (
-    <div className="bg-purple-800 rounded-lg p-4 mt-6 shadow w-full max-w-3xl mx-auto">
-      <div className="flex text-2x font-bold items-center text-slate-200 gap-20">
+    <div className="bg-purple-800 rounded-lg p-4 sm:p-6 md:p-8 mt-6 shadow w-full max-w-5xl mx-auto flex flex-col">
+      <div className="flex text-sm md:text-xl font-bold items-center text-slate-200 gap-20">
         <div>
           <p>Temperature: </p>
           <p>Humidity: </p>

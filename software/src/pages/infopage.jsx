@@ -10,7 +10,7 @@ function InfoPage() {
       <StarsBackground />
       <div className="absolute inset-0 flex justify-around items-start p-10">
         <div className=" bg-purple-950 flex justify-center p-10">
-          <div className=" space-y-4 w-[500px]">
+          <div className=" space-y-4 w-[900px]">
             <div className="flex justify-center relative">
               <button
                 onClick={() => navigate(-1)}

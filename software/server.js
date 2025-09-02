@@ -3,15 +3,14 @@ import fetch from "node-fetch";
 import cors from "cors";
 
 const app = express();
-app.use(cors()); // libera CORS para o React
-
+app.use(cors());
 const PORT = 4000;
 
 app.get("/events", async (req, res) => {
   try {
     const response = await fetch("https://in-the-sky.org/rss.php");
     const text = await response.text();
-    res.send(text); // devolve o XML puro
+    res.send(text);
   } catch (err) {
     res.status(500).send({ error: err.message });
   }
