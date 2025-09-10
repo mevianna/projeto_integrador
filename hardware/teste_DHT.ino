@@ -6,10 +6,11 @@
 #include <DHT.h>
 #include <DHT_U.h>
 
-#define DHTTYPE DHT11
-//#define DHTTYPE DHT22
+// Definição de qual sensor está sendo usado
+//#define DHTTYPE DHT11
+#define DHTTYPE DHT22
 
-#define DHTPIN 2
+#define DHTPIN 18
 
 // Cria um objeto do tipo DHT_Unified, o qual contém dois sub-objetos:
 // um para temperatura e outro para umidade.
@@ -21,7 +22,7 @@ uint32_t delayMS;
 void setup()
 {
   // Inicializa o sensor DHT e a comunicação serial
-  Serial.begin(9600);
+  Serial.begin(115200);
   dht.begin();
 
   Serial.println("Usando o Sensor DHT");
@@ -54,7 +55,7 @@ void setup()
 
 void loop()
 {
-  delay(delayMS);
+  delay(5000);
   // Inicializa o evento (estrutura que contém dados lidos) de temperatura e umidade
   sensors_event_t event;
 
@@ -73,10 +74,10 @@ void loop()
 
   // Realiza a leitura dos dados de umidade. Se for inválido (x), mostra uma mensagem de erro. 
   dht.humidity().getEvent(&event);
+  
   if (isnan(event.relative_humidity))
-  {
     Serial.println("Erro na leitura da Umidade!");
-  }
+
   else
   {
     Serial.print("Umidade: ");
