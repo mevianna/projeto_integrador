@@ -2,6 +2,7 @@
 #include <Wire.h> // Faz a conexão I2C interna com <Adafruit_BMP280.h>
 #include <Adafruit_BMP280.h>
 
+#define I2C_ADDRESS 0x76 // Ou 0x77. No módulo usado, com base em testes, descobriu-se que é 0x76
 // Cria um objeto do sensor BMP
 Adafruit_BMP280 bmp;
 
@@ -9,9 +10,6 @@ void setup() {
   // Inicializa a serial e o sensor
   Serial.begin(115200);
   Serial.println(F("BMP280 teste"));
-
-  delay(2000);
-  Serial.println("Serial funcionando!");
 
   /* Testa se o sensor foi corretamente inicializado. Se não foi, mostra mensagem
   de erro e o ID do sensor para possível erro
@@ -22,15 +20,13 @@ void setup() {
   * 0x61 - representa um BME 680 */
   bmp.begin();
   
-  if (!bmp.begin(0x76)) {
-    if (!bmp.begin(0x77)) {
-      Serial.println("Sensor não encontrado!");
-      Serial.println(F("Could not find a valid BMP280 sensor, check wiring or "
-                      "try a different address!"));
-      Serial.print("SensorID: 0x");
-      Serial.println(bmp.sensorID(),16);
-      while(1);
-    }
+  if (!bmp.begin(I2C_ADDRESS)) {
+    Serial.println("Sensor não encontrado!");
+    Serial.println(F("Could not find a valid BMP280 sensor, check wiring or "
+                    "try a different address!"));
+    Serial.print("SensorID: 0x");
+    Serial.println(bmp.sensorID(),16);
+    while(1);
   }
 }
 
