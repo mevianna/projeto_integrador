@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getCloudCover } from "/home/beatriz/react/projeto_integrador/software/src/services/cloudService.jsx";
+import { getCloudCover } from "../../services/cloudService";
 
 function Visibility() {
   const [cloud, setCloud] = useState({ value: 0, time: null });

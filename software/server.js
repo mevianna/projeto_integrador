@@ -5,6 +5,9 @@ import cors from "cors";
 const app = express();
 app.use(cors());
 const PORT = 4000;
+app.use(express.json());
+
+let dadosESP = {};
 
 app.get("/events", async (req, res) => {
   try {
@@ -16,6 +19,17 @@ app.get("/events", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor proxy rodando em http://localhost:${PORT}`);
+// rota para receber dados do ESP32
+app.post("/dados", (req, res) => {
+  dadosESP = req.body;
+  res.send("OK");
+});
+
+// permite acesso aos dados do ESP32
+app.get("/dados", (req, res) => {
+  res.json(dadosESP);
+});
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log("Servidor rodando na rede!");
 });
