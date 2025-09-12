@@ -9,7 +9,7 @@ function Info() {
   }
 
   return (
-    <div className="bg-purple-800 rounded-lg p-4 sm:p-6 md:p-8 mt-6 shadow w-full max-w-5xl mx-auto flex flex-col">
+    <div className="bg-purple-800 rounded-3xl p-4 sm:p-6 md:p-8 mt-6 shadow w-full max-w-5xl mx-auto flex flex-col">
       <div className="flex text-sm md:text-xl font-bold items-center text-slate-200 gap-20">
         <div>
           <p>Temperature: </p>

@@ -16,6 +16,7 @@ export async function getCloudCover() {
 
   console.log(lat, lon);
   try {
+    console.log(url);
     const response = await fetch(url);
     if (!response.ok) throw new Error("Open-Meteo request error");
     const data = await response.json();

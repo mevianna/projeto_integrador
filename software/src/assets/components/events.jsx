@@ -20,7 +20,7 @@ function Events({ events = [] }) {
   });
 
   if (!events || events.length === 0)
-    return <div className="text-slate-300 p-4">Carregando eventos...</div>;
+    return <div className="text-slate-300 p-4">Loading events...</div>;
 
   if (filteredEvents.length === 0)
     return (
@@ -57,7 +57,7 @@ function Events({ events = [] }) {
         return (
           <div
             key={key}
-            className="p-4 bg-purple-800 rounded-2xl shadow-md text-slate-200 hover:shadow-lg transition"
+            className="p-4 bg-purple-800 rounded-3xl shadow-md text-slate-200 hover:shadow-lg transition"
           >
             <h2 className="text-lg font-bold mb-2">{displayedTitle}</h2>
             <p className="text-sm mb-2">{descProcessed}</p>

@@ -16,24 +16,30 @@ function Visibility() {
     fetchCloud();
     const timer = setInterval(fetchCloud, 10 * 60 * 1000);
     return () => clearInterval(timer);
-  }, [cloud]);
+  }, []);
 
   let data = new Date();
   const level = Math.max(0, Math.min(100, -(cloud.value - 100)));
 
   return (
-    <div className="bg-purple-800 rounded-lg p-4 sm:p-6 md:p-8 mt-6 shadow  w-full max-h-5xl mx-auto space-y-4">
+    <div className="bg-purple-800 rounded-3xl p-4 sm:p-6 md:p-8 mt-6 shadow  w-full max-h-5xl mx-auto space-y-4">
       <div className="flex justify-between text-white mb-2">
         <span className="font-bold">Today</span>
         <span>{data.toString().slice(0, 11)}</span>
       </div>
-      <div className="w-100 bg-purple-900 h-6 rounded-md">
+      <div className="w-100 bg-purple-900 h-6 rounded-full text-slate-200 font-bold ">
         <div
-          className="h-6 bg-gradient-to-r from-red-500 via-yellow-400 to-green-500 rounded-full"
+          className="h-6 bg-gradient-to-r from-red-500 via-yellow-400 to-green-500 rounded-full text-right px-2 font-bold text-sm text-slate-200"
           style={{ width: `${level}%` }}
-        />
+        ></div>
+        <div
+          className="text-sm font-bold text-slate-200 mx-auto py-1"
+          style={{ transform: `translateX(${level - 2}%)` }}
+        >
+          {level}%
+        </div>
       </div>
-      <div className="flex justify-between text-slate-300 w-100 text-sm mt-1">
+      <div className="flex justify-between text-slate-300 w-100 text-sm mt-1 py-3">
         <span>Poor</span>
         <span>Moderate</span>
         <span>Excellent</span>

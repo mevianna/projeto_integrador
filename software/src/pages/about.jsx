@@ -6,9 +6,9 @@ function AboutPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="w-screen h-screen relative">
+    <div className="h-screen w-full min-h-screen flex justify-center gap-4 p-4 relative overflow-x-hidden">
       <StarsBackground />
-      <div className="absolute inset-0 flex justify-around items-start p-10">
+      <div className="inset-0 sm:p-6 md:p-8 p-4 relative z-10 flex flex-col items-center space-y-6 w-full max-w-5xl">
         <div className=" bg-purple-950 flex justify-center p-10">
           <div className=" space-y-4 w-[800px]">
             <div className="flex justify-center relative">
@@ -48,16 +48,8 @@ function AboutPage() {
               </div>
               <div className="flex flex-wrap space-x-20 justify-center">
                 <img
-                  className="rounded-full object-cover h-[150px] w-[150px]"
-                  src="https://avatars.githubusercontent.com/u/197432407?v=4"
-                ></img>
-                <img
-                  className="rounded-full object-cover h-[150px] w-[150px]"
-                  src="https://avatars.githubusercontent.com/u/178849007?v=4"
-                ></img>
-                <img
-                  className="rounded-full object-cover h-[150px] w-[150px]"
-                  src="https://avatars.githubusercontent.com/u/160762179?v=4"
+                  className="object-cover h-[430px] w-auto"
+                  src="astrodivas"
                 ></img>
               </div>
             </div>

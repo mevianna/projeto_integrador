@@ -42,6 +42,33 @@ def get_first_image():
 
     except requests.exceptions.RequestException as e:
         return jsonify({'error': f'Erro ao acessar o site: {e}'}), 500
+    
+@app.route('/get_icon', methods=['POST'])
+def get_icon():
+    data = request.get_json()
+    link_site = data.get('link')
+
+    if not link_site:
+        return jsonify({'error': 'Link do site não fornecido.'}), 400
+
+    try:
+        res = requests.get(link_site)
+        res.raise_for_status() 
+        
+        dados = BeautifulSoup(res.text, "html.parser")
+        imagens = dados.find_all('img')  # pega todas as imagens
+
+        if len(imagens) > 1:
+            segundo_icon = imagens[1]   # segunda imagem
+            alt_text = segundo_icon.get('alt', 'Sem alt disponível')
+            return jsonify({'icon_alt': alt_text})
+        else:
+            return jsonify({'error': 'Menos de duas imagens encontradas.'}), 404
+
+    except requests.exceptions.RequestException as e:
+        return jsonify({'error': f'Erro ao acessar o site: {e}'}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
+

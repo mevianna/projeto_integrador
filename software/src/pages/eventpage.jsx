@@ -20,6 +20,7 @@ function EventPage() {
   const link = searchParams.get("link") || "";
 
   const [imageUrl, setImageUrl] = useState(null);
+  const [iconalt, setIconAlt] = useState(null);
   const [loadingImage, setLoadingImage] = useState(true);
   const [errorImage, setErrorImage] = useState(null);
 
@@ -61,6 +62,32 @@ function EventPage() {
     }
   }, [link]);
 
+  useEffect(() => {
+    if (link) {
+      const fetchIcon = async () => {
+        try {
+          const response = await fetch("http://127.0.0.1:5000/get_icon", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ link: link }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Erro na API: ${response.status}`);
+          }
+
+          const data = await response.json();
+          setIconAlt(data.icon_alt);
+        } catch (error) {
+          console.error("Erro ao buscar icone:", error);
+        }
+      };
+      fetchIcon();
+    }
+  }, [link]);
+
   const getProcessedTitle = () => {
     if (!title) return "Título não disponível";
 
@@ -89,7 +116,7 @@ function EventPage() {
       <StarsBackground />
       <div className="absolute inset-0 flex justify-around items-start p-10">
         <div className="bg-purple-950 flex justify-center p-10">
-          <div className="space-y-4 w-[500px]">
+          <div className="space-y-4 w-[800px]">
             <div className="flex justify-center relative">
               <button
                 onClick={() => navigate(-1)}
@@ -101,36 +128,56 @@ function EventPage() {
                 Description
               </h1>
             </div>
-            <div className="space-y-4 bg-purple-800 p-6 rounded-md shadow">
-              <h2 className="text-xl text-white font-bold">
-                {getProcessedTitle()}
-              </h2>
+            <div className="space-y-4 bg-purple-800 p-6 rounded-3xl border-purple-900 border-y-2 border-x-2shadow">
+              <div className="flex gap-4">
+                <div className="">
+                  {loadingImage && (
+                    <p className="text-white text-center">Loading Image...</p>
+                  )}
 
-              {loadingImage && (
-                <p className="text-white text-center">Loading Image...</p>
-              )}
+                  {errorImage && (
+                    <p className="text-red-400 text-center">
+                      Erro ao carregar imagem: {errorImage}
+                    </p>
+                  )}
 
-              {errorImage && (
-                <p className="text-red-400 text-center">
-                  Erro ao carregar imagem: {errorImage}
+                  {imageUrl && (
+                    <img
+                      className="rounded-3xl h-auto w-50 object-cover"
+                      src={imageUrl}
+                      alt="Imagem do evento"
+                      onError={(e) => {
+                        console.error("Erro ao carregar imagem");
+                        e.target.style.display = "none";
+                      }}
+                    />
+                  )}
+                </div>
+                <div className="text-left flex-1">
+                  <h2 className="text-xl text-white font-bold">
+                    {getProcessedTitle()}
+                  </h2>
+                  <p className="text-white whitespace-pre-wrap py-1 ">
+                    {getProcessedDescription()}
+                  </p>
+                  {iconalt && (
+                    <p className="text-white whitespace-pre-wrap py-4">
+                      {iconalt.split("from")[0]}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-purple-950 justify-center p-4 rounded-3xl">
+                <h1 className="text-slate-200 text-lg font-bold mb-2">
+                  ⚠️ Safety Notice
+                </h1>
+                <p className="text-slate-300 whitespace-pre-wrap ">
+                  Never look directly at the Sun without certified solar filters
+                  (ISO 12312-2). Do not use sunglasses, glass, or improvised
+                  methods. For nighttime observations, choose safe locations.
                 </p>
-              )}
-
-              {imageUrl && (
-                <img
-                  className="rounded-md h-auto  object-cover"
-                  src={imageUrl}
-                  alt="Imagem do evento"
-                  onError={(e) => {
-                    console.error("Erro ao carregar imagem");
-                    e.target.style.display = "none";
-                  }}
-                />
-              )}
-
-              <p className="text-white whitespace-pre-wrap">
-                {getProcessedDescription()}
-              </p>
+              </div>
             </div>
           </div>
         </div>
