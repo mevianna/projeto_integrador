@@ -11,25 +11,42 @@ function Info() {
     uvClassificacao: "-"
   });
 
-  async function fetchData() {
+  // função que busca dados do ESP32 e salva no banco automaticamente
+  async function fetchAndSaveData() {
     try {
-      const response = await fetch("http://IP_PC:4000/dados"); // alterar o IP de acordo com o IP do PC
+      // busca os dados do ESP32
+      const response = await fetch("http://192.168.100.204:4000/dados");
       const data = await response.json();
       setSensorData(data);
+
+      // atualiza os dados no servidor
+      await fetch("http://192.168.100.204:4000/dados", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      // salva os dados no banco imediatamente
+      await fetch("http://192.168.100.204:4000/dados/salvar", {
+        method: "POST",
+      });
+
     } catch (error) {
-      console.error("Erro ao buscar dados:", error);
+      console.error("Erro ao atualizar/salvar dados:", error);
     }
   }
 
   useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 100000); // atualiza a cada 100s
+    // primeira execução
+    fetchAndSaveData();
+
+    // repete a cada 100s
+    const interval = setInterval(fetchAndSaveData, 100000);
     return () => clearInterval(interval);
   }, []);
 
   function ViewHistory() {
-    const query = new URLSearchParams();
-    navigate(`/history?`);
+    navigate("/history");
   }
 
   return (
@@ -48,12 +65,12 @@ function Info() {
           <p>UV Index: {sensorData.uvClassificacao}</p>
         </div>
       </div>
-      <div className="justify-end flex">
+      <div className="justify-end flex gap-3 mt-3">
         <button
-          onClick={() => ViewHistory()}
-          className="mt-3 px-3 py-1 text-sm text-slate-200 bg-purple-600 hover:bg-purple-700 rounded-lg"
+          onClick={ViewHistory} // redireciona para histórico
+          className="px-3 py-1 text-sm text-slate-200 bg-purple-600 hover:bg-purple-700 rounded-lg"
         >
-          View history
+          View History
         </button>
       </div>
     </div>

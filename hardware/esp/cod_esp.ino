@@ -151,12 +151,12 @@ void enviarJSON() {
   HTTPClient http;
 
   WiFiClient client;
-  if (!client.connect("192.168.0.104", 4000)) Serial.println("Falha na conexão TCP com o servidor!");
+  if (!client.connect("IP_PC", 4000)) Serial.println("Falha na conexão TCP com o servidor!");
   else Serial.println("Conexão TCP estabelecida com sucesso!");
 
   // Substituir pelo IP do computador de quem está usando
   // para descobrir o IP, rode ipconfig no cmd e procure pelo endereço IPv4
-  http.begin("http://192.168.0.104:4000/dados");
+  http.begin("http://IP_PC:4000/dados");
   http.addHeader("Content-Type", "application/json");
 
   // Monta JSON

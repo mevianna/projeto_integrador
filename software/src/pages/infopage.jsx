@@ -13,7 +13,7 @@ function InfoPage() {
           <div className=" space-y-4 w-[900px]">
             <div className="flex justify-center relative">
               <button
-                onClick={() => navigate(-1)}
+                onClick={() => navigate("/history")}
                 className="absolute left-0 top-0 bottom-0 text-slate-100"
               >
                 <ChevronLeftIcon />
