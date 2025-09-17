@@ -15,6 +15,10 @@ function HistoryPage() {
       .catch((err) => console.error("Erro ao buscar histórico:", err));
   }, []);
 
+  function ViewGraphs() {
+    navigate("/history/graphs");
+  }
+
   return (
     <div className="w-screen h-screen relative">
       <StarsBackground />
@@ -31,6 +35,12 @@ function HistoryPage() {
               <h1 className="text-slate-200 text-center text-lg font-bold mb-2">
                 History
               </h1>
+              <div className="justify-end flex gap-3 mt-3">
+                <button onClick={ViewGraphs} // redireciona para graficos
+                className="px-3 py-1 absolute right-0 top-0 bottom-0 text-sm text-slate-200 bg-purple-600 hover:bg-purple-700 rounded-lg">
+                  View Graphs
+                </button>
+              </div>
             </div>
 
             {/* tabela de histórico */}

@@ -7,6 +7,7 @@ import EventsPage from "./pages/eventpage.jsx";
 import InfoPage from "./pages/infopage.jsx";
 import AboutPage from "./pages/about.jsx";
 import HistoryPage from "./pages/history.jsx";
+import GraphPages from "./pages/graphs.jsx";
 
 const router = createBrowserRouter([
   {
@@ -32,7 +33,12 @@ const router = createBrowserRouter([
   {
     path: "/info",
     element: <InfoPage />,
-  }
+  },
+
+  {
+    path: "/history/graphs",
+    element: <GraphPages />,
+  },
 ]);
 
 createRoot(document.getElementById("root")).render(

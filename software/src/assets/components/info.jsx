@@ -15,19 +15,19 @@ function Info() {
   async function fetchAndSaveData() {
     try {
       // busca os dados do ESP32
-      const response = await fetch("http://192.168.100.204:4000/dados");
+      const response = await fetch((`${window.location.origin}/dados`));
       const data = await response.json();
       setSensorData(data);
 
       // atualiza os dados no servidor
-      await fetch("http://192.168.100.204:4000/dados", {
+      await fetch(`${window.location.origin}/dados`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
       });
 
       // salva os dados no banco imediatamente
-      await fetch("http://192.168.100.204:4000/dados/salvar", {
+      await fetch(`${window.location.origin}/dados/salvar`, {
         method: "POST",
       });
 
