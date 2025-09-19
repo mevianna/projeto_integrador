@@ -6,8 +6,8 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import EventsPage from "./pages/eventpage.jsx";
 import InfoPage from "./pages/infopage.jsx";
 import AboutPage from "./pages/about.jsx";
-import HistoryPage from "./pages/history.jsx";
-import GraphPages from "./pages/graphs.jsx";
+import HistoryPage from "./pages/historypage.jsx";
+import GraphPages from "./pages/graphspage.jsx";
 
 const router = createBrowserRouter([
   {

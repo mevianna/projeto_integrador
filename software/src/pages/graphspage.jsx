@@ -31,9 +31,9 @@ function GraphsPage() {
   return (
     <div className="w-screen h-screen relative">
       <StarsBackground />
-      <div className="absolute inset-0 flex justify-around items-start p-10">
-        <div className="bg-purple-950 flex justify-center p-10 rounded-xl shadow-lg">
-          <div className="space-y-8 w-[900px]">
+        <div className="absolute inset-0 flex justify-around items-start p-10 w-screen h-screen">
+          <div className="bg-purple-950 flex justify-center">
+            <div className=" space-y-4 w-[900px]">
             <div className="flex justify-center relative">
               <button
                 onClick={() => navigate(-1)}
@@ -41,7 +41,7 @@ function GraphsPage() {
               >
                 <ChevronLeftIcon />
               </button>
-              <h1 className="text-slate-200 text-center text-lg font-bold mb-2">
+              <h1 className="text-slate-200 text-center text-xl font-bold mb-2">
                 Graphs
               </h1>
             </div>

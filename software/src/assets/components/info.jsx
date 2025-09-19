@@ -1,6 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
+const API_URL = "http://localhost:4000";
+
 function Info() {
   const navigate = useNavigate();
 
@@ -15,19 +17,19 @@ function Info() {
   async function fetchAndSaveData() {
     try {
       // busca os dados do ESP32
-      const response = await fetch((`${window.location.origin}/dados`));
+      const response = await fetch((`${API_URL}/dados`));
       const data = await response.json();
       setSensorData(data);
 
       // atualiza os dados no servidor
-      await fetch(`${window.location.origin}/dados`, {
+      await fetch(`${API_URL}/dados`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
       });
 
       // salva os dados no banco imediatamente
-      await fetch(`${window.location.origin}/dados/salvar`, {
+      await fetch(`${API_URL}/dados/salvar`, {
         method: "POST",
       });
 

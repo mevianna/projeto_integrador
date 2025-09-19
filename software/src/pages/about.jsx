@@ -6,7 +6,7 @@ function AboutPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="h-screen w-full min-h-screen flex justify-center gap-4 p-4 relative overflow-x-hidden">
+    <div className="w-full min-h-screen flex justify-center gap-4 p-4 relative overflow-x-hidden">
       <StarsBackground />
       <div className="inset-0 sm:p-6 md:p-8 p-4 relative z-10 flex flex-col items-center space-y-6 w-full max-w-5xl">
         <div className=" bg-purple-950 flex justify-center p-10">
