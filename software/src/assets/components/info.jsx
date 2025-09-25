@@ -43,7 +43,7 @@ function Info() {
     fetchAndSaveData();
 
     // repete a cada 100s
-    const interval = setInterval(fetchAndSaveData, 100000);
+    const interval = setInterval(fetchAndSaveData, 300000);
     return () => clearInterval(interval);
   }, []);
 

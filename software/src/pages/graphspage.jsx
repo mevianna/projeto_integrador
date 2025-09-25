@@ -55,8 +55,36 @@ function GraphsPage() {
                 <h2 className="text-slate-200 text-center text-lg font-bold mb-2">
                   Temperatura (°C)
                 </h2>
+                <div>
+                  <ResponsiveContainer width="100%" height={300}>
+                      <LineChart data={historico}>
+                        <CartesianGrid>
+                          <XAxis 
+                            dataKey="data" 
+                            tickFormatter={(value) => new Date(value).toLocaleTimeString()} 
+                            stroke="#ccc"
+                          />
+                          <YAxis 
+                            label={{ value: "°C", angle: -90, position: "insideBottom", fill: "#ccc" }} 
+                            stroke="#ccc"
+                          />
+                        </CartesianGrid>
+                      <Tooltip 
+                        labelFormatter={(value) => formatTime(value)} 
+                        formatter={(value) => [`${value} °C`, "Temperatura"]}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="temperatura" 
+                        stroke="#ff7300" 
+                        strokeWidth={2} 
+                        dot={true} 
+                        isAnimationActive={false} 
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
-              
             )}
           </div>
         </div>
