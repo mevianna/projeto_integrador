@@ -2,6 +2,7 @@ import { ChevronLeftIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import StarsBackground from "../assets/components/stars.jsx";
 import { useEffect, useState } from "react";
+import PropTypes from 'prop-types';
 
 import {
   LineChart,
@@ -13,6 +14,31 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    const formattedDate = new Intl.DateTimeFormat('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(new Date(label));
+    return (
+      <div style={{
+        backgroundColor: "#4B0082",
+        color: "#f2ff00",
+        padding: "10px",
+        borderRadius: "5px",
+        fontSize: "14px"
+      }}>
+        <p>{`Data: ${formattedDate}`}</p>
+        <p>{`Temperatura: ${payload[0].value}°C`}</p>
+        {payload[1] && <p>{`Umidade: ${payload[1].value}%`}</p>}
+      </div>
+    );
+  }
+  return null;
+};
+
 function GraphsPage() {
   const navigate = useNavigate();
   const [historico, setHistorico] = useState([]);
@@ -21,12 +47,15 @@ function GraphsPage() {
   useEffect(() => {
     fetch("http://localhost:4000/dados/historico")
       .then((res) => res.json())
-      .then((data) => setHistorico(data))
+      .then((data) => { // converte os dados
+        const formattedData = data.map(item => ({
+          ...item,
+          created_at: new Date(item.created_at) // mantém como Date mas convertido
+        }));
+        setHistorico(formattedData);
+      })
       .catch((err) => console.error("Erro ao buscar histórico:", err));
   }, []);
-
-  // formata o tempo para exibir no eixo X
-  const formatTime = (item) => new Date(item.data).toLocaleTimeString();
 
   return (
     <div className="w-screen h-screen relative">
@@ -57,29 +86,39 @@ function GraphsPage() {
                 </h2>
                 <div>
                   <ResponsiveContainer width="100%" height={300}>
-                      <LineChart data={historico}>
-                        <CartesianGrid>
-                          <XAxis 
-                            dataKey="data" 
-                            tickFormatter={(value) => new Date(value).toLocaleTimeString()} 
-                            stroke="#ccc"
-                          />
-                          <YAxis 
-                            label={{ value: "°C", angle: -90, position: "insideBottom", fill: "#ccc" }} 
-                            stroke="#ccc"
-                          />
-                        </CartesianGrid>
-                      <Tooltip 
-                        labelFormatter={(value) => formatTime(value)} 
-                        formatter={(value) => [`${value} °C`, "Temperatura"]}
+                    <LineChart
+                      data={historico}
+                      margin={{ top: 2, right: 10, left: 10, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                        dataKey="created_at"
+                        stroke="#ccc"
+                        tickFormatter={(value) =>
+                          new Intl.DateTimeFormat('pt-BR', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          }).format(new Date(value))
+                        }
                       />
-                      <Line 
-                        type="monotone" 
-                        dataKey="temperatura" 
-                        stroke="#ff7300" 
-                        strokeWidth={2} 
-                        dot={true} 
-                        isAnimationActive={false} 
+                      <YAxis
+                        domain={[0, 'auto']}
+                        label={{ value: "°C", angle: -90, position: "insideLeft", fill: "#ccc" }}
+                        stroke="#ccc"
+                      />
+                      <Tooltip
+                        content={<CustomTooltip />}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="temperatura"
+                        stroke="#f2ff00"
+                        strokeWidth={2}
+                        dot={true}
+                        isAnimationActive={false}
+                        activeDot={{ r: 8 }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
