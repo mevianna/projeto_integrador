@@ -28,13 +28,8 @@ function Info() {
         body: JSON.stringify(data)
       });
 
-      // salva os dados no banco imediatamente
-      await fetch(`${API_URL}/dados/salvar`, {
-        method: "POST",
-      });
-
     } catch (error) {
-      console.error("Erro ao atualizar/salvar dados:", error);
+      console.error("Erro ao atualizar dados:", error);
     }
   }
 
@@ -42,8 +37,8 @@ function Info() {
     // primeira execução
     fetchAndSaveData();
 
-    // repete a cada 100s
-    const interval = setInterval(fetchAndSaveData, 300000);
+    // repete a cada 10 minutos
+    const interval = setInterval(fetchAndSaveData, 600000);
     return () => clearInterval(interval);
   }, []);
 
