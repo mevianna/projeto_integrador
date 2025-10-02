@@ -8,8 +8,10 @@ const app = express();
 app.use(cors());
 const PORT = 4000;
 app.use(express.json());
-let dadosESP = {};
 
+let dadosESP = {}; // último dado recebido
+
+// rota para eventos externos
 app.get("/events", async (req, res) => {
   try {
     const response = await fetch("https://in-the-sky.org/rss.php");
@@ -24,18 +26,24 @@ app.get("/events", async (req, res) => {
 app.post("/dados", (req, res) => {
   dadosESP = req.body;
   res.json({ ok: true });
+
+  // salva imediatamente na primeira vez que receber dados
+  if (!app.locals.primeiraConexao) {
+    salvarUltimoDado();
+    app.locals.primeiraConexao = true;
+  }
 });
 
+// função para salvar último dado
 function salvarUltimoDado() {
   const { temperatura, umidade, pressaoAtm, uvClassificacao } = dadosESP;
 
   // não salva se não houver dados
   if (temperatura == null && umidade == null && pressaoAtm == null) {
-    console.log("Nenhum dado disponível para salvar na hora cheia");
+    console.log("Nenhum dado disponível para salvar");
     return;
   }
 
-  // verifica último registro para evitar duplicidade
   const last = db.prepare("SELECT * FROM leituras ORDER BY id DESC LIMIT 1").get();
 
   if (
@@ -62,13 +70,14 @@ function salvarUltimoDado() {
     new Date().toISOString()
   );
 
-  console.log(`Salvou dado da hora cheia: ${new Date().toISOString()}`);
+  console.log(`Salvou dado: ${new Date().toISOString()}`);
 }
 
-// agenda o salvamento a cada hora cheia usando node-cron
+// agenda o salvamento a cada hora redonda
 cron.schedule("0 0 * * * *", salvarUltimoDado);
+console.log("Agendamento de salvamento a cada hora cheia iniciado");
 
-// rota para acessar os dados atuais
+// rota para acessar dados atuais 
 app.get("/dados", (req, res) => {
   res.json(dadosESP);
 });
@@ -79,6 +88,6 @@ app.get("/dados/historico", (req, res) => {
   res.json(rows);
 });
 
-app.listen(PORT, "0.0.0.0", () => 
-  console.log("Servidor rodando na rede!")
-);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Servidor rodando na rede na porta ${PORT}`);
+});

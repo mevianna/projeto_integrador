@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, } from "react";
 
 const API_URL = "http://localhost:4000";
 
@@ -34,12 +34,24 @@ function Info() {
   }
 
   useEffect(() => {
-    // primeira execução
+    // primeira execução imediata
     fetchAndSaveData();
 
-    // repete a cada 10 minutos
-    const interval = setInterval(fetchAndSaveData, 600000);
-    return () => clearInterval(interval);
+    // calcula quanto tempo falta até a próxima hora cheia
+    const now = new Date();
+    const msAteProximaHora =
+      (60 - now.getMinutes()) * 60 * 1000 - now.getSeconds() * 1000 - now.getMilliseconds();
+
+    // agenda o primeiro update exatamente na próxima hora cheia
+    const timeout = setTimeout(() => {
+      fetchAndSaveData();
+
+      // depois disso, atualiza de hora em hora
+      const interval = setInterval(fetchAndSaveData, 3600000);
+      return () => clearInterval(interval);
+    }, msAteProximaHora);
+
+    return () => clearTimeout(timeout);
   }, []);
 
   function ViewHistory() {
