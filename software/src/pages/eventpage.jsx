@@ -21,6 +21,7 @@ function EventPage() {
 
   const [imageUrl, setImageUrl] = useState(null);
   const [iconalt, setIconAlt] = useState(null);
+  const [credit, setCredit] = useState(null);
   const [loadingImage, setLoadingImage] = useState(true);
   const [errorImage, setErrorImage] = useState(null);
 
@@ -85,6 +86,33 @@ function EventPage() {
         }
       };
       fetchIcon();
+    }
+  }, [link]);
+
+  useEffect(() => {
+    if (link) {
+      const fetchCredit = async () => {
+        try {
+          const response = await fetch("http://127.0.0.1:5000/get_credits", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ link: link }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Erro na API: ${response.status}`);
+          }
+
+          const data = await response.json();
+          setCredit(data.credit_text);
+        } catch (error) {
+          console.error("Erro ao buscar credito:", error);
+        }
+      };
+
+      fetchCredit();
     }
   }, [link]);
 
@@ -177,6 +205,16 @@ function EventPage() {
                   (ISO 12312-2). Do not use sunglasses, glass, or improvised
                   methods. For nighttime observations, choose safe locations.
                 </p>
+              </div>
+              <div>
+                <h2 className="text-slate-200 text-lg font-bold mb-2">
+                  Image credit
+                </h2>
+                {credit && (
+                  <p className="text-white whitespace-pre-wrap py-2">
+                    {credit}
+                  </p>
+                )}
               </div>
             </div>
           </div>
