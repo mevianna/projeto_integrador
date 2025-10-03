@@ -23,7 +23,9 @@ function EventPage() {
   const [iconalt, setIconAlt] = useState(null);
   const [credit, setCredit] = useState(null);
   const [loadingImage, setLoadingImage] = useState(true);
+  const [loadingCredit, setLoadingCredit] = useState(true);
   const [errorImage, setErrorImage] = useState(null);
+  const [errorCredit, setErrorCredit] = useState(null);
 
   useEffect(() => {
     if (link) {
@@ -91,6 +93,8 @@ function EventPage() {
 
   useEffect(() => {
     if (link) {
+      setLoadingCredit(true);
+      setErrorCredit(null);
       const fetchCredit = async () => {
         try {
           const response = await fetch("http://127.0.0.1:5000/get_credits", {
@@ -109,10 +113,15 @@ function EventPage() {
           setCredit(data.credit_text);
         } catch (error) {
           console.error("Erro ao buscar credito:", error);
+          setErrorCredit(error.message);
+        } finally {
+          setLoadingCredit(false);
         }
       };
 
       fetchCredit();
+    } else {
+      setLoadingCredit(false);
     }
   }, [link]);
 
@@ -158,7 +167,7 @@ function EventPage() {
             </div>
             <div className="space-y-4 bg-purple-800 p-6 rounded-3xl border-purple-900 border-y-2 border-x-2shadow">
               <div className="flex gap-4">
-                <div className="">
+                <div>
                   {loadingImage && (
                     <p className="text-white text-center">Loading Image...</p>
                   )}
@@ -210,8 +219,23 @@ function EventPage() {
                 <h2 className="text-slate-200 text-lg font-bold mb-2">
                   Image credit
                 </h2>
+                {loadingCredit && (
+                  <p className="text-white text-left">Loading Credit...</p>
+                )}
+
+                {errorCredit && (
+                  <p className="text-red-400 text-center">
+                    Erro ao carregar credito: {errorCredit}
+                  </p>
+                )}
                 {credit && (
-                  <p className="text-white whitespace-pre-wrap py-2">
+                  <p
+                    className="text-white whitespace-pre-wrap py-2"
+                    onError={(e) => {
+                      console.error("Erro ao carregar credito");
+                      e.target.style.display = "none";
+                    }}
+                  >
                     {credit}
                   </p>
                 )}
