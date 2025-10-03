@@ -40,6 +40,21 @@ app.post("/dados/refresh", (req, res) => {
   res.json({ ok: true });
 });
 
+app.get("/dados/ultimo", (req, res) => {
+  try {
+    const ultimoDado = db.prepare(`
+      SELECT * FROM leituras
+      ORDER BY datetime(created_at) DESC
+      LIMIT 1
+    `).get();
+
+    res.json(ultimoDado);
+  } catch (error) {
+    console.error("Erro ao buscar último dado:", error);
+    res.status(500).json({ error: "Erro ao buscar último dado" });
+  }
+});
+
 // função para salvar último dado
 function salvarUltimoDado() {
   const { temperatura, umidade, pressaoAtm, uvClassificacao } = dadosESP;
