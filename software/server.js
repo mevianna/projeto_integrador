@@ -34,6 +34,12 @@ app.post("/dados", (req, res) => {
   }
 });
 
+// rota para atualizar dadosESP pelo refresh
+app.post("/dados/refresh", (req, res) => {
+  salvarUltimoDado();
+  res.json({ ok: true });
+});
+
 // função para salvar último dado
 function salvarUltimoDado() {
   const { temperatura, umidade, pressaoAtm, uvClassificacao } = dadosESP;
