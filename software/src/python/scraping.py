@@ -5,7 +5,8 @@ import requests
 from bs4 import BeautifulSoup
 
 app = Flask(__name__)
-CORS(app)  
+CORS(app, resources={r"/*": {"origins": "*"}})
+
 
 @app.route('/get_first_image', methods=['POST'])
 def get_first_image():
@@ -60,13 +61,38 @@ def get_icon():
 
         if len(imagens) > 1:
             segundo_icon = imagens[1]   # segunda imagem
-            alt_text = segundo_icon.get('alt', 'Sem alt disponível')
+            alt_text = segundo_icon.get('alt', '')
             return jsonify({'icon_alt': alt_text})
         else:
             return jsonify({'error': 'Menos de duas imagens encontradas.'}), 404
 
     except requests.exceptions.RequestException as e:
         return jsonify({'error': f'Erro ao acessar o site: {e}'}), 500
+
+@app.route('/get_credits', methods=['POST'])
+def get_credits():
+    data = request.get_json()
+    link_site = data.get('link')
+
+    if not link_site:
+        return jsonify({'error': 'Link do site não fornecido.'}), 400
+
+    try:
+        res = requests.get(link_site)
+        res.raise_for_status() 
+        
+        dados = BeautifulSoup(res.text, "html.parser")
+        texto = dados.find('h2', string='Image credit')  
+
+        if texto: 
+            credit = texto.find_next_sibling('p').text
+            return jsonify({'credit_text': credit})
+        else:
+            return jsonify({'error': 'sem creditos.'}), 404
+
+    except requests.exceptions.RequestException as e:
+        return jsonify({'error': f'Erro ao acessar o site: {e}'}), 500
+
 
 
 if __name__ == '__main__':
