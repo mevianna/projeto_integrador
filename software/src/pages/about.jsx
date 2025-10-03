@@ -53,17 +53,17 @@ function AboutPage() {
                 />
                 <a
                   href="https://github.com/beastartare"
-                  className="absolute left-[250px] top-[550px] w-[150px] h-[300px]"
+                  className="absolute left-[250px] top-[500px] w-[150px] h-[350px]"
                   title="Beatriz"
                 ></a>
                 <a
                   href="https://github.com/mevianna"
-                  className="absolute left-[390px] top-[550px] w-[120px] h-[300px]"
+                  className="absolute left-[390px] top-[500px] w-[120px] h-[350px]"
                   title="Maria Eduarda"
                 ></a>
                 <a
                   href="https://github.com/rafasavaris"
-                  className="absolute left-[500px] top-[550px] w-[150px] h-[300px] "
+                  className="absolute left-[500px] top-[500px] w-[150px] h-[350px] "
                   title="Rafaela"
                 ></a>
               </div>
