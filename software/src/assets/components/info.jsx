@@ -6,12 +6,15 @@ const API_URL = "http://localhost:4000";
 function Info() {
   const navigate = useNavigate();
 
+  const [lastUpdated, setLastUpdated] = useState(null);
+
   const [sensorData, setSensorData] = useState({
     temperatura: "-",
     umidade: "-",
     pressaoAtm: "-",
     uvClassificacao: "-"
   });
+
 
   // função que busca dados do ESP32 e salva no banco automaticamente
   async function fetchAndSaveData() {
@@ -20,6 +23,9 @@ function Info() {
       const response = await fetch((`${API_URL}/dados`));
       const data = await response.json();
       setSensorData(data);
+
+      // atualiza o horário da última atualização
+      setLastUpdated(new Date());
 
       // atualiza os dados no servidor
       await fetch(`${API_URL}/dados`, {
@@ -58,6 +64,10 @@ function Info() {
     navigate("/history");
   }
 
+  const formattedTime = lastUpdated
+    ? lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    : "-";
+
   return (
     <div className="bg-purple-800 rounded-lg p-4 sm:p-6 md:p-8 mt-6 shadow w-full max-w-5xl mx-auto flex flex-col">
       <div className="flex text-sm md:text-xl font-bold items-center text-slate-200 gap-20">
@@ -74,7 +84,10 @@ function Info() {
           <p>UV Index: {sensorData.uvClassificacao}</p>
         </div>
       </div>
-      <div className="justify-end flex gap-3 mt-3">
+      <div className="flex justify-between items-center gap-3 mt-3">
+        <small className="text-sm text-slate-400">
+          Updated: {formattedTime}
+        </small>
         <button
           onClick={ViewHistory} // redireciona para histórico
           className="px-3 py-1 text-sm text-slate-200 bg-purple-600 hover:bg-purple-700 rounded-lg"
