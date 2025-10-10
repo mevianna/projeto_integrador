@@ -53,17 +53,10 @@ function App() {
       try {
         console.log("Fetching events...");
         const response = await fetch("http://localhost:4000/events");
-        const text = await response.text();
-
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(text, "application/xml");
-
-        const items = [...xml.querySelectorAll("item")].map((item) => ({
-          title: item.querySelector("title")?.textContent,
-          link: item.querySelector("link")?.textContent,
-          description: item.querySelector("description")?.textContent,
-          pubDate: item.querySelector("pubDate")?.textContent,
-        }));
+        if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+        const items = await response.json(); // ✅ Agora lê como JSON
+        console.log("Parsed events:", items.length);
+        setEvents(items);
 
         console.log("Parsed events:", items.length);
         setEvents(items);
@@ -119,7 +112,6 @@ function App() {
       </div>
     </div>
   );
-  
 }
 
 export default App;

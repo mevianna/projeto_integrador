@@ -12,7 +12,7 @@ function Info() {
     temperatura: "-",
     umidade: "-",
     pressaoAtm: "-",
-    uvClassificacao: "-"
+    uvClassificacao: "-",
   });
 
   // função para buscar dados do backend
@@ -39,17 +39,17 @@ function Info() {
 
   // carregar dados no primeira acesso da página
   useEffect(() => {
-  const savedData = sessionStorage.getItem("sensorData");
-  const savedTime = sessionStorage.getItem("lastUpdated");
+    const savedData = sessionStorage.getItem("sensorData");
+    const savedTime = sessionStorage.getItem("lastUpdated");
 
-  if (savedData && savedTime) {
-    // já tem cache, usa ele
-    setSensorData(JSON.parse(savedData));
-    setLastUpdated(new Date(savedTime));
-  } else {
-    // se não tiver cache, busca do backend
-    fetchData();
-  }
+    if (savedData && savedTime) {
+      // já tem cache, usa ele
+      setSensorData(JSON.parse(savedData));
+      setLastUpdated(new Date(savedTime));
+    } else {
+      // se não tiver cache, busca do backend
+      fetchData();
+    }
 
     // agenda atualização a cada hora cheia
     const now = new Date();
@@ -78,7 +78,7 @@ function Info() {
         year: "numeric",
         hour: "2-digit",
         minute: "2-digit",
-        second: "2-digit"
+        second: "2-digit",
       })
     : "-";
 
@@ -108,8 +108,18 @@ function Info() {
           className="px-3 py-1 text-sm text-slate-200 rounded-md flex right gap-1"
         >
           <svg
-            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`w-5 h-5 ${isRefreshing ? "animate-spin" : ""}`}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865 a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/>
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className={`w-5 h-5 ${isRefreshing ? "animate-spin" : ""}`}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865 a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
+            />
           </svg>
         </button>
       </div>

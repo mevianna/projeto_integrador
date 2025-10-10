@@ -6,7 +6,7 @@ function AboutPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="w-full min-h-screen flex justify-center gap-4 p-4 relative overflow-x-hidden">
+    <div className="w-full min-h-screen flex justify-center gap-4 relative overflow-x-hidden sm:p-6 md:p-8 p-4">
       <StarsBackground />
       <div className="inset-0 sm:p-6 md:p-8 p-4 relative z-10 flex flex-col items-center space-y-6 w-full max-w-5xl">
         <div className=" bg-purple-950 flex justify-center p-10">
@@ -18,7 +18,7 @@ function AboutPage() {
               >
                 <ChevronLeftIcon />
               </button>
-              <h1 className=" text-slate-200 text-center text-3xl font-bold mb-2">
+              <h1 className=" text-slate-200 text-center text-xl  sm:text-2xl md:text-3xl font-bold mb-2">
                 About
               </h1>
             </div>
