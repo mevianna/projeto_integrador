@@ -149,11 +149,11 @@ function EventPage() {
   };
 
   return (
-    <div className="w-screen h-screen relative">
+    <div className="w-screen h-screen relative ">
       <StarsBackground />
-      <div className="absolute inset-0 flex justify-around items-start p-10">
-        <div className="bg-purple-950 flex justify-center p-10">
-          <div className="space-y-4 w-[800px]">
+      <div className="inset-0 flex justify-around items-start relative">
+        <div className="bg-purple-950 flex justify-center p-4 sm:p-6 md:p-8">
+          <div className="space-y-4 w-[500px] sm:w-[700px] md:w-[800px]">
             <div className="flex justify-center relative">
               <button
                 onClick={() => navigate(-1)}
@@ -229,13 +229,7 @@ function EventPage() {
                   </p>
                 )}
                 {credit && (
-                  <p
-                    className="text-white whitespace-pre-wrap py-2"
-                    onError={(e) => {
-                      console.error("Erro ao carregar credito");
-                      e.target.style.display = "none";
-                    }}
-                  >
+                  <p className="text-white whitespace-pre-wrap py-2">
                     {credit}
                   </p>
                 )}
