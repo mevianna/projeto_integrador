@@ -54,7 +54,19 @@ function App() {
         console.log("Fetching events...");
         const response = await fetch("http://localhost:4000/events");
         if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
-        const items = await response.json(); // ✅ Agora lê como JSON
+
+        // Lê como texto XML (não JSON)
+        const xmlText = await response.text();
+
+        // ✅ Opcional: converte XML para JSON
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(xmlText, "text/xml");
+        const items = Array.from(xml.querySelectorAll("item")).map((item) => ({
+          title: item.querySelector("title")?.textContent || "",
+          description: item.querySelector("description")?.textContent || "",
+          link: item.querySelector("link")?.textContent || "",
+          date: item.querySelector("pubDate")?.textContent || "",
+        }));
         console.log("Parsed events:", items.length);
         setEvents(items);
 
