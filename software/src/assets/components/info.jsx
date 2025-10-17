@@ -35,7 +35,6 @@ function Info() {
     }
   }
 
-<<<<<<< HEAD
   // refresh manual: atualiza o backend e depois busca o dado atualizado
   async function handleRefresh() {
     setIsRefreshing(true);
@@ -50,21 +49,6 @@ function Info() {
     }
     setIsRefreshing(false);
   }
-=======
-  // carregar dados no primeira acesso da página
-  useEffect(() => {
-    const savedData = sessionStorage.getItem("sensorData");
-    const savedTime = sessionStorage.getItem("lastUpdated");
-
-    if (savedData && savedTime) {
-      // já tem cache, usa ele
-      setSensorData(JSON.parse(savedData));
-      setLastUpdated(new Date(savedTime));
-    } else {
-      // se não tiver cache, busca do backend
-      fetchData();
-    }
->>>>>>> 560307cd80fa3747f3564175697f6a98e22859a2
 
   useEffect(() => {
     // carregar último dado ao abrir a página
