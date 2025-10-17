@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function StarsBackground() {
   const stars = Array.from({ length: 100 }).map(() => ({
     top: Math.random() * 100 + "%",

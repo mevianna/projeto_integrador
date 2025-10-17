@@ -47,8 +47,10 @@ function App() {
 
         if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
 
+        // Lê como texto XML (não JSON)
         const xmlText = await response.text();
 
+        // ✅ Opcional: converte XML para JSON
         const parser = new DOMParser();
         const xml = parser.parseFromString(xmlText, "text/xml");
         const items = Array.from(xml.querySelectorAll("item")).map((item) => ({
@@ -57,6 +59,8 @@ function App() {
           link: item.querySelector("link")?.textContent || "",
           date: item.querySelector("pubDate")?.textContent || "",
         }));
+        console.log("Parsed events:", items.length);
+        setEvents(items);
 
         console.log("Parsed events:", items.length);
         setEvents(items);
