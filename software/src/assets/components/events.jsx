@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import PropTypes from "prop-types";
 
 function Events({ events = [] }) {
   const navigate = useNavigate();
@@ -75,5 +76,16 @@ function Events({ events = [] }) {
     </div>
   );
 }
+
+Events.propTypes = {
+  events: PropTypes.arrayOf(
+    PropTypes.shape({
+      title: PropTypes.string,
+      description: PropTypes.string,
+      link: PropTypes.string,
+      pubDate: PropTypes.string,
+    })
+  ),
+};
 
 export default Events;
