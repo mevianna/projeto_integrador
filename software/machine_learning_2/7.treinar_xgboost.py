@@ -14,8 +14,9 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline as ImbPipeline
-from sklearn.model_selection import GridSearchCV
+#from sklearn.model_selection import GridSearchCV
 import xgboost as xgb
+from sklearn.calibration import CalibratedClassifierCV
 
 # ------------------------------------------------------------------------------
 # PARTE 2: FUNÇÃO PARA ENGENHARIA DE FEATURES
@@ -83,6 +84,7 @@ y_train, y_test = y.iloc[:split_idx], y.iloc[split_idx:]
 print(f"Tamanho do treino: {len(X_train)} amostras")
 print(f"Tamanho do teste: {len(X_test)} amostras")
 
+''' vou deixar comentado pq ja sei os melhores parametros.
 # 5. Define o Pipeline de Machine Learning
 # Agora com o XGBoost
 pipeline = ImbPipeline([
@@ -92,7 +94,79 @@ pipeline = ImbPipeline([
     ("clf", xgb.XGBClassifier(n_jobs=-1, random_state=42, eval_metric='logloss', use_label_encoder=False)) 
     # n_jobs=-1 para usar todos os cores, e eval_metric para remover um warning
 ])
+'''
 
+# 5. Pipeline direto com melhores parâmetros
+pipeline = ImbPipeline([
+    ("imputer", SimpleImputer(strategy="median")),
+    ("scaler", StandardScaler()),
+    ("smote", SMOTE(random_state=42)),
+    ("clf", xgb.XGBClassifier(
+        n_estimators=100,
+        max_depth=3,
+        learning_rate=0.1,
+        n_jobs=-1,
+        random_state=42,
+        eval_metric='logloss',
+        use_label_encoder=False
+    ))
+])
+
+# >>>> Treina o pipeline direto
+pipeline.fit(X_train, y_train)
+
+# ------------------------------------------------------------------------------
+# >>>> 6. Previsão e probabilidade de chuva
+# ------------------------------------------------------------------------------
+y_pred = pipeline.predict(X_test)
+y_proba = pipeline.predict_proba(X_test)[:,1]  # Probabilidade de chuva
+
+print("\n--- Probabilidades de Chuva ---")
+print(y_proba)
+
+
+
+# ------------------------------------------------------------------------------
+# >>>> 7. Avaliação do modelo
+# ------------------------------------------------------------------------------
+
+# Supondo que você já tem y_proba
+threshold = 0.7  # só prever chuva se a probabilidade for >= 70%
+y_pred_high_precision = (y_proba >= threshold).astype(int)
+
+# Avaliação
+from sklearn.metrics import classification_report
+print(classification_report(y_test, y_pred_high_precision))
+
+print("\n--- Relatório de Classificação do Modelo Otimizado (XGBoost) ---")
+print(classification_report(y_test, y_pred))
+print("----------------------------------------------------------")
+
+# --------------------------
+# limiar
+# --------------------------
+from sklearn.metrics import precision_score, recall_score
+
+# Limiar que você quer testar, por exemplo 0.6
+threshold = 0.6
+y_pred_threshold = (y_proba >= threshold).astype(int)
+
+precision = precision_score(y_test, y_pred_threshold)
+recall = recall_score(y_test, y_pred_threshold)
+
+print(f"Limiar: {threshold}")
+print(f"Precision: {precision:.2f}")
+print(f"Recall: {recall:.2f}")
+
+
+# ------------------------------------------------------------------------------
+# >>>> 8. Importância das features
+# ------------------------------------------------------------------------------
+importances = pipeline.named_steps['clf'].feature_importances_
+feature_names = X.columns
+feature_importance_df = pd.DataFrame({'feature': feature_names, 'importance': importances})
+print(feature_importance_df.sort_values(by='importance', ascending=False).head(10))
+'''
 # 6. Define o grid de parâmetros para o XGBoost
 # Os parâmetros são diferentes do Random Forest.
 param_grid = {
@@ -101,7 +175,7 @@ param_grid = {
     'clf__learning_rate': [0.01, 0.1, 0.2]
 }
 
-# 7. Executa o Grid Search com o novo pipeline e grid de parâmetros
+# 7. Executa o Grid Search com o novo pipeline e grid de parâmetros -> ja executei, ja sei os parametros
 print("5. Iniciando o Grid Search para XGBoost...")
 grid_search = GridSearchCV(pipeline, param_grid, cv=5, scoring='f1', n_jobs=-1)
 grid_search.fit(X_train, y_train)
@@ -115,6 +189,15 @@ print("\n6. Avaliando o melhor modelo no conjunto de teste...")
 best_model = grid_search.best_estimator_
 y_pred = best_model.predict(X_test)
 
+
+# Probabilidade de chuva
+y_proba = best_model.predict_proba(X_test)[:,1]
+
+# Avaliação (opcional)
+from sklearn.metrics import classification_report
+print(classification_report(y_test, y_pred))
+
+
 # 9. Imprime o relatório de classificação
 print("\n--- Relatório de Classificação do Modelo Otimizado (XGBoost) ---")
 print(classification_report(y_test, y_pred))
@@ -125,3 +208,26 @@ importances = best_model.named_steps['clf'].feature_importances_
 feature_names = X.columns
 feature_importance_df = pd.DataFrame({'feature': feature_names, 'importance': importances})
 print(feature_importance_df.sort_values(by='importance', ascending=False).head(10))
+'''
+from sklearn.calibration import calibration_curve
+from sklearn.metrics import brier_score_loss
+import matplotlib.pyplot as plt
+
+# y_proba: probabilidades previstas de chuva (como você já tem)
+# y_test: valores reais
+
+# 1. Brier score (quanto menor, melhor)
+brier = brier_score_loss(y_test, y_proba)
+print(f"Brier Score: {brier:.4f}")
+
+# 2. Curva de calibração
+prob_true, prob_pred = calibration_curve(y_test, y_proba, n_bins=10)
+
+plt.figure(figsize=(6,6))
+plt.plot(prob_pred, prob_true, marker='o', label='Modelo')
+plt.plot([0,1],[0,1], linestyle='--', label='Perfeitamente calibrado')
+plt.xlabel('Probabilidade prevista')
+plt.ylabel('Frequência real')
+plt.title('Curva de Calibração')
+plt.legend()
+plt.show()
