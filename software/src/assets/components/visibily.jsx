@@ -3,13 +3,10 @@ import { getCloudCover } from "../../services/cloudService";
 
 function Visibility() {
   const [cloud, setCloud] = useState({ value: 0, time: null });
-  const [loading, setLoading] = useState(true);
 
   async function fetchCloud() {
-    setLoading(true);
     const data = await getCloudCover();
     setCloud(data);
-    setLoading(false);
   }
 
   useEffect(() => {
