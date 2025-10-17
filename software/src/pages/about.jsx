@@ -11,7 +11,6 @@ function AboutPage() {
 
       <div className=" w-full max-w-5xl mx-auto flex flex-col mt-6 relative overflow-y-hidden z-10">
         <div className="p-6 sm:p-8 flex flex-col items-center space-y-8">
-          {/* Cabeçalho */}
           <div className="flex justify-center relative w-full">
             <button
               onClick={() => navigate(-1)}
