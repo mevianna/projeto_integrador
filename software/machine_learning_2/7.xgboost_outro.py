@@ -79,6 +79,11 @@ print("3. Separando features (X) e alvo (y)...")
 X = df_processed.drop(columns=["datetime", "precip_mm", "rain"])
 y = df_processed["rain"]
 
+print("Features usadas no modelo:\n")
+print(X.columns.tolist())
+print(f"\nTotal de features: {len(X.columns)}")
+
+
 print("\n\n=======================================================")
 print("   Rodando a provável VERSÃO ANTIGA (sem calibração)")
 print("=======================================================\n")
@@ -94,7 +99,7 @@ print(f"Tamanho do treino (antigo): {len(X_train_v_antiga)} amostras")
 print(f"Tamanho do teste (antigo): {len(X_test_v_antiga)} amostras")
 
 # 2. Define o modelo (o mesmo XGBoost)
-modelo_antigo = xgb.XGBClassifier(
+modelo = xgb.XGBClassifier(
     n_estimators=100,
     max_depth=3,
     learning_rate=0.1,
@@ -106,10 +111,10 @@ modelo_antigo = xgb.XGBClassifier(
 
 # 3. Treina o modelo nos 85% dos dados
 print("\nTreinando o modelo antigo (em 85% dos dados)...")
-modelo_antigo.fit(X_train_v_antiga, y_train_v_antiga)
+modelo.fit(X_train_v_antiga, y_train_v_antiga)
 
 # 4. Gera previsões de probabilidade
-y_proba_antigo = modelo_antigo.predict_proba(X_test_v_antiga)[:,1]
+y_proba_antigo = modelo.predict_proba(X_test_v_antiga)[:,1]
 
 # 5. Avalia o Brier Score
 brier_antigo = brier_score_loss(y_test_v_antiga, y_proba_antigo)
@@ -120,10 +125,12 @@ print("Plotando a curva de calibração (Versão Antiga)...")
 prob_true_antigo, prob_pred_antigo = calibration_curve(y_test_v_antiga, y_proba_antigo, n_bins=10)
 
 plt.figure(figsize=(6,6))
-plt.plot(prob_pred_antigo, prob_true_antigo, marker='o', label='Modelo Antigo (sem calibração)')
+plt.plot(prob_pred_antigo, prob_true_antigo, marker='o', label='Nosso modelo')
 plt.plot([0,1], [0,1], linestyle='--', label='Perfeitamente calibrado')
 plt.xlabel('Probabilidade prevista')
 plt.ylabel('Frequência real')
-plt.title('Curva de calibração (Provável Versão Antiga)')
+plt.title('Modelo')
 plt.legend()
 plt.show()
+
+modelo.get_booster().save_model("modelo_xgb.json")
