@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 // src/services/cloudService.js
 export async function getCloudCover() {
   const { lat, lon } = await new Promise((resolve, reject) => {

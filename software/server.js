@@ -3,6 +3,9 @@ import fetch from "node-fetch";
 import cors from "cors";
 import db from "./src/db/database.js";
 import cron from "node-cron";
+import { spawn } from "child_process";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
 app.use(cors());
@@ -111,6 +114,85 @@ app.get("/dados/historico", (req, res) => {
     .prepare("SELECT * FROM leituras ORDER BY id DESC LIMIT 50")
     .all();
   res.json(rows);
+});
+
+// define __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.post("/predict", async (req, res) => {
+  try {
+    const { cloudCover } = req.body;
+    console.log("Cloud cover recebido:", cloudCover);
+
+    const lastESP = db.prepare(`
+      SELECT temperatura, umidade, pressaoAtm, created_at 
+      FROM leituras
+      ORDER BY datetime(created_at) DESC
+      LIMIT 1
+    `).get();
+
+    if (!lastESP) return res.status(400).json({ error: "Sem dados do ESP" });
+
+    const pressao_mbar = lastESP.pressaoAtm * 0.01;
+    const date = new Date(lastESP.created_at);
+    const hour = date.getHours();
+    const dayofweek = date.getDay();
+    const month = date.getMonth() + 1;
+
+    const features = [
+      pressao_mbar,
+      lastESP.temperatura,
+      lastESP.umidade,
+      0, 0,
+      cloudCover,
+      hour, dayofweek, month,
+      cloudCover, cloudCover, cloudCover,
+      pressao_mbar, pressao_mbar, pressao_mbar,
+      lastESP.temperatura, lastESP.temperatura, lastESP.temperatura,
+      lastESP.umidade, lastESP.umidade, lastESP.umidade,
+      0, 0, 0,
+      lastESP.temperatura,
+      pressao_mbar,
+      0, 0
+    ];
+
+    console.log("Features geradas:", features);
+
+    const pyPath = path.join(__dirname, "src", "python", "server.py");
+    console.log("Executando Python em:", pyPath);
+
+    const py = spawn("python", [pyPath]);
+    let resultData = "";
+
+    py.stdout.on("data", (data) => {
+      console.log("Python stdout:", data.toString());
+      resultData += data.toString();
+    });
+
+    py.stderr.on("data", (data) => {
+      console.error("Python stderr:", data.toString());
+    });
+
+    py.on("close", (code) => {
+      console.log(`Python finalizado com código: ${code}`);
+      try {
+        const parsed = JSON.parse(resultData);
+        console.log("Predição retornada:", parsed);
+        res.json(parsed);
+      } catch (err) {
+        console.error("Erro ao interpretar saída Python:", err, resultData);
+        res.status(500).json({ error: "Falha ao interpretar resposta do modelo" });
+      }
+    });
+
+    py.stdin.write(JSON.stringify({ features }));
+    py.stdin.end();
+
+  } catch (error) {
+    console.error("Erro na rota /predict:", error);
+    res.status(500).json({ error: "Erro interno no servidor" });
+  }
 });
 
 app.listen(PORT, "0.0.0.0", () => {
