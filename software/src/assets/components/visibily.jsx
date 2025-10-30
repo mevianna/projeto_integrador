@@ -31,6 +31,7 @@ function Visibility() {
 
     console.log("Predição recebida:", result);
 
+    setPrediction(result.prediction[0]);
     } catch (err) {
       console.error("Erro ao buscar cloud cover ou enviar para predição:", err);
     }
@@ -78,7 +79,7 @@ function Visibility() {
       </div>
       <div className="text-center text-white font-bold mt-2">
         {prediction !== null ? (
-          <p>Predicted probability: {(prediction[0] * 100).toFixed(2)}%</p>
+          <p>Rain probability: {(prediction[0] * 100).toFixed(2)}%</p>
         ) : (
           <p>Loading prediction...</p>
         )}

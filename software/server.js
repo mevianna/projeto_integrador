@@ -135,10 +135,6 @@ app.post("/predict", async (req, res) => {
     if (!lastESP) return res.status(400).json({ error: "Sem dados do ESP" });
 
     const pressao_mbar = lastESP.pressaoAtm * 0.01;
-    const date = new Date(lastESP.created_at);
-    const hour = date.getHours();
-    const dayofweek = date.getDay();
-    const month = date.getMonth() + 1;
 
     const features = [
       pressao_mbar,
@@ -146,15 +142,6 @@ app.post("/predict", async (req, res) => {
       lastESP.umidade,
       0, 0,
       cloudCover,
-      hour, dayofweek, month,
-      cloudCover, cloudCover, cloudCover,
-      pressao_mbar, pressao_mbar, pressao_mbar,
-      lastESP.temperatura, lastESP.temperatura, lastESP.temperatura,
-      lastESP.umidade, lastESP.umidade, lastESP.umidade,
-      0, 0, 0,
-      lastESP.temperatura,
-      pressao_mbar,
-      0, 0
     ];
 
     console.log("Features geradas:", features);
