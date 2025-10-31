@@ -137,11 +137,13 @@ function Info() {
         </button>
       </div>
       <div className="flex text-sm md:text-xl font-bold text-slate-200 gap-16">
-        {prediction !== null ? (
-              <p>Rain probability: {(prediction[0] * 100).toFixed(2)}%</p>
-            ) : (
-              <p>Loading prediction...</p>
-            )}
+        {isRefreshing ? (
+          <p>Loading prediction...</p>
+        ) : prediction !== null ? (
+          <p>Rain probability now: {(prediction[0] * 100).toFixed(2)}%</p>
+        ) : (
+          <p>Loading prediction...</p>
+        )}
       </div>
       <div className="flex justify-between items-center gap-3 mt-4 mb-2">
         <small className="text-sm text-slate-400">Updated: {formattedDateTime}</small>
