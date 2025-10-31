@@ -63,3 +63,4 @@ plt.show()
 
 # 9. Salva modelo
 modelo.get_booster().save_model("modelo_xgb.bin")
+modelo.get_booster().save_model("modelo_xgb.json")
