@@ -5,7 +5,6 @@ const API_URL = "http://localhost:4000";
 
 function Visibility() {
   const [cloud, setCloud] = useState({ value: 0, time: null });
-  const [prediction, setPrediction] = useState(null);
 
     async function fetchCloud() {
     try {
@@ -14,27 +13,17 @@ function Visibility() {
 
     console.log("Enviando cloudCover:", data.value);
 
-    const response = await fetch(`${API_URL}/predict`, {
+    const response = await fetch(`${API_URL}/cloudcover`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ cloudCover: data.value }),
     });
 
-    // Tenta ler como JSON
-    let result = null;
-    try {
-      result = await response.json();
-    } catch (jsonErr) {
-      console.error("Não foi possível parsear JSON do backend:", jsonErr);
-      return; // não tenta ler .text() depois
-    }
+    if (!response.ok) throw new Error("Falha ao enviar cloudCover");
 
-    console.log("Predição recebida:", result);
-
-    setPrediction(result.prediction[0]);
-    } catch (err) {
-      console.error("Erro ao buscar cloud cover ou enviar para predição:", err);
-    }
+  } catch (err) {
+    console.error("Erro ao buscar cloud cover ou enviar para predição:", err);
+  }
 }
 
   useEffect(() => {
@@ -76,13 +65,6 @@ function Visibility() {
         <small className="text-sm font-bold text-slate-200">
           {cloud.value}% cloud cover
         </small>
-      </div>
-      <div className="text-center text-white font-bold mt-2">
-        {prediction !== null ? (
-          <p>Rain probability: {(prediction[0] * 100).toFixed(2)}%</p>
-        ) : (
-          <p>Loading prediction...</p>
-        )}
       </div>
     </div>
   );

@@ -12,7 +12,64 @@ app.use(cors());
 const PORT = 4000;
 app.use(express.json());
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 let dadosESP = {}; // último dado recebido
+let cloudCover = null;
+let ultimaPrevisao = null;  // guarda última previsão
+
+async function gerarPrevisao() {
+  return new Promise((resolve, reject) => {
+    try {
+      const lastESP = db.prepare(`
+        SELECT temperatura, umidade, pressaoAtm, created_at 
+        FROM leituras
+        ORDER BY datetime(created_at) DESC
+        LIMIT 1
+      `).get();
+
+      if (!lastESP) return reject("Sem dados do ESP");
+
+      const pressao_mbar = lastESP.pressaoAtm * 0.01;
+      const features = [
+        pressao_mbar,
+        lastESP.temperatura,
+        lastESP.umidade,
+        0, 0,
+        cloudCover,
+      ];
+
+      console.log("Gerando previsão com features:", features);
+
+      const pyPath = path.join(__dirname, "src", "python", "server.py");
+      const py = spawn("python", [pyPath]);
+
+      let resultData = "";
+      py.stdout.on("data", (data) => (resultData += data.toString()));
+      py.stderr.on("data", (data) => console.error("Python stderr:", data.toString()));
+
+      py.on("close", (code) => {
+        try {
+          const parsed = JSON.parse(resultData);
+          ultimaPrevisao = parsed;
+          console.log("Nova previsão gerada:", parsed);
+          resolve(parsed);
+        } catch (err) {
+          console.error("Erro ao interpretar saída Python:", err, resultData);
+          reject("Erro ao interpretar resposta do modelo");
+        }
+      });
+
+      py.stdin.write(JSON.stringify({ features }));
+      py.stdin.end();
+
+    } catch (error) {
+      console.error("Erro ao gerar previsão:", error);
+      reject(error);
+    }
+  });
+}
 
 // rota para eventos externos
 app.get("/events", async (req, res) => {
@@ -34,12 +91,14 @@ app.post("/dados", (req, res) => {
   if (!app.locals.primeiraConexao) {
     salvarUltimoDado();
     app.locals.primeiraConexao = true;
+    gerarPrevisao();
   }
 });
 
 // rota para atualizar dadosESP pelo refresh
-app.post("/dados/refresh", (req, res) => {
+app.post("/dados/refresh", async (req, res) => {
   salvarUltimoDado();
+  await gerarPrevisao();
   res.json({ ok: true });
 });
 
@@ -100,7 +159,10 @@ function salvarUltimoDado() {
 }
 
 // agenda o salvamento a cada hora redonda
-cron.schedule("0 0 * * * *", salvarUltimoDado);
+cron.schedule("0 * * * *", () => {
+  console.log("Gerando nova previsão programada...");
+  gerarPrevisao();
+});
 console.log("Agendamento de salvamento a cada hora cheia iniciado");
 
 // rota para acessar dados atuais
@@ -116,70 +178,24 @@ app.get("/dados/historico", (req, res) => {
   res.json(rows);
 });
 
-// define __dirname
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+app.post("/cloudcover", (req, res) => {
+   const { cloudCover: novoValor } = req.body;
 
-app.post("/predict", async (req, res) => {
-  try {
-    const { cloudCover } = req.body;
-    console.log("Cloud cover recebido:", cloudCover);
-
-    const lastESP = db.prepare(`
-      SELECT temperatura, umidade, pressaoAtm, created_at 
-      FROM leituras
-      ORDER BY datetime(created_at) DESC
-      LIMIT 1
-    `).get();
-
-    if (!lastESP) return res.status(400).json({ error: "Sem dados do ESP" });
-
-    const pressao_mbar = lastESP.pressaoAtm * 0.01;
-
-    const features = [
-      pressao_mbar,
-      lastESP.temperatura,
-      lastESP.umidade,
-      0, 0,
-      cloudCover,
-    ];
-
-    console.log("Features geradas:", features);
-
-    const pyPath = path.join(__dirname, "src", "python", "server.py");
-    console.log("Executando Python em:", pyPath);
-
-    const py = spawn("python", [pyPath]);
-    let resultData = "";
-
-    py.stdout.on("data", (data) => {
-      console.log("Python stdout:", data.toString());
-      resultData += data.toString();
-    });
-
-    py.stderr.on("data", (data) => {
-      console.error("Python stderr:", data.toString());
-    });
-
-    py.on("close", (code) => {
-      console.log(`Python finalizado com código: ${code}`);
-      try {
-        const parsed = JSON.parse(resultData);
-        console.log("Predição retornada:", parsed);
-        res.json(parsed);
-      } catch (err) {
-        console.error("Erro ao interpretar saída Python:", err, resultData);
-        res.status(500).json({ error: "Falha ao interpretar resposta do modelo" });
-      }
-    });
-
-    py.stdin.write(JSON.stringify({ features }));
-    py.stdin.end();
-
-  } catch (error) {
-    console.error("Erro na rota /predict:", error);
-    res.status(500).json({ error: "Erro interno no servidor" });
+  if (novoValor == null) {
+    return res.status(400).json({ error: "cloudCover não enviado" });
   }
+
+  cloudCover = novoValor;
+  res.json({ ok: true, cloudCover });
+});
+
+app.get("/predict", (req, res) => {
+  if (!ultimaPrevisao) {
+    return res.status(404).json({ error: "Nenhuma previsão gerada ainda" });
+  }
+  res.json({
+    ultimaPrevisao,
+  });
 });
 
 app.listen(PORT, "0.0.0.0", () => {

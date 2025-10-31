@@ -15,40 +15,57 @@ function Info() {
 
   const [lastUpdated, setLastUpdated] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [prediction, setPrediction] = useState(null);
 
-  // busca o último dado salvo no banco
-  async function fetchLastData() {
-    try {
-      const response = await fetch(`${API_URL}/dados/ultimo`);
-      const data = await response.json();
+async function fetchPrediction() {
+  try {
+    const res = await fetch(`${API_URL}/predict`);
+    if (!res.ok) throw new Error("Erro ao buscar predição");
+    const data = await res.json();
 
-      setSensorData({
-        temperatura: data.temperatura,
-        umidade: data.umidade,
-        pressaoAtm: data.pressaoAtm,
-        uvClassificacao: data.uvClassificacao
-      });
-
-      setLastUpdated(new Date(data.created_at));
-    } catch (error) {
-      console.error("Erro ao buscar último dado:", error);
+    if (data.ultimaPrevisao && data.ultimaPrevisao.prediction) { 
+      setPrediction(data.ultimaPrevisao.prediction[0]);
+    } else {
+      console.warn("Resposta inesperada de /predict:", data);
     }
+  } catch (err) {
+    console.error("Erro ao buscar predição:", err);
   }
+}
 
-  // refresh manual: atualiza o backend e depois busca o dado atualizado
-  async function handleRefresh() {
-    setIsRefreshing(true);
-    try {
-      // primeiro atualiza o backend
-      await fetch(`${API_URL}/dados/refresh`, { method: "POST" });
+// Busca último dado salvo no banco
+async function fetchLastData() {
+  try {
+    const response = await fetch(`${API_URL}/dados/ultimo`);
+    const data = await response.json();
 
-      // depois busca o último dado atualizado
-      await fetchLastData();
-    } catch (error) {
-      console.error("Erro no refresh:", error);
-    }
-    setIsRefreshing(false);
+    setSensorData({
+      temperatura: data.temperatura,
+      umidade: data.umidade,
+      pressaoAtm: data.pressaoAtm,
+      uvClassificacao: data.uvClassificacao
+    });
+
+    setLastUpdated(new Date(data.created_at));
+
+    // busca previsão só quando os dados são atualizados
+    fetchPrediction();
+  } catch (error) {
+    console.error("Erro ao buscar último dado:", error);
   }
+}
+
+// refresh manual: atualiza o backend e depois busca o dado atualizado
+async function handleRefresh() {
+  setIsRefreshing(true);
+  try {
+    await fetch(`${API_URL}/dados/refresh`, { method: "POST" });
+    await fetchLastData();
+  } catch (error) {
+    console.error("Erro no refresh:", error);
+  }
+  setIsRefreshing(false);
+}
 
   useEffect(() => {
     // carregar último dado ao abrir a página
@@ -122,7 +139,14 @@ function Info() {
           </svg>
         </button>
       </div>
-      <div className="flex justify-between items-center gap-3 mt-6 mb-2">
+      <div className="flex text-sm md:text-xl font-bold text-slate-200 gap-16">
+        {prediction !== null ? (
+              <p>Rain probability: {(prediction[0] * 100).toFixed(2)}%</p>
+            ) : (
+              <p>Loading prediction...</p>
+            )}
+      </div>
+      <div className="flex justify-between items-center gap-3 mt-4 mb-2">
         <small className="text-sm text-slate-400">Updated: {formattedDateTime}</small>
         <button
           onClick={ViewHistory}
