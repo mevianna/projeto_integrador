@@ -50,8 +50,8 @@ function AboutPage() {
 
             <div className="flex flex-wrap justify-center relative mt-10">
               <img
-                className="object-cover h-[430px] w-auto"
-                src="astrodivas"
+                className="object-cover h-[600px] w-auto"
+                src="astrodivos.png"
                 alt="Equipe Astrodivas"
               />
               <a
