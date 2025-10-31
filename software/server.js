@@ -12,13 +12,16 @@ app.use(cors());
 const PORT = 4000;
 app.use(express.json());
 
+// caminho do arquivo atual
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// variáveis globais
 let dadosESP = {}; // último dado recebido
-let cloudCover = null;
+let cloudCover = null; // cobertura de nuvens atual
 let ultimaPrevisao = null;  // guarda última previsão
 
+// funçao para gerar a previsão
 async function gerarPrevisao() {
   return new Promise((resolve, reject) => {
     try {
@@ -50,6 +53,7 @@ async function gerarPrevisao() {
       py.stderr.on("data", (data) => console.error("Python stderr:", data.toString()));
 
       py.on("close", (code) => {
+        console.log(`Processo Python finalizado com código: ${code}`);
         try {
           const parsed = JSON.parse(resultData);
           ultimaPrevisao = parsed;
@@ -91,14 +95,14 @@ app.post("/dados", (req, res) => {
   if (!app.locals.primeiraConexao) {
     salvarUltimoDado();
     app.locals.primeiraConexao = true;
-    gerarPrevisao();
+    gerarPrevisao(); // gera previsão inicial
   }
 });
 
 // rota para atualizar dadosESP pelo refresh
 app.post("/dados/refresh", async (req, res) => {
   salvarUltimoDado();
-  await gerarPrevisao();
+  await gerarPrevisao(); // gera nova previsão
   res.json({ ok: true });
 });
 
@@ -161,8 +165,10 @@ function salvarUltimoDado() {
 // agenda o salvamento a cada hora redonda
 cron.schedule("0 * * * *", () => {
   console.log("Gerando nova previsão programada...");
-  gerarPrevisao();
+  salvarUltimoDado();
+  gerarPrevisao(); // gera nova previsão
 });
+
 console.log("Agendamento de salvamento a cada hora cheia iniciado");
 
 // rota para acessar dados atuais
@@ -178,6 +184,7 @@ app.get("/dados/historico", (req, res) => {
   res.json(rows);
 });
 
+// rota para atualizar cloudCover
 app.post("/cloudcover", (req, res) => {
    const { cloudCover: novoValor } = req.body;
 
@@ -189,6 +196,7 @@ app.post("/cloudcover", (req, res) => {
   res.json({ ok: true, cloudCover });
 });
 
+// rota para obter última previsão
 app.get("/predict", (req, res) => {
   if (!ultimaPrevisao) {
     return res.status(404).json({ error: "Nenhuma previsão gerada ainda" });

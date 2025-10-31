@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const API_URL = "http://localhost:4000";
 
@@ -17,61 +17,58 @@ function Info() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [prediction, setPrediction] = useState(null);
 
-async function fetchPrediction() {
-  try {
-    const res = await fetch(`${API_URL}/predict`);
-    if (!res.ok) throw new Error("Erro ao buscar predição");
-    const data = await res.json();
+  const fetchPrediction = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_URL}/predict`);
+      if (!res.ok) throw new Error("Erro ao buscar predição");
+      const data = await res.json();
 
-    if (data.ultimaPrevisao && data.ultimaPrevisao.prediction) { 
-      setPrediction(data.ultimaPrevisao.prediction[0]);
-    } else {
-      console.warn("Resposta inesperada de /predict:", data);
+      if (data.ultimaPrevisao && data.ultimaPrevisao.prediction) {
+        setPrediction(data.ultimaPrevisao.prediction[0]);
+      } else {
+        console.warn("Resposta inesperada de /predict:", data);
+      }
+    } catch (err) {
+      console.error("Erro ao buscar predição:", err);
     }
-  } catch (err) {
-    console.error("Erro ao buscar predição:", err);
-  }
-}
+  }, []);
 
-// Busca último dado salvo no banco
-async function fetchLastData() {
-  try {
-    const response = await fetch(`${API_URL}/dados/ultimo`);
-    const data = await response.json();
+  // função para buscar o último dado (usada no useEffect e no refresh)
+  const fetchLastData = useCallback(async () => {
+    try {
+      const response = await fetch(`${API_URL}/dados/ultimo`);
+      const data = await response.json();
 
-    setSensorData({
-      temperatura: data.temperatura,
-      umidade: data.umidade,
-      pressaoAtm: data.pressaoAtm,
-      uvClassificacao: data.uvClassificacao
-    });
+      setSensorData({
+        temperatura: data.temperatura,
+        umidade: data.umidade,
+        pressaoAtm: data.pressaoAtm,
+        uvClassificacao: data.uvClassificacao,
+      });
 
-    setLastUpdated(new Date(data.created_at));
+      setLastUpdated(new Date(data.created_at));
+      await fetchPrediction();
+    } catch (error) {
+      console.error("Erro ao buscar último dado:", error);
+    }
+  }, [fetchPrediction]);
 
-    // busca previsão só quando os dados são atualizados
-    fetchPrediction();
-  } catch (error) {
-    console.error("Erro ao buscar último dado:", error);
-  }
-}
+  // refresh manual
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await fetch(`${API_URL}/dados/refresh`, { method: "POST" });
+      await fetchLastData();
+    } catch (error) {
+      console.error("Erro no refresh:", error);
+    }
+    setIsRefreshing(false);
+  }, [fetchLastData]);
 
-// refresh manual: atualiza o backend e depois busca o dado atualizado
-async function handleRefresh() {
-  setIsRefreshing(true);
-  try {
-    await fetch(`${API_URL}/dados/refresh`, { method: "POST" });
-    await fetchLastData();
-  } catch (error) {
-    console.error("Erro no refresh:", error);
-  }
-  setIsRefreshing(false);
-}
-
+  // efeito para carregar os dados automaticamente
   useEffect(() => {
-    // carregar último dado ao abrir a página
     fetchLastData();
 
-    // agenda atualização a cada hora cheia
     const now = new Date();
     const msAteProximaHora =
       (60 - now.getMinutes()) * 60 * 1000 -
@@ -80,12 +77,12 @@ async function handleRefresh() {
 
     const timeout = setTimeout(() => {
       fetchLastData();
-      const interval = setInterval(fetchLastData, 3600000); // depois de 1h
+      const interval = setInterval(fetchLastData, 3600000);
       return () => clearInterval(interval);
     }, msAteProximaHora);
 
     return () => clearTimeout(timeout);
-  }, []);
+  }, [fetchLastData]);
 
   function ViewHistory() {
     navigate("/history");
