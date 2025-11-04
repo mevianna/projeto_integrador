@@ -26,7 +26,7 @@ async function gerarPrevisao() {
   return new Promise((resolve, reject) => {
     try {
       const lastESP = db.prepare(`
-        SELECT temperatura, umidade, pressaoAtm, created_at 
+        SELECT temperatura, umidade, pressaoAtm, created_at,  ventoVelocidade, ventoDirecao, cloudCover, precipitacao
         FROM leituras
         ORDER BY datetime(created_at) DESC
         LIMIT 1
@@ -39,8 +39,8 @@ async function gerarPrevisao() {
         pressao_mbar,
         lastESP.temperatura,
         lastESP.umidade,
-        0, 0,
-        cloudCover,
+        lastESP.ventoVelocidade, lastESP.ventoDirecao,
+        lastESP.cloudCover,
       ];
 
       console.log("Gerando previsão com features:", features);
@@ -87,23 +87,32 @@ app.get("/events", async (req, res) => {
 });
 
 // rota para atualizar dadosESP
-app.post("/dados", (req, res) => {
+app.post("/dados", async(req, res) => {
   dadosESP = req.body;
   res.json({ ok: true });
 
   // salva imediatamente na primeira vez que receber dados
   if (!app.locals.primeiraConexao) {
-    salvarUltimoDado();
-    app.locals.primeiraConexao = true;
-    gerarPrevisao(); // gera previsão inicial
+    try {
+      await gerarPrevisao();
+      await salvarUltimoDado(); 
+      app.locals.primeiraConexao = true;
+    } catch (err) {
+      console.error("Erro ao gerar previsão inicial:", err);
+    }
   }
 });
 
 // rota para atualizar dadosESP pelo refresh
 app.post("/dados/refresh", async (req, res) => {
-  salvarUltimoDado();
-  await gerarPrevisao(); // gera nova previsão
-  res.json({ ok: true });
+  try {
+    await gerarPrevisao(); // gera nova previsão e atualiza ultimaPrevisao
+    await salvarUltimoDado();
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("Erro no refresh:", err);
+    res.status(500).json({ error: "Erro ao gerar previsão ou salvar dado" });
+  }
 });
 
 app.get("/dados/ultimo", (req, res) => {
@@ -122,7 +131,7 @@ app.get("/dados/ultimo", (req, res) => {
 });
 
 // função para salvar último dado
-function salvarUltimoDado() {
+async function salvarUltimoDado() {
   const { temperatura, umidade, pressaoAtm, uvClassificacao } = dadosESP;
 
   // não salva se não houver dados
@@ -130,6 +139,9 @@ function salvarUltimoDado() {
     console.log("Nenhum dado disponível para salvar");
     return;
   }
+
+  const probabilidadeChuva =
+  ultimaPrevisao?.prediction?.[0]?.[0] ?? 0;
 
   const last = db
     .prepare("SELECT * FROM leituras ORDER BY id DESC LIMIT 1")
@@ -140,15 +152,20 @@ function salvarUltimoDado() {
     last.temperatura === temperatura &&
     last.umidade === umidade &&
     last.pressaoAtm === pressaoAtm &&
-    last.uvClassificacao === uvClassificacao
+    last.uvClassificacao === uvClassificacao &&
+    last.ventoDirecao === 0 &&
+    last.ventoVelocidade === 0 &&
+    last.cloudCover === cloudCover &&
+    last.rainProbability === probabilidadeChuva &&
+    last.precipitacao === 0
   ) {
     console.log("Último registro é igual, não salvou");
     return;
   }
 
   const stmt = db.prepare(`
-    INSERT INTO leituras (temperatura, umidade, pressaoAtm, uvClassificacao, created_at)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO leituras (temperatura, umidade, pressaoAtm, uvClassificacao, created_at, ventoVelocidade, ventoDirecao, cloudCover, rainProbability, precipitacao)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   stmt.run(
@@ -156,17 +173,27 @@ function salvarUltimoDado() {
     umidade,
     pressaoAtm,
     uvClassificacao,
-    new Date().toISOString()
+    new Date().toISOString(),
+    0,
+    0,
+    cloudCover,
+    probabilidadeChuva,
+    0
   );
 
   console.log(`Salvou dado: ${new Date().toISOString()}`);
+  const ultimo = db.prepare(`
+    SELECT * FROM leituras ORDER BY id DESC LIMIT 1
+  `).get();
+
+  console.log("Dado salvo no banco:", ultimo);
 }
 
 // agenda o salvamento a cada hora redonda
-cron.schedule("0 * * * *", () => {
+cron.schedule("0 * * * *", async() => {
   console.log("Gerando nova previsão programada...");
-  salvarUltimoDado();
-  gerarPrevisao(); // gera nova previsão
+  await salvarUltimoDado();
+  await gerarPrevisao(); // gera nova previsão
 });
 
 console.log("Agendamento de salvamento a cada hora cheia iniciado");
@@ -191,7 +218,6 @@ app.post("/cloudcover", (req, res) => {
   if (novoValor == null) {
     return res.status(400).json({ error: "cloudCover não enviado" });
   }
-
   cloudCover = novoValor;
   res.json({ ok: true, cloudCover });
 });

@@ -20,4 +20,24 @@ db.exec(`
   )
 `);
 
+function addColumnIfNotExists(table, column, type, defaultValue = null) {
+  const info = db.prepare(`PRAGMA table_info(${table});`).all();
+  const exists = info.some(col => col.name === column);
+  
+  if (!exists) {
+    console.log(`Adicionando coluna '${column}' à tabela '${table}'...`);
+    const defaultClause =
+      defaultValue !== null
+        ? `DEFAULT ${typeof defaultValue === "string" ? `'${defaultValue}'` : defaultValue}`
+        : "";
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${type} ${defaultClause}`);
+  }
+}
+
+addColumnIfNotExists("leituras", "ventoVelocidade", "REAL", 0);
+addColumnIfNotExists("leituras", "ventoDirecao", "REAL", 0);
+addColumnIfNotExists("leituras", "cloudCover", "REAL", 0);
+addColumnIfNotExists("leituras", "rainProbability", "REAL", 0);
+addColumnIfNotExists("leituras", "precipitacao", "REAL", 0);
+
 export default db;

@@ -4,7 +4,7 @@ import xgboost as xgb
 import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(BASE_DIR, "modelo_xgb.bin")
+MODEL_PATH = os.path.join(BASE_DIR, "modelo_xgb.json")
 
 try:
     input_str = sys.stdin.read()

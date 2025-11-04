@@ -28,8 +28,19 @@ function Visibility() {
 
   useEffect(() => {
     fetchCloud();
-    const timer = setInterval(fetchCloud, 10 * 60 * 1000);
-    return () => clearInterval(timer);
+     const now = new Date();
+    const msAteProximaHora =
+      (60 - now.getMinutes()) * 60 * 1000 -
+      now.getSeconds() * 1000 -
+      now.getMilliseconds();
+
+    const timeout = setTimeout(() => {
+      fetchCloud();
+      const interval = setInterval(fetchCloud, 3600000);
+      return () => clearInterval(interval);
+    }, msAteProximaHora);
+
+    return () => clearTimeout(timeout);
   }, []);
 
   let data = new Date();

@@ -16,10 +16,17 @@ function Info() {
   const [lastUpdated, setLastUpdated] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [prediction, setPrediction] = useState(null);
+  const [noPrediction, setNoPrediction] = useState(false);
 
   const fetchPrediction = useCallback(async () => {
     try {
       const res = await fetch(`${API_URL}/predict`);
+      if(res.status === 404) {
+        setNoPrediction(true);
+        setPrediction(null);
+        return;
+      }
+
       if (!res.ok) throw new Error("Erro ao buscar predição");
       const data = await res.json();
 
@@ -139,6 +146,8 @@ function Info() {
       <div className="flex text-sm md:text-xl font-bold text-slate-200 gap-16">
         {isRefreshing ? (
           <p>Loading prediction...</p>
+        ) : noPrediction ? (
+        <p>No prediction available at the moment</p>
         ) : prediction !== null ? (
           <p>Rain probability now: {(prediction[0] * 100).toFixed(2)}%</p>
         ) : (
