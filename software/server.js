@@ -21,6 +21,29 @@ let dadosESP = {}; // último dado recebido
 let cloudCover = null; // cobertura de nuvens atual
 let ultimaPrevisao = null;  // guarda última previsão
 
+function gerarFeatures() {
+  if (!dadosESP || Object.keys(dadosESP).length === 0) {
+    throw new Error("Nenhum dado do ESP disponível para gerar features.");
+  }
+
+  if (cloudCover == null) {
+    throw new Error("CloudCover ainda não disponível.");
+  }
+
+  const pressao_mbar = dadosESP.pressaoAtm * 0.01;
+
+  return [
+    pressao_mbar,
+    dadosESP.temperatura,
+    dadosESP.umidade,
+    dadosESP.uvClassificacao,
+    0, // ventoVelocidade
+    0, // ventoDirecao
+    cloudCover ?? 0,
+    0, // precipitação (opcional)
+  ];
+}
+
 // funçao para gerar a previsão
 async function gerarPrevisao(features = null) {
   return new Promise((resolve, reject) => {
@@ -89,17 +112,7 @@ app.post("/dados", async (req, res) => {
   dadosESP = req.body;
   res.json({ ok: true });
 
-  const pressao_mbar = dadosESP.pressaoAtm * 0.01;
-  const features = [
-    pressao_mbar,
-    dadosESP.temperatura,
-    dadosESP.umidade,
-    dadosESP.uvClassificacao,
-    0,
-    0,
-    cloudCover ?? 0,
-    0,
-  ];
+  const features = gerarFeatures();
 
   if (!app.locals.primeiraConexao) {
     try {
@@ -131,17 +144,7 @@ app.post("/dados/refresh", async (req, res) => {
 
     app.locals.executandoPrevisao = true;
 
-    const pressao_mbar = dadosESP.pressaoAtm * 0.01;
-    const features = [
-      pressao_mbar,
-      dadosESP.temperatura,
-      dadosESP.umidade,
-      dadosESP.uvClassificacao,
-      0,
-      0,
-      cloudCover ?? 0,
-      0,
-    ];
+    const features = gerarFeatures();
 
     const previsao = await gerarPrevisao(features);
     await salvarUltimoDado(features);
@@ -232,28 +235,7 @@ async function salvarUltimoDado(features = null) {
 cron.schedule("0 * * * *", async() => {
   console.log("Gerando nova previsão programada...");
   try {
-    if (!dadosESP || Object.keys(dadosESP).length === 0) {
-      console.warn("Nenhum dado atual do ESP disponível. Abortando previsão.");
-      return;
-    }
-
-    if (cloudCover == null) {
-      console.warn("CloudCover ainda não disponível. Abortando previsão.");
-      return;
-    }
-
-    // monta as features com os dados atuais em memória
-    const pressao_mbar = dadosESP.pressaoAtm * 0.01;
-    const features = [
-      pressao_mbar,
-      dadosESP.temperatura,
-      dadosESP.umidade,
-      dadosESP.uvClassificacao,
-      0,
-      0,
-      cloudCover ?? 0,
-      0
-    ];
+    const features = gerarFeatures();
 
     // gera a previsão com os dados atuais
     await gerarPrevisao(features);
