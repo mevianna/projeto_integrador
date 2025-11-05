@@ -15,30 +15,6 @@ function Info() {
 
   const [lastUpdated, setLastUpdated] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [prediction, setPrediction] = useState(null);
-  const [noPrediction, setNoPrediction] = useState(false);
-
-  const fetchPrediction = useCallback(async () => {
-    try {
-      const res = await fetch(`${API_URL}/predict`);
-      if(res.status === 404) {
-        setNoPrediction(true);
-        setPrediction(null);
-        return;
-      }
-
-      if (!res.ok) throw new Error("Erro ao buscar predição");
-      const data = await res.json();
-
-      if (data.ultimaPrevisao && data.ultimaPrevisao.prediction) {
-        setPrediction(data.ultimaPrevisao.prediction[0]);
-      } else {
-        console.warn("Resposta inesperada de /predict:", data);
-      }
-    } catch (err) {
-      console.error("Erro ao buscar predição:", err);
-    }
-  }, []);
 
   // função para buscar o último dado (usada no useEffect e no refresh)
   const fetchLastData = useCallback(async () => {
@@ -51,26 +27,35 @@ function Info() {
         umidade: data.umidade,
         pressaoAtm: data.pressaoAtm,
         uvClassificacao: data.uvClassificacao,
+        prediction: data.rainProbability,
       });
 
       setLastUpdated(new Date(data.created_at));
-      await fetchPrediction();
     } catch (error) {
       console.error("Erro ao buscar último dado:", error);
     }
-  }, [fetchPrediction]);
+  }, []);
 
   // refresh manual
   const handleRefresh = useCallback(async () => {
-    setIsRefreshing(true);
-    try {
-      await fetch(`${API_URL}/dados/refresh`, { method: "POST" });
-      await fetchLastData();
-    } catch (error) {
-      console.error("Erro no refresh:", error);
+  setIsRefreshing(true);
+  try {
+    const response = await fetch(`${API_URL}/dados/refresh`, { method: "POST" });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error("Erro no refresh:", errorData.error || response.statusText);
+      alert("Erro ao gerar previsão. Tente novamente mais tarde.");
+      setIsRefreshing(false);
+      return;
     }
+    await fetchLastData();
+  } catch (error) {
+    console.error("Erro no refresh:", error);
+    alert("Erro de conexão com o servidor.");
+  } finally {
     setIsRefreshing(false);
-  }, [fetchLastData]);
+  }
+}, [fetchLastData]);
 
   // efeito para carregar os dados automaticamente
   useEffect(() => {
@@ -146,10 +131,8 @@ function Info() {
       <div className="flex text-sm md:text-xl font-bold text-slate-200 gap-16">
         {isRefreshing ? (
           <p>Loading prediction...</p>
-        ) : noPrediction ? (
-        <p>No prediction available at the moment</p>
-        ) : prediction !== null ? (
-          <p>Rain probability now: {(prediction[0] * 100).toFixed(2)}%</p>
+        ) : sensorData.prediction !== null ? (
+          <p>Rain probability now: {(sensorData.prediction * 100).toFixed(2)}%</p>
         ) : (
           <p>Loading prediction...</p>
         )}

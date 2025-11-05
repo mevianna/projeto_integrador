@@ -22,26 +22,24 @@ let cloudCover = null; // cobertura de nuvens atual
 let ultimaPrevisao = null;  // guarda última previsão
 
 // funçao para gerar a previsão
-async function gerarPrevisao() {
+async function gerarPrevisao(features = null) {
   return new Promise((resolve, reject) => {
     try {
-      const lastESP = db.prepare(`
-        SELECT temperatura, umidade, pressaoAtm, created_at,  ventoVelocidade, ventoDirecao, cloudCover, precipitacao
-        FROM leituras
-        ORDER BY datetime(created_at) DESC
-        LIMIT 1
-      `).get();
-
-      if (!lastESP) return reject("Sem dados do ESP");
-
-      const pressao_mbar = lastESP.pressaoAtm * 0.01;
-      const features = [
-        pressao_mbar,
-        lastESP.temperatura,
-        lastESP.umidade,
-        lastESP.ventoVelocidade, lastESP.ventoDirecao,
-        lastESP.cloudCover,
-      ];
+      if (!features) {
+          return reject("Sem dados atuais disponíveis");
+      } else if(!Array.isArray(features) || features.length < 6) {
+        return reject("Features inválidas para previsão");
+      } else {
+        const inputModel = [
+        features[0], // pressao_mbar
+        features[1], // temperatura
+        features[2], // umidade
+        features[4], // ventoVelocidade
+        features[5], // ventoDirecao
+        features[6], // cloudCover
+        ]
+        features = inputModel;
+      }
 
       console.log("Gerando previsão com features:", features);
 
@@ -87,15 +85,26 @@ app.get("/events", async (req, res) => {
 });
 
 // rota para atualizar dadosESP
-app.post("/dados", async(req, res) => {
+app.post("/dados", async (req, res) => {
   dadosESP = req.body;
   res.json({ ok: true });
 
-  // salva imediatamente na primeira vez que receber dados
+  const pressao_mbar = dadosESP.pressaoAtm * 0.01;
+  const features = [
+    pressao_mbar,
+    dadosESP.temperatura,
+    dadosESP.umidade,
+    dadosESP.uvClassificacao,
+    0,
+    0,
+    cloudCover ?? 0,
+    0,
+  ];
+
   if (!app.locals.primeiraConexao) {
     try {
-      await gerarPrevisao();
-      await salvarUltimoDado(); 
+      await gerarPrevisao(features);
+      await salvarUltimoDado(features);
       app.locals.primeiraConexao = true;
     } catch (err) {
       console.error("Erro ao gerar previsão inicial:", err);
@@ -106,12 +115,42 @@ app.post("/dados", async(req, res) => {
 // rota para atualizar dadosESP pelo refresh
 app.post("/dados/refresh", async (req, res) => {
   try {
-    await gerarPrevisao(); // gera nova previsão e atualiza ultimaPrevisao
-    await salvarUltimoDado();
-    res.json({ ok: true });
+    if (app.locals.executandoPrevisao) {
+      return res.status(429).json({ error: "Previsão em execução, tente novamente." });
+    }
+
+    if (!dadosESP || Object.keys(dadosESP).length === 0) {
+      console.warn("Nenhum dado atual do ESP disponível. Abortando previsão.");
+      return res.status(400).json({ error: "Nenhum dado atual do ESP disponível." });
+    }
+
+    if (cloudCover == null) {
+      console.warn("CloudCover ainda não disponível. Abortando previsão.");
+      return res.status(400).json({ error: "CloudCover ainda não disponível." });
+    }
+
+    app.locals.executandoPrevisao = true;
+
+    const pressao_mbar = dadosESP.pressaoAtm * 0.01;
+    const features = [
+      pressao_mbar,
+      dadosESP.temperatura,
+      dadosESP.umidade,
+      dadosESP.uvClassificacao,
+      0,
+      0,
+      cloudCover ?? 0,
+      0,
+    ];
+
+    const previsao = await gerarPrevisao(features);
+    await salvarUltimoDado(features);
+    res.json({ ok: true, previsao });
   } catch (err) {
     console.error("Erro no refresh:", err);
     res.status(500).json({ error: "Erro ao gerar previsão ou salvar dado" });
+  } finally {
+    app.locals.executandoPrevisao = false;
   }
 });
 
@@ -131,17 +170,17 @@ app.get("/dados/ultimo", (req, res) => {
 });
 
 // função para salvar último dado
-async function salvarUltimoDado() {
-  const { temperatura, umidade, pressaoAtm, uvClassificacao } = dadosESP;
-
-  // não salva se não houver dados
-  if (temperatura == null && umidade == null && pressaoAtm == null) {
-    console.log("Nenhum dado disponível para salvar");
+async function salvarUltimoDado(features = null) {
+  if (!features || !Array.isArray(features)) {
+    console.log("Nenhum dado válido recebido para salvar.");
     return;
   }
 
-  const probabilidadeChuva =
-  ultimaPrevisao?.prediction?.[0]?.[0] ?? 0;
+  // desestruturação correta conforme a ordem das features
+  const [pressaoAtm, temperatura, umidade, uvClassificacao, ventoVelocidade, ventoDirecao, cloud, precipitacao] = features;
+
+  // pega a probabilidade de chuva da última previsão (ou 0)
+  const probabilidadeChuva = ultimaPrevisao?.prediction?.[0]?.[0] ?? 0;
 
   const last = db
     .prepare("SELECT * FROM leituras ORDER BY id DESC LIMIT 1")
@@ -153,11 +192,11 @@ async function salvarUltimoDado() {
     last.umidade === umidade &&
     last.pressaoAtm === pressaoAtm &&
     last.uvClassificacao === uvClassificacao &&
-    last.ventoDirecao === 0 &&
-    last.ventoVelocidade === 0 &&
-    last.cloudCover === cloudCover &&
+    last.ventoDirecao === ventoDirecao &&
+    last.ventoVelocidade === ventoVelocidade &&
+    last.cloudCover === cloud &&
     last.rainProbability === probabilidadeChuva &&
-    last.precipitacao === 0
+    last.precipitacao === precipitacao
   ) {
     console.log("Último registro é igual, não salvou");
     return;
@@ -174,11 +213,11 @@ async function salvarUltimoDado() {
     pressaoAtm,
     uvClassificacao,
     new Date().toISOString(),
-    0,
-    0,
-    cloudCover,
+    ventoVelocidade,
+    ventoDirecao,
+    cloud,
     probabilidadeChuva,
-    0
+    precipitacao
   );
 
   console.log(`Salvou dado: ${new Date().toISOString()}`);
@@ -192,8 +231,40 @@ async function salvarUltimoDado() {
 // agenda o salvamento a cada hora redonda
 cron.schedule("0 * * * *", async() => {
   console.log("Gerando nova previsão programada...");
-  await salvarUltimoDado();
-  await gerarPrevisao(); // gera nova previsão
+  try {
+    if (!dadosESP || Object.keys(dadosESP).length === 0) {
+      console.warn("Nenhum dado atual do ESP disponível. Abortando previsão.");
+      return;
+    }
+
+    if (cloudCover == null) {
+      console.warn("CloudCover ainda não disponível. Abortando previsão.");
+      return;
+    }
+
+    // monta as features com os dados atuais em memória
+    const pressao_mbar = dadosESP.pressaoAtm * 0.01;
+    const features = [
+      pressao_mbar,
+      dadosESP.temperatura,
+      dadosESP.umidade,
+      dadosESP.uvClassificacao,
+      0,
+      0,
+      cloudCover ?? 0,
+      0
+    ];
+
+    // gera a previsão com os dados atuais
+    await gerarPrevisao(features);
+
+    // salva os dados + previsão
+    await salvarUltimoDado(features);
+
+    console.log("Previsão e dados salvos com sucesso na hora cheia.");
+  } catch (err) {
+    console.error("Erro ao gerar previsão programada:", err);
+  }
 });
 
 console.log("Agendamento de salvamento a cada hora cheia iniciado");
