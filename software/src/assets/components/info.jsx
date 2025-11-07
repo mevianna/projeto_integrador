@@ -7,10 +7,11 @@ function Info() {
   const navigate = useNavigate();
 
   const [sensorData, setSensorData] = useState({
-    temperatura: "-",
-    umidade: "-",
-    pressaoAtm: "-",
+    temperatura: null,
+    umidade: null,
+    pressaoAtm: null,
     uvClassificacao: "-",
+    prediction: null,
   });
 
   const [lastUpdated, setLastUpdated] = useState(null);
@@ -61,19 +62,9 @@ function Info() {
   useEffect(() => {
     fetchLastData();
 
-    const now = new Date();
-    const msAteProximaHora =
-      (60 - now.getMinutes()) * 60 * 1000 -
-      now.getSeconds() * 1000 -
-      now.getMilliseconds();
+    const interval = setInterval(fetchLastData, 20000);
+    return () => clearInterval(interval);
 
-    const timeout = setTimeout(() => {
-      fetchLastData();
-      const interval = setInterval(fetchLastData, 3600000);
-      return () => clearInterval(interval);
-    }, msAteProximaHora);
-
-    return () => clearTimeout(timeout);
   }, [fetchLastData]);
 
   function ViewHistory() {
@@ -97,14 +88,19 @@ function Info() {
         <div className="flex text-sm md:text-xl font-bold text-slate-200 gap-16">
           <div>
             <p>Temperature: {sensorData.temperatura} °C</p>
-            <p>Humidity: {sensorData.umidade} %</p>
+            <p>Humidity: {(sensorData.umidade)} %</p>
           </div>
           <div>
             <p>Wind Speed: -</p>
             <p>Wind Direction: -</p>
           </div>
           <div>
-            <p>Atmospheric Pressure: {sensorData.pressaoAtm} Pa</p>
+            <p>Atmospheric Pressure: {" "}
+              {sensorData.pressaoAtm !== null
+                ? Number(sensorData.pressaoAtm).toFixed(2)
+                : "-"}{" "}
+              Pa
+            </p>
             <p>UV Index: {sensorData.uvClassificacao}</p>
           </div>
         </div>
@@ -131,7 +127,9 @@ function Info() {
       <div className="flex text-sm md:text-xl font-bold text-slate-200 gap-16">
         {isRefreshing ? (
           <p>Loading prediction...</p>
-        ) : sensorData.prediction !== null ? (
+        ) : sensorData.prediction === null ? (
+          <p>No prediction available</p>
+        ): sensorData.prediction !== null ? (
           <p>Rain probability now: {(sensorData.prediction * 100).toFixed(2)}%</p>
         ) : (
           <p>Loading prediction...</p>

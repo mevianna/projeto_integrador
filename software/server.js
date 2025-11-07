@@ -20,27 +20,36 @@ const __dirname = path.dirname(__filename);
 let dadosESP = {}; // último dado recebido
 let cloudCover = null; // cobertura de nuvens atual
 let ultimaPrevisao = null;  // guarda última previsão
+app.locals.executandoPrevisaoInicial = false;
+let ultimaAtualizacao = 0;
 
-function gerarFeatures() {
+async function esperarCloudCover() {
+  const intervalo = 1000; // checa a cada 1 segundo
+
+  while (cloudCover == null) {
+    console.log("Aguardando definição de cloudCover...");
+    await new Promise((resolve) => setTimeout(resolve, intervalo));
+  }
+
+  return cloudCover;
+}
+
+async function gerarFeatures() {
+  await esperarCloudCover();
+
   if (!dadosESP || Object.keys(dadosESP).length === 0) {
     throw new Error("Nenhum dado do ESP disponível para gerar features.");
   }
 
-  if (cloudCover == null) {
-    throw new Error("CloudCover ainda não disponível.");
-  }
-
-  const pressao_mbar = dadosESP.pressaoAtm * 0.01;
-
   return [
-    pressao_mbar,
+    dadosESP.pressaoAtm,
     dadosESP.temperatura,
     dadosESP.umidade,
     dadosESP.uvClassificacao,
     0, // ventoVelocidade
     0, // ventoDirecao
-    cloudCover ?? 0,
-    0, // precipitação (opcional)
+    cloudCover ?? 0, // cloudCover ou 0 se nao definido
+    dadosESP.precipitacao, // precipitação
   ];
 }
 
@@ -53,15 +62,15 @@ async function gerarPrevisao(features = null) {
       } else if(!Array.isArray(features) || features.length < 6) {
         return reject("Features inválidas para previsão");
       } else {
-        const inputModel = [
-        features[0], // pressao_mbar
+        const input = [
+        features[0] * 0.01, // pressao_mbar
         features[1], // temperatura
         features[2], // umidade
         features[4], // ventoVelocidade
         features[5], // ventoDirecao
         features[6], // cloudCover
         ]
-        features = inputModel;
+        features = input;
       }
 
       console.log("Gerando previsão com features:", features);
@@ -109,19 +118,36 @@ app.get("/events", async (req, res) => {
 
 // rota para atualizar dadosESP
 app.post("/dados", async (req, res) => {
+  const agora = Date.now();
+  if (agora - ultimaAtualizacao < 5000) {
+    console.log("Ignorando atualização duplicada /dados");
+    return res.status(200).json({ ok: true, ignorado: true });
+  }
+  ultimaAtualizacao = agora;
+
   dadosESP = req.body;
   res.json({ ok: true });
 
-  const features = gerarFeatures();
+  if (app.locals.executandoPrevisaoInicial) {
+    return;
+  }
 
-  if (!app.locals.primeiraConexao) {
-    try {
-      await gerarPrevisao(features);
-      await salvarUltimoDado(features);
-      app.locals.primeiraConexao = true;
-    } catch (err) {
-      console.error("Erro ao gerar previsão inicial:", err);
-    }
+  if (app.locals.primeiraConexao) {
+    return;
+  }
+
+  app.locals.executandoPrevisaoInicial = true;
+  console.log("Gerando previsão inicial...");
+
+  try {
+    const features = await gerarFeatures();
+    await gerarPrevisao(features);
+    await salvarUltimoDado(features);
+    app.locals.primeiraConexao = true;
+  } catch (err) {
+    console.error("Erro ao gerar previsão inicial:", err);
+  } finally {
+    app.locals.executandoPrevisaoInicial = false;
   }
 });
 
@@ -132,19 +158,9 @@ app.post("/dados/refresh", async (req, res) => {
       return res.status(429).json({ error: "Previsão em execução, tente novamente." });
     }
 
-    if (!dadosESP || Object.keys(dadosESP).length === 0) {
-      console.warn("Nenhum dado atual do ESP disponível. Abortando previsão.");
-      return res.status(400).json({ error: "Nenhum dado atual do ESP disponível." });
-    }
-
-    if (cloudCover == null) {
-      console.warn("CloudCover ainda não disponível. Abortando previsão.");
-      return res.status(400).json({ error: "CloudCover ainda não disponível." });
-    }
-
     app.locals.executandoPrevisao = true;
 
-    const features = gerarFeatures();
+    const features = await gerarFeatures();
 
     const previsao = await gerarPrevisao(features);
     await salvarUltimoDado(features);
@@ -183,7 +199,7 @@ async function salvarUltimoDado(features = null) {
   const [pressaoAtm, temperatura, umidade, uvClassificacao, ventoVelocidade, ventoDirecao, cloud, precipitacao] = features;
 
   // pega a probabilidade de chuva da última previsão (ou 0)
-  const probabilidadeChuva = ultimaPrevisao?.prediction?.[0]?.[0] ?? 0;
+  const probabilidadeChuva = ultimaPrevisao?.prediction?.[0]?.[1] ?? 0;
 
   const last = db
     .prepare("SELECT * FROM leituras ORDER BY id DESC LIMIT 1")
@@ -235,7 +251,7 @@ async function salvarUltimoDado(features = null) {
 cron.schedule("0 * * * *", async() => {
   console.log("Gerando nova previsão programada...");
   try {
-    const features = gerarFeatures();
+    const features = await gerarFeatures();
 
     // gera a previsão com os dados atuais
     await gerarPrevisao(features);
@@ -273,16 +289,6 @@ app.post("/cloudcover", (req, res) => {
   }
   cloudCover = novoValor;
   res.json({ ok: true, cloudCover });
-});
-
-// rota para obter última previsão
-app.get("/predict", (req, res) => {
-  if (!ultimaPrevisao) {
-    return res.status(404).json({ error: "Nenhuma previsão gerada ainda" });
-  }
-  res.json({
-    ultimaPrevisao,
-  });
 });
 
 app.listen(PORT, "0.0.0.0", () => {
