@@ -27,8 +27,6 @@ function HistoryTable() {
                 <th className="p-3 text-left">Umidade (%)</th>
                 <th className="p-3 text-left">Pressão (Pa)</th>
                 <th className="p-3 text-left">Índice UV</th>
-                <th className="p-3 text-left">Velocidade Vento (m/s)</th>
-                <th className="p-3 text-left">Direção do vento (°)</th>
                 <th className="p-3 text-left">Cloud Cover (%)</th>
                 <th className="p-3 text-left">Probabilidade Chuva (%)</th>
                 <th className="p-3 text-left">Precipitação (mm)</th>
@@ -46,8 +44,6 @@ function HistoryTable() {
                   <td className="p-3">{row.umidade ?? "-"}</td>
                   <td className="p-3">{row.pressaoAtm ?? "-"}</td>
                   <td className="p-3">{row.uvClassificacao ?? "-"}</td>
-                  <td className="p-3">{row.ventoVelocidade ?? "-"}</td>
-                  <td className="p-3">{row.ventoDirecao ?? "-"}</td>
                   <td className="p-3">{row.cloudCover ?? "-"}</td>
                   <td className="p-3">{(row.rainProbability* 100).toFixed(2) ?? "-"}</td>
                   <td className="p-3">{row.precipitacao ?? "-"}</td>

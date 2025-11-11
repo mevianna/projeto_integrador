@@ -91,10 +91,6 @@ function Info() {
             <p>Humidity: {(sensorData.umidade)} %</p>
           </div>
           <div>
-            <p>Wind Speed: -</p>
-            <p>Wind Direction: -</p>
-          </div>
-          <div>
             <p>Atmospheric Pressure: {" "}
               {sensorData.pressaoAtm !== null
                 ? Number(sensorData.pressaoAtm).toFixed(2)
