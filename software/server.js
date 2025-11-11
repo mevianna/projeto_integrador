@@ -162,8 +162,8 @@ async function esperarCloudCover() {
  * @function gerarFeatures
  * 
  * @returns {Promise<Array<number|string>>} Uma Promise que resolve com um array de features,
- * incluindo pressão atmosférica, temperatura, umidade, classificação UV, velocidade e direção do vento,
- * cobertura de nuvens e precipitação.
+ * incluindo pressão atmosférica, temperatura, umidade, classificação UV, cobertura de nuvens
+ * e precipitação.
  * 
  * @throws {Error} Se `dadosESP` não estiver definido ou estiver vazio.
  *
@@ -189,8 +189,6 @@ async function gerarFeatures() {
     dadosESP.temperatura,
     dadosESP.umidade,
     dadosESP.uvClassificacao,
-    0, // ventoVelocidade
-    0, // ventoDirecao
     cloudCover ?? 0, // cloudCover ou 0 se nao definido
     dadosESP.precipitacao, // precipitação
   ];
@@ -214,7 +212,7 @@ async function gerarFeatures() {
  * @function gerarPrevisao
  * @param {Array<number>} [features=null] - Array contendo as *features* meteorológicas
  * necessárias para a previsão, na seguinte ordem:
- * `[pressaoAtm, temperatura, umidade, uvClassificacao, ventoVelocidade, ventoDirecao, cloudCover, precipitacao]`.
+ * `[pressaoAtm, temperatura, umidade, uvClassificacao, cloudCover, precipitacao]`.
  *
  * @returns {Promise<Object>} Retorna uma Promise que resolve com o objeto de previsão gerado
  * pelo script Python, contendo os resultados do modelo.
@@ -242,9 +240,9 @@ async function gerarPrevisao(features = null) {
         features[0] * 0.01, // pressao_mbar
         features[1], // temperatura
         features[2], // umidade
-        features[4], // ventoVelocidade
-        features[5], // ventoDirecao
-        features[6], // cloudCover
+        0, // ventoVelocidade
+        0, // ventoDirecao
+        features[4], // cloudCover
         ]
         if(features[7] > 0 && features[7] != ultimaPrecipitacao) {
           return resolve.json({prediction: [[0, 1]]});
@@ -294,7 +292,7 @@ async function gerarPrevisao(features = null) {
  * @async
  * @function salvarUltimoDado
  * @param {Array<number>} [features=null] - Lista de *features* meteorológicas, na seguinte ordem:
- * `[pressaoAtm, temperatura, umidade, uvClassificacao, ventoVelocidade, ventoDirecao, cloudCover, precipitacao]`.
+ * `[pressaoAtm, temperatura, umidade, uvClassificacao, cloudCover, precipitacao]`.
  *
  * @returns {Promise<void>} Uma Promise que é resolvida após a operação de salvamento (ou ignorada se os dados forem idênticos).
  * @throws {Error} Se ocorrer falha ao acessar ou gravar no banco de dados.
@@ -305,8 +303,6 @@ async function gerarPrevisao(features = null) {
  *   26.5,   // temperatura
  *   70,     // umidade
  *   5,      // uvClassificacao
- *   12.3,   // ventoVelocidade
- *   180,    // ventoDirecao
  *   40,     // cloudCover
  *   0       // precipitacao
  * ]);
@@ -318,7 +314,7 @@ async function salvarUltimoDado(features = null) {
   }
 
   // desestruturação correta conforme a ordem das features
-  const [pressaoAtm, temperatura, umidade, uvClassificacao, ventoVelocidade, ventoDirecao, cloud, precipitacao] = features;
+  const [pressaoAtm, temperatura, umidade, uvClassificacao, cloud, precipitacao] = features;
 
   // pega a probabilidade de chuva da última previsão (ou 0)
   const probabilidadeChuva = ultimaPrevisao?.prediction?.[0]?.[1] ?? 0;
@@ -333,8 +329,6 @@ async function salvarUltimoDado(features = null) {
     last.umidade === umidade &&
     last.pressaoAtm === pressaoAtm &&
     last.uvClassificacao === uvClassificacao &&
-    last.ventoDirecao === ventoDirecao &&
-    last.ventoVelocidade === ventoVelocidade &&
     last.cloudCover === cloud &&
     last.rainProbability === probabilidadeChuva &&
     last.precipitacao === precipitacao
@@ -344,7 +338,7 @@ async function salvarUltimoDado(features = null) {
   }
 
   const stmt = db.prepare(`
-    INSERT INTO leituras (temperatura, umidade, pressaoAtm, uvClassificacao, created_at, ventoVelocidade, ventoDirecao, cloudCover, rainProbability, precipitacao)
+    INSERT INTO leituras (temperatura, umidade, pressaoAtm, uvClassificacao, created_at, cloudCover, rainProbability, precipitacao)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
@@ -354,8 +348,6 @@ async function salvarUltimoDado(features = null) {
     pressaoAtm,
     uvClassificacao,
     new Date().toISOString(),
-    ventoVelocidade,
-    ventoDirecao,
     cloud,
     probabilidadeChuva,
     precipitacao
@@ -628,8 +620,6 @@ app.post("/dados/refresh", async (req, res) => {
  *   "umidade": 80,
  *   "pressaoAtm": 1012,
  *   "uvClassificacao": 3,
- *   "ventoVelocidade": 5.2,
- *   "ventoDirecao": 180,
  *   "cloudCover": 60,
  *   "rainProbability": 0.35,
  *   "precipitacao": 0,
@@ -683,8 +673,6 @@ app.get("/dados/ultimo", (req, res) => {
  *     "umidade": 75,
  *     "pressaoAtm": 1013,
  *     "uvClassificacao": 2,
- *     "ventoVelocidade": 3.1,
- *     "ventoDirecao": 180,
  *     "cloudCover": 0.7,
  *     "rainProbability": 0.3,
  *     "precipitacao": 0,
