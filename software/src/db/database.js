@@ -16,10 +16,14 @@ db.exec(`
     umidade REAL,
     pressaoAtm REAL,
     uvClassificacao TEXT,
+    cloudCover REAL,
+    rainProbability REAL,
+    precipitacao REAL,
     created_at TEXT
   )
 `);
 
+// função para adicionar coluna se não existir
 function addColumnIfNotExists(table, column, type, defaultValue = null) {
   const info = db.prepare(`PRAGMA table_info(${table});`).all();
   const exists = info.some(col => col.name === column);
@@ -32,12 +36,26 @@ function addColumnIfNotExists(table, column, type, defaultValue = null) {
         : "";
     db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${type} ${defaultClause}`);
   }
+};
+
+// função para deletar coluna indesejada se existir
+function deleteColumn(table, column) {
+  const info = db.prepare(`PRAGMA table_info(${table});`).all();
+  const exists = info.some(col => col.name === column);
+
+  if(exists)
+  {
+    console.log(`Removendo coluna '${column}' da tabela '${table}'...`);
+    db.exec(`ALTER TABLE ${table} DROP COLUMN ${column}`);
+  }
 }
 
-addColumnIfNotExists("leituras", "ventoVelocidade", "REAL", 0);
-addColumnIfNotExists("leituras", "ventoDirecao", "REAL", 0);
+// caso alguma versão antiga não tenha essas colunas, adiciona elas
 addColumnIfNotExists("leituras", "cloudCover", "REAL", 0);
 addColumnIfNotExists("leituras", "rainProbability", "REAL", 0);
 addColumnIfNotExists("leituras", "precipitacao", "REAL", 0);
+// caso alguma versão antiga tenha essas colunas, remove elas
+deleteColumn("leituras", "ventoVelocidade");
+deleteColumn("leituras", "ventoDirecao");
 
 export default db;
