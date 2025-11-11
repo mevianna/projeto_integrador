@@ -1,4 +1,32 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: server.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: server.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * *******************************************************************************
  * Nome do arquivo: server.js
  * Descrição: Servidor meteorológico para receber dados do ESP, gerar previsões
@@ -17,7 +45,7 @@
  *   - node-cron: agenda tarefas periódicas (como geração horária de previsão)
  *   - sqlite3: persistência de dados meteorológicos e previsões
  *   - child_process: execução de scripts Python para previsão
- *   - path & url: manipulação de caminhos de arquivos
+ *   - path &amp; url: manipulação de caminhos de arquivos
  *   - ./src/db/database.js: módulo de acesso ao banco SQLite
  *
  * ------------------------------------------------------------------------------
@@ -116,12 +144,6 @@ let ultimaPrevisao = null;
 let ultimaAtualizacao = 0;
 
 /**
- * Última precipitação registrada.
- * @type {number}
- */
-let ultimaPrecipitacao = 0;
-
-/**
  * Flag para controlar se a previsão inicial está em execução.
  * @type {boolean}
  */
@@ -134,7 +156,7 @@ app.locals.executandoPrevisaoInicial = false;
  *
  * @function esperarCloudCover
  * @async
- * @returns {Promise<number>} Retorna uma Promise que resolve com o valor de "cloudCover" assim que ele for definido.
+ * @returns {Promise&lt;number>} Retorna uma Promise que resolve com o valor de "cloudCover" assim que ele for definido.
  */
 async function esperarCloudCover() {
   const intervalo = 1000; // checa a cada 1 segundo
@@ -148,20 +170,19 @@ async function esperarCloudCover() {
 }
 
 /**
- * Gera as features necessárias para a previsão e para o salvamento no banco, atualizando
- * o valor da última precipitação.
+ * Gera as features necessárias para a previsão e para o salvamento no banco.
  *
  * A função aguarda até que a variável `cloudCover` esteja definida, garantindo que
  * todos os dados necessários estejam disponíveis. Em seguida, valida se os dados
  * recebidos do dispositivo ESP estão presentes e, caso contrário, lança um erro.
  * 
- * Salva a última precipitação registrada e retorna um array contendo as principais variáveis
- * meteorológicas que serão usadas pelo modelo de previsão e para o registro no banco de dados.
+ * Retorna um array contendo as principais variáveis meteorológicas que serão usadas
+ * pelo modelo de previsão e para o registro no banco de dados.
  *
  * @async
  * @function gerarFeatures
  * 
- * @returns {Promise<Array<number|string>>} Uma Promise que resolve com um array de features,
+ * @returns {Promise&lt;Array&lt;number|string>>} Uma Promise que resolve com um array de features,
  * incluindo pressão atmosférica, temperatura, umidade, classificação UV, velocidade e direção do vento,
  * cobertura de nuvens e precipitação.
  * 
@@ -182,8 +203,6 @@ async function gerarFeatures() {
     throw new Error("Nenhum dado do ESP disponível para gerar features.");
   }
 
-  ultimaPrecipitacao = dadosESP.precipitacao;
-
   return [
     dadosESP.pressaoAtm,
     dadosESP.temperatura,
@@ -200,8 +219,7 @@ async function gerarFeatures() {
  * Gera a previsão de chuva com base nas *features* meteorológicas,
  * executando um script Python externo responsável pelo modelo de previsão.
  *
- * A função valida o conjunto de *features* fornecido, normaliza os dados e, caso
- * a precipitação atual seja maior que zero e diferente da última registrada,
+ * A função valida o conjunto de *features* fornecido, normaliza os dados e
  * os envia ao script Python (`server.py`) por meio de um processo filho.
  * O resultado retornado pelo Python é lido via *stdout*, interpretado em JSON
  * e resolvido como objeto JavaScript.
@@ -212,11 +230,11 @@ async function gerarFeatures() {
  *
  * @async
  * @function gerarPrevisao
- * @param {Array<number>} [features=null] - Array contendo as *features* meteorológicas
+ * @param {Array&lt;number>} [features=null] - Array contendo as *features* meteorológicas
  * necessárias para a previsão, na seguinte ordem:
  * `[pressaoAtm, temperatura, umidade, uvClassificacao, ventoVelocidade, ventoDirecao, cloudCover, precipitacao]`.
  *
- * @returns {Promise<Object>} Retorna uma Promise que resolve com o objeto de previsão gerado
+ * @returns {Promise&lt;Object>} Retorna uma Promise que resolve com o objeto de previsão gerado
  * pelo script Python, contendo os resultados do modelo.
  *
  * @throws {Error} Caso as *features* estejam ausentes, inválidas ou ocorra erro ao interpretar
@@ -235,7 +253,7 @@ async function gerarPrevisao(features = null) {
     try {
       if (!features) {
           return reject("Sem dados atuais disponíveis");
-      } else if(!Array.isArray(features) || features.length < 6) {
+      } else if(!Array.isArray(features) || features.length &lt; 6) {
         return reject("Features inválidas para previsão");
       } else {
         const input = [
@@ -246,9 +264,6 @@ async function gerarPrevisao(features = null) {
         features[5], // ventoDirecao
         features[6], // cloudCover
         ]
-        if(features[7] > 0 && features[7] != ultimaPrecipitacao) {
-          return resolve.json({prediction: [[0, 1]]});
-        }
         features = input;
       }
 
@@ -293,10 +308,10 @@ async function gerarPrevisao(features = null) {
  *
  * @async
  * @function salvarUltimoDado
- * @param {Array<number>} [features=null] - Lista de *features* meteorológicas, na seguinte ordem:
+ * @param {Array&lt;number>} [features=null] - Lista de *features* meteorológicas, na seguinte ordem:
  * `[pressaoAtm, temperatura, umidade, uvClassificacao, ventoVelocidade, ventoDirecao, cloudCover, precipitacao]`.
  *
- * @returns {Promise<void>} Uma Promise que é resolvida após a operação de salvamento (ou ignorada se os dados forem idênticos).
+ * @returns {Promise&lt;void>} Uma Promise que é resolvida após a operação de salvamento (ou ignorada se os dados forem idênticos).
  * @throws {Error} Se ocorrer falha ao acessar ou gravar no banco de dados.
  *
  * @example
@@ -328,15 +343,15 @@ async function salvarUltimoDado(features = null) {
     .get();
 
   if (
-    last &&
-    last.temperatura === temperatura &&
-    last.umidade === umidade &&
-    last.pressaoAtm === pressaoAtm &&
-    last.uvClassificacao === uvClassificacao &&
-    last.ventoDirecao === ventoDirecao &&
-    last.ventoVelocidade === ventoVelocidade &&
-    last.cloudCover === cloud &&
-    last.rainProbability === probabilidadeChuva &&
+    last &amp;&amp;
+    last.temperatura === temperatura &amp;&amp;
+    last.umidade === umidade &amp;&amp;
+    last.pressaoAtm === pressaoAtm &amp;&amp;
+    last.uvClassificacao === uvClassificacao &amp;&amp;
+    last.ventoDirecao === ventoDirecao &amp;&amp;
+    last.ventoVelocidade === ventoVelocidade &amp;&amp;
+    last.cloudCover === cloud &amp;&amp;
+    last.rainProbability === probabilidadeChuva &amp;&amp;
     last.precipitacao === precipitacao
   ) {
     console.log("Último registro é igual, não salvou");
@@ -391,17 +406,17 @@ async function salvarUltimoDado(features = null) {
  * GET /events
  *
  * // Resposta de sucesso (200 OK):
- * <?xml version="1.0" encoding="UTF-8"?>
- * <rss version="2.0">
- *   <channel>
- *     <title>Astronomical Events</title>
- *     <item>
- *       <title>Conjunção da Lua com Marte</title>
- *       <pubDate>Fri, 08 Nov 2025 03:00:00 GMT</pubDate>
+ * &lt;?xml version="1.0" encoding="UTF-8"?>
+ * &lt;rss version="2.0">
+ *   &lt;channel>
+ *     &lt;title>Astronomical Events&lt;/title>
+ *     &lt;item>
+ *       &lt;title>Conjunção da Lua com Marte&lt;/title>
+ *       &lt;pubDate>Fri, 08 Nov 2025 03:00:00 GMT&lt;/pubDate>
  *       ...
- *     </item>
- *   </channel>
- * </rss>
+ *     &lt;/item>
+ *   &lt;/channel>
+ * &lt;/rss>
  *
  * // Resposta de erro (500 Internal Server Error):
  * {
@@ -507,7 +522,7 @@ app.post("/cloudcover", (req, res) => {
  */
 app.post("/dados", async (req, res) => {
   const agora = Date.now();
-  if (agora - ultimaAtualizacao < 5000) {
+  if (agora - ultimaAtualizacao &lt; 5000) {
     console.log("Ignorando atualização duplicada /dados");
     return res.status(200).json({ ok: true, ignorado: true });
   }
@@ -771,4 +786,26 @@ cron.schedule("0 * * * *", async() => {
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Servidor rodando na rede na porta ${PORT}`);
 });
-console.log("Agendamento de salvamento a cada hora cheia iniciado");
+console.log("Agendamento de salvamento a cada hora cheia iniciado");</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#PORT">PORT</a></li><li><a href="global.html#__dirname">__dirname</a></li><li><a href="global.html#__filename">__filename</a></li><li><a href="global.html#addInfoPrompt">addInfoPrompt</a></li><li><a href="global.html#addToggleTraceTypesOnClick">addToggleTraceTypesOnClick</a></li><li><a href="global.html#app">app</a></li><li><a href="global.html#cloudCover">cloudCover</a></li><li><a href="global.html#dadosESP">dadosESP</a></li><li><a href="global.html#esperarCloudCover">esperarCloudCover</a></li><li><a href="global.html#gerarFeatures">gerarFeatures</a></li><li><a href="global.html#gerarPrevisao">gerarPrevisao</a></li><li><a href="global.html#gerarPrevisaoAgendada">gerarPrevisaoAgendada</a></li><li><a href="global.html#iniciarServidor">iniciarServidor</a></li><li><a href="global.html#openShell">openShell</a></li><li><a href="global.html#salvarUltimoDado">salvarUltimoDado</a></li><li><a href="global.html#ultimaAtualizacao">ultimaAtualizacao</a></li><li><a href="global.html#ultimaPrevisao">ultimaPrevisao</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Tue Nov 11 2025 19:48:35 GMT-0300 (Horário Padrão de Brasília)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
