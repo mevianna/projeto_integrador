@@ -1,53 +1,58 @@
 /**
- * *******************************************************************************
- * Nome do arquivo: server.js
- * Descrição: Servidor meteorológico para receber dados do ESP, gerar previsões
- *            de chuva via script Python (modelo XGBoost) e armazenar leituras
- *            em banco SQLite.
- * Autoras: Rafaela Fernandes Savaris e Beatriz Schulter Tartare
- * Versão: 1.0.0
- * Data de criação: 29/08/2025
- * Última modificação: 07/11/2025
- * Contato: savarisf.rafaela@gmail.com, email_bia@gmail.com 
- * 
- * Dependências principais:
- *   - express: criação do servidor e definição de rotas HTTP
- *   - cors: habilita requisições entre origens diferentes
- *   - node-fetch: realiza requisições externas (ex: feeds RSS)
- *   - node-cron: agenda tarefas periódicas (como geração horária de previsão)
- *   - sqlite3: persistência de dados meteorológicos e previsões
- *   - child_process: execução de scripts Python para previsão
- *   - path & url: manipulação de caminhos de arquivos
- *   - ./src/db/database.js: módulo de acesso ao banco SQLite
+ * @file server.js
+ * @fileoverview Servidor meteorológico para receber dados do ESP, gerar previsões
+ * de chuva via script Python (modelo XGBoost) e armazenar leituras em banco SQLite.
  *
- * ------------------------------------------------------------------------------
- * 
- * Resumo:
+ * @version 1.0.0
+ * @date 2025-08-29
+ * @lastmodified 2025-11-11
+ *
+ * @author
+ * Rafaela Fernandes Savaris <savarisf.rafaela@gmail.com>
+ * Beatriz Schulter Tartare <email_bia@gmail.com>
+ *
+ * @license Proprietary
+ *
+ * @requires express Criação do servidor e definição de rotas HTTP.
+ * @requires cors Habilita requisições entre origens diferentes (CORS).
+ * @requires node-fetch Realiza requisições externas (ex: feeds RSS).
+ * @requires node-cron Agenda tarefas periódicas (como geração horária de previsão).
+ * @requires better-sqlite3 Persistência de dados meteorológicos e previsões.
+ * @requires child_process Execução de scripts Python para previsão.
+ * @requires path Manipulação de caminhos de arquivos.
+ * @requires url Resolução de caminhos e URLs.
+ * @requires ./src/db/database.js Módulo de acesso ao banco SQLite.
+ *
+ * @description
  * Este servidor recebe leituras meteorológicas enviadas por um dispositivo ESP,
- * processa e armazena esses dados, gera previsões de chuva com modelo Python,
+ * processa e armazena esses dados, gera previsões de chuva com um modelo Python (XGBoost)
  * e fornece rotas REST para consulta de dados, histórico e eventos astronômicos.
  *
- * Principais rotas:
- *   GET    /events          → Retorna feed RSS de eventos astronômicos
- *   POST   /dados           → Recebe dados do ESP e inicia previsão inicial
- *   POST   /dados/refresh   → Força nova geração de previsão
- *   GET    /dados/ultimo    → Retorna o último registro do banco
- *   GET    /dados/historico → Retorna os últimos 50 registros
- *   POST   /cloudcover      → Atualiza cobertura de nuvens atual
+ * ### Principais rotas
+ * - `GET /events` → Retorna feed RSS de eventos astronômicos.
+ * - `POST /dados` → Recebe dados do ESP e inicia previsão inicial.
+ * - `POST /dados/refresh` → Força nova geração de previsão.
+ * - `GET /dados/ultimo` → Retorna o último registro do banco.
+ * - `GET /dados/historico` → Retorna os últimos 50 registros.
+ * - `POST /cloudcover` → Atualiza cobertura de nuvens atual.
  *
- * Variáveis globais:
- *   __filename, __dirname, dadosESP, cloudCover, ultimaPrevisao, ultimaAtualizacao
+ * ### Variáveis globais
+ * - `__filename`
+ * - `__dirname`
+ * - `dadosESP`
+ * - `cloudCover`
+ * - `ultimaPrevisao`
+ * - `ultimaAtualizacao`
  *
- * Funções principais:
- *   esperarCloudCover()               - Aguarda definição da cobertura de nuvens
- *   gerarFeatures()                   - Gera features meteorológicas para previsão
- *   gerarPrevisao(features = null)    - Executa script Python e retorna previsão de chuva
- *   salvarUltimoDado(features = null) - Salva leituras e previsão no banco de dados
- * 
- * Observações:
+ * ### Funções principais
+ * - `esperarCloudCover()` → Aguarda definição da cobertura de nuvens.
+ * - `gerarFeatures()` → Gera features meteorológicas para previsão.
+ * - `gerarPrevisao(features = null)` → Executa script Python e retorna previsão de chuva.
+ * - `salvarUltimoDado(features = null)` → Salva leituras e previsão no banco de dados.
+ *
+ * ### Observações
  * - Inclui agendamento automático de previsão horária via node-cron.
  * - Requisições são compatíveis com front-end React e ESP via JSON.
- * ********************************************************************************
  */
 
 import { spawn } from "child_process";
