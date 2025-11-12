@@ -17,7 +17,6 @@
  * @requires cors Habilita requisições entre origens diferentes (CORS).
  * @requires node-fetch Realiza requisições externas (ex: feeds RSS).
  * @requires node-cron Agenda tarefas periódicas (como geração horária de previsão).
- * @requires better-sqlite3 Persistência de dados meteorológicos e previsões.
  * @requires child_process Execução de scripts Python para previsão.
  * @requires path Manipulação de caminhos de arquivos.
  * @requires url Resolução de caminhos e URLs.
@@ -29,12 +28,12 @@
  * e fornece rotas REST para consulta de dados, histórico e eventos astronômicos.
  *
  * ### Principais rotas
- * - `GET /events` → Retorna feed RSS de eventos astronômicos.
- * - `POST /dados` → Recebe dados do ESP e inicia previsão inicial.
- * - `POST /dados/refresh` → Força nova geração de previsão.
- * - `GET /dados/ultimo` → Retorna o último registro do banco.
- * - `GET /dados/historico` → Retorna os últimos 50 registros.
- * - `POST /cloudcover` → Atualiza cobertura de nuvens atual.
+ * - `GET /events` - Retorna feed RSS de eventos astronômicos.
+ * - `POST /dados` - Recebe dados do ESP e inicia previsão inicial.
+ * - `POST /dados/refresh` - Força nova geração de previsão.
+ * - `GET /dados/ultimo` - Retorna o último registro do banco.
+ * - `GET /dados/historico` - Retorna os últimos 50 registros.
+ * - `POST /cloudcover` - Atualiza cobertura de nuvens atual.
  *
  * ### Variáveis globais
  * - `__filename`
@@ -45,10 +44,10 @@
  * - `ultimaAtualizacao`
  *
  * ### Funções principais
- * - `esperarCloudCover()` → Aguarda definição da cobertura de nuvens.
- * - `gerarFeatures()` → Gera features meteorológicas para previsão.
- * - `gerarPrevisao(features = null)` → Executa script Python e retorna previsão de chuva.
- * - `salvarUltimoDado(features = null)` → Salva leituras e previsão no banco de dados.
+ * - `esperarCloudCover()` - Aguarda definição da cobertura de nuvens.
+ * - `gerarFeatures()` - Gera features meteorológicas para previsão.
+ * - `gerarPrevisao(features = null)` - Executa script Python e retorna previsão de chuva.
+ * - `salvarUltimoDado(features = null)` - Salva leituras e previsão no banco de dados.
  *
  * ### Observações
  * - Inclui agendamento automático de previsão horária via node-cron.
@@ -325,7 +324,7 @@ async function salvarUltimoDado(features = null) {
   const probabilidadeChuva = ultimaPrevisao?.prediction?.[0]?.[1] ?? 0;
 
   const last = db
-    .prepare("SELECT * FROM leituras ORDER BY id DESC LIMIT 1")
+    .prepare("SELECT * FROM dados_estacao_metereologica ORDER BY id DESC LIMIT 1")
     .get();
 
   if (
@@ -343,7 +342,7 @@ async function salvarUltimoDado(features = null) {
   }
 
   const stmt = db.prepare(`
-    INSERT INTO leituras (temperatura, umidade, pressaoAtm, uvClassificacao, created_at, cloudCover, rainProbability, precipitacao)
+    INSERT INTO dados_estacao_metereologica (temperatura, umidade, pressaoAtm, uvClassificacao, created_at, cloudCover, rainProbability, precipitacao)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
@@ -360,7 +359,7 @@ async function salvarUltimoDado(features = null) {
 
   console.log(`Salvou dado: ${new Date().toISOString()}`);
   const ultimo = db.prepare(`
-    SELECT * FROM leituras ORDER BY id DESC LIMIT 1
+    SELECT * FROM dados_estacao_metereologica ORDER BY id DESC LIMIT 1
   `).get();
 
   console.log("Dado salvo no banco:", ultimo);
@@ -603,7 +602,7 @@ app.post("/dados/refresh", async (req, res) => {
  * @route GET /dados/ultimo
  * @summary Retorna o último registro de leituras meteorológicas armazenadas no banco de dados.
  *
- * Esta rota consulta a tabela `leituras` do banco SQLite e retorna o registro mais recente
+ * Esta rota consulta a tabela `dados_estacao_metereologica` do banco SQLite e retorna o registro mais recente
  * em formato JSON. É usada pelo front-end para obter os dados atuais do dispositivo ESP,
  * incluindo temperatura, umidade, pressão atmosférica, UV, cobertura de nuvens, probabilidade de chuva, etc.
  *
@@ -639,7 +638,7 @@ app.post("/dados/refresh", async (req, res) => {
 app.get("/dados/ultimo", (req, res) => {
   try {
     const ultimoDado = db.prepare(`
-      SELECT * FROM leituras
+      SELECT * FROM dados_estacao_metereologica
       ORDER BY datetime(created_at) DESC
       LIMIT 1
     `).get();
@@ -655,7 +654,7 @@ app.get("/dados/ultimo", (req, res) => {
  * @route GET /dados/historico
  * @summary Retorna os últimos 50 registros de leituras meteorológicas armazenados no banco de dados.
  *
- * Esta rota consulta a tabela `leituras` no banco de dados SQLite e retorna
+ * Esta rota consulta a tabela `dados_estacao_metereologica` no banco de dados SQLite e retorna
  * os 50 registros mais recentes em formato JSON.
  * 
  * Em caso de erro na consulta ao banco, retorna um status HTTP 500 com uma mensagem
@@ -694,7 +693,7 @@ app.get("/dados/ultimo", (req, res) => {
 app.get("/dados/historico", (req, res) => {
   try {
     const rows = db
-      .prepare("SELECT * FROM leituras ORDER BY id DESC LIMIT 50")
+      .prepare("SELECT * FROM dados_estacao_metereologica ORDER BY id DESC LIMIT 50")
       .all();
     res.json(rows);
   } catch (error) {
