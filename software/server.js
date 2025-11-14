@@ -186,8 +186,6 @@ async function gerarFeatures() {
     throw new Error("Nenhum dado do ESP disponível para gerar features.");
   }
 
-  ultimaPrecipitacao = dadosESP.precipitacao;
-
   return [
     dadosESP.pressaoAtm,
     dadosESP.temperatura,
@@ -248,8 +246,10 @@ async function gerarPrevisao(features = null) {
         0, // ventoDirecao
         features[4], // cloudCover
         ]
-        if(features[7] > 0 && features[7] != ultimaPrecipitacao) {
-          return resolve.json({prediction: [[0, 1]]});
+        if(features[5] > 0 && features[5] != ultimaPrecipitacao) {
+          console.log("Precipitação detectada!");
+          ultimaPrevisao = ({prediction: [[0, 1]]});
+          return resolve(ultimaPrevisao);
         }
         features = input;
       }
@@ -278,6 +278,7 @@ async function gerarPrevisao(features = null) {
 
       py.stdin.write(JSON.stringify({ features }));
       py.stdin.end();
+      ultimaPrecipitacao = features[5];
 
     } catch (error) {
       console.error("Erro ao gerar previsão:", error);
@@ -322,7 +323,7 @@ async function salvarUltimoDado(features = null) {
 
   // pega a probabilidade de chuva da última previsão (ou 0)
   const probabilidadeChuva = ultimaPrevisao?.prediction?.[0]?.[1] ?? 0;
-
+  
   const last = db
     .prepare("SELECT * FROM dados_estacao_metereologica ORDER BY id DESC LIMIT 1")
     .get();
@@ -343,7 +344,7 @@ async function salvarUltimoDado(features = null) {
 
   const stmt = db.prepare(`
     INSERT INTO dados_estacao_metereologica (temperatura, umidade, pressaoAtm, uvClassificacao, created_at, cloudCover, rainProbability, precipitacao)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   stmt.run(
