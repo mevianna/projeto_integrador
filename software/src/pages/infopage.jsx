@@ -18,7 +18,7 @@ function InfoPage() {
     <div className="w-screen h-screen overflow-hidden relative flex flex-col items-center justify-center">
       <StarsBackground />
 
-      <div className="bg-purple-950 w-[90%] sm:w-[85%] md:w-[80%] lg:w-[70%] h-[90%] rounded-3xl shadow-lg p-4 sm:p-6 md:p-8 flex flex-col justify-between relative z-10">
+      <div className="bg-purple-950 w-[90%] sm:w-[50%] md:w-[70%] lg:w-[70%] h-[90%] rounded-3xl shadow-lg p-4 sm:p-6 md:p-8 flex flex-col justify-between relative z-10">
         {/* Cabeçalho */}
         <div className="flex items-center justify-center relative">
           <button

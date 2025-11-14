@@ -153,7 +153,7 @@ function EventPage() {
       <StarsBackground />
       <div className="inset-0 flex justify-around items-start relative">
         <div className="bg-purple-950 flex justify-center p-4 sm:p-6 md:p-8">
-          <div className="space-y-4 w-[500px] sm:w-[700px] md:w-[800px]">
+          <div className="space-y-4 w-[400px] sm:w-[600px] md:w-[800px]">
             <div className="flex justify-center relative">
               <button
                 onClick={() => navigate(-1)}
