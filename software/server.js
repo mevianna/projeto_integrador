@@ -249,6 +249,7 @@ async function gerarPrevisao(features = null) {
         if(features[5] > 0 && features[5] != ultimaPrecipitacao) {
           console.log("Precipitação detectada!");
           ultimaPrevisao = ({prediction: [[0, 1]]});
+          ultimaPrecipitacao = features[5];
           return resolve(ultimaPrevisao);
         }
         features = input;
