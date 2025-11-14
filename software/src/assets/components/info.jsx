@@ -1,11 +1,79 @@
+/**
+ * @file info.jsx
+ * @fileoverview Painel meteorológico da página principal. Exibe os dados mais
+ * recentes coletados pelo servidor, incluindo temperatura, umidade, pressão,
+ * cobertura de nuvens, índice UV e probabilidade de chuva prevista pelo modelo.
+ *
+ * @version 1.0.0
+ * @date 
+ * @lastmodified 2025-11-14
+ *
+ * @author
+ * Rafaela Fernandes Savaris <savarisf.rafaela@gmail.com>
+ * Beatriz Schulter Tartare <email_bia@gmail.com>
+ *
+ * @license Proprietary
+ *
+ * @requires react-router-dom Navegação entre páginas (useNavigate)
+ * @requires react Hooks do React (useState, useEffect, useCallback)
+ *
+ * @description
+ * O componente `Info` é responsável por:
+ * - Buscar periodicamente (a cada 20 segundos) o último registro de dados
+ *   meteorológicos armazenados no backend.
+ * - Exibir os valores mais recentes, incluindo a probabilidade de chuva.
+ * - Permitir atualização manual, que força o servidor a gerar uma nova previsão.
+ * - Navegar para a tela de histórico completo.
+ *
+ * ### Variáveis globais
+ * - `API_URL`: URL base da API backend.
+ *
+ * ### Hooks utilizados
+ * - `useState`: armazena dados do sensor, horário da última atualização e estado do botão de refresh.
+ * - `useEffect`: inicializa o carregamento automático e define o intervalo periódico.
+ * - `useCallback`: memoiza funções internas (`fetchLastData`, `handleRefresh`).
+ *
+ * ### Funções principais
+ * - `fetchLastData()`: Busca o último registro do servidor e atualiza o estado.
+ * - `handleRefresh()`: Solicita ao servidor que gere uma nova previsão e atualiza os dados.
+ * - `ViewHistory()`: Redireciona o usuário para a página de histórico.
+ * - `Info()`: Componente React principal responsável pela renderização dos dados.
+ *
+ * ### Observações
+ * - Caso o servidor não retorne previsão, o componente exibe "No prediction available".
+ * - O botão de atualização exibe animação com base no estado `isRefreshing`.
+ */
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useCallback } from "react";
 
+/**
+ * Endereço base da API backend.
+ * @constant {string}
+ */
 const API_URL = "http://localhost:4000";
 
+/**
+ * @component Info
+ * @description
+ * Exibe as últimas medições da estação meteorológica e permite atualizar
+ * manualmente a previsão, além de acessar o histórico de registros.
+ *
+ * @returns {JSX.Element} Interface com os dados mais recentes.
+ */
 function Info() {
   const navigate = useNavigate();
 
+  /**
+   * Dados mais recentes obtidos do servidor.
+   * @typedef {Object} SensorData
+   * @property {?number} temperatura - Temperatura em graus Celsius.
+   * @property {?number} umidade - Umidade relativa em porcentagem.
+   * @property {?number} pressaoAtm - Pressão atmosférica em Pascal.
+   * @property {string} uvClassificacao - Classificação do índice UV.
+   * @property {?number} prediction - Probabilidade de chuva (0 a 1).
+   */
+
+  /** @type {[SensorData, Function]} */
   const [sensorData, setSensorData] = useState({
     temperatura: null,
     umidade: null,
@@ -14,10 +82,25 @@ function Info() {
     prediction: null,
   });
 
+  /**
+   * Armazena a data/hora da última atualização recebida.
+   * @type {[Date|null, Function]}
+   */
   const [lastUpdated, setLastUpdated] = useState(null);
+
+  /**
+   * Indica se o sistema está no processo de atualização/refresh.
+   * @type {[boolean, Function]}
+   */
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // função para buscar o último dado (usada no useEffect e no refresh)
+  /**
+   * Busca o último registro de dados armazenado no servidor.
+   *
+   * @async
+   * @function fetchLastData
+   * @returns {Promise<void>}
+   */
   const fetchLastData = useCallback(async () => {
     try {
       const response = await fetch(`${API_URL}/dados/ultimo`);
@@ -37,7 +120,14 @@ function Info() {
     }
   }, []);
 
-  // refresh manual
+  /**
+   * Realiza manualmente a atualização dos dados chamando o endpoint
+   * de geração de previsão e depois recarregando os valores mais recentes.
+   *
+   * @async
+   * @function handleRefresh
+   * @returns {Promise<void>}
+   */
   const handleRefresh = useCallback(async () => {
   setIsRefreshing(true);
   try {
@@ -58,7 +148,12 @@ function Info() {
   }
 }, [fetchLastData]);
 
-  // efeito para carregar os dados automaticamente
+  /**
+   * Carrega os dados automaticamente ao montar o componente
+   * e atualiza a cada 20 segundos.
+   *
+   * @effect
+   */
   useEffect(() => {
     fetchLastData();
 
@@ -67,10 +162,20 @@ function Info() {
 
   }, [fetchLastData]);
 
+  /**
+   * Navega para a página de histórico de medições.
+   *
+   * @function ViewHistory
+   */
   function ViewHistory() {
     navigate("/history");
   }
 
+   /**
+   * Formata a data/hora da última atualização para exibição no layout.
+   *
+   * @type {string}
+   */
   const formattedDateTime = lastUpdated
     ? lastUpdated.toLocaleString([], {
         day: "2-digit",
