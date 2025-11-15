@@ -15,7 +15,7 @@ from sklearn.metrics import (
 )
 import matplotlib.pyplot as plt
 from sklearn.model_selection import TimeSeriesSplit, RandomizedSearchCV
-
+import json
 
 # ----------------------
 # 1) Função de engenharia de features
@@ -164,6 +164,16 @@ if __name__ == '__main__':
     print("\nMétricas:")
     for k, v in metrics.items():
         print(f"{k}: {v}")
+
+    modelo = best.get_booster()
+    json_path = "modelo_sem_vento_xgb.json"
+    modelo.save_model(json_path)
+    print(f"Booster salvo em: {json_path}")
+
+    features_path = "features_sem_vento.json"
+    with open(features_path, 'w') as f:
+        json.dump(list(X.columns), f)
+    print(f"Ordem das features salva em: {features_path}")
 
     plt.figure(figsize=(7,7))
     plt.plot(base_curve[1], base_curve[0], 'o-', label='Base')
