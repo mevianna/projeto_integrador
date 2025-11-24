@@ -19,6 +19,14 @@ const CustomTooltip = ({ active, payload, label }) => {
       hour: "2-digit",
       minute: "2-digit",
     }).format(new Date(label));
+
+    const key = payload[0].name;
+    const value = payload[0].value;
+
+    const labelName = key === "temperatura" ? "Temperature" : "Humidity";
+
+    const unit = key === "temperatura" ? "°C" : "%";
+
     return (
       <div
         style={{
@@ -29,9 +37,8 @@ const CustomTooltip = ({ active, payload, label }) => {
           fontSize: "14px",
         }}
       >
-        <p>{`Data: ${formattedDate}`}</p>
-        <p>{`Temperatura: ${payload[0].value}°C`}</p>
-        {payload[1] && <p>{`Umidade: ${payload[1].value}%`}</p>}
+        <p>{`Date: ${formattedDate}`}</p>
+        <p>{`${labelName}: ${value}${unit}`}</p>
       </div>
     );
   }
@@ -51,7 +58,6 @@ CustomTooltip.propTypes = {
 function Graphs() {
   const [historico, setHistorico] = useState([]);
 
-  // busca dados do backend
   useEffect(() => {
     fetch("http://localhost:4000/dados/historico")
       .then((res) => res.json())
@@ -71,14 +77,13 @@ function Graphs() {
   return (
     <>
       {historico.length === 0 ? (
-        <p className="text-slate-300 text-center">
-          Nenhum dado registrado ainda.
-        </p>
+        <p className="text-slate-300 text-center">No data recorded yet.</p>
       ) : (
         <div className="flex flex-col w-full space-y-6 p-4 sm:p-6 md:p-8">
-          <div className="bg-purple-800  rounded-md shadow h-[475px] w-full">
+          {/* TEMPERATURA */}
+          <div className="bg-purple-800 rounded-md shadow h-[475px] w-full">
             <h2 className="text-slate-200 text-center text-lg font-bold mb-2">
-              Temperatura (°C)
+              Temperature (°C)
             </h2>
             <ResponsiveContainer width="100%" height={400}>
               <LineChart
@@ -124,9 +129,11 @@ function Graphs() {
               </LineChart>
             </ResponsiveContainer>
           </div>
+
+          {/* UMIDADE */}
           <div className="bg-purple-800 p-6 rounded-md shadow h-[475px] w-full">
             <h2 className="text-slate-200 text-center text-lg font-bold mb-2">
-              Umidade (%)
+              Humidity (%)
             </h2>
             <ResponsiveContainer width="100%" height={400}>
               <LineChart

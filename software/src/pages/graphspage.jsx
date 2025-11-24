@@ -9,9 +9,9 @@ function GraphsPage() {
   return (
     <div className="w-screen h-screen relative">
       <StarsBackground />
-        <div className="absolute inset-0 flex justify-around items-start p-10 w-screen h-screen overflow-y-auto">
-          <div className="bg-purple-950 flex justify-center">
-            <div className=" space-y-4 w-[900px]">
+      <div className="absolute inset-0 flex justify-around items-start p-10 w-screen h-screen overflow-y-auto">
+        <div className="bg-purple-950 flex justify-center">
+          <div className=" space-y-4 w-[400px] md:w-[900px] sm:w-[600px]">
             <div className="flex justify-center relative w-full">
               <button
                 onClick={() => navigate(-1)}

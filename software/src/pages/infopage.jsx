@@ -18,7 +18,7 @@ function InfoPage() {
     <div className="w-screen h-screen overflow-hidden relative flex flex-col items-center justify-center">
       <StarsBackground />
 
-      <div className="bg-purple-950 w-[90%] sm:w-[85%] md:w-[80%] lg:w-[70%] h-[90%] rounded-3xl shadow-lg p-4 sm:p-6 md:p-8 flex flex-col justify-between relative z-10">
+      <div className="bg-purple-950 w-[90%] sm:w-[50%] md:w-[70%] lg:w-[70%] h-[90%] rounded-3xl shadow-lg p-4 sm:p-6 md:p-8 flex flex-col justify-between relative z-10">
         {/* Cabeçalho */}
         <div className="flex items-center justify-center relative">
           <button
@@ -28,7 +28,7 @@ function InfoPage() {
             <ChevronLeftIcon size={24} />
           </button>
           <h1 className="text-slate-200 text-lg sm:text-xl md:text-2xl font-bold text-center">
-            Histórico de Leituras
+            Reading History
           </h1>
         </div>
 
@@ -36,7 +36,7 @@ function InfoPage() {
         <div className="flex-1 flex flex-col justify-center items-center mt-4 bg-purple-800 rounded-2xl shadow-inner p-3 sm:p-4 md:p-6 overflow-hidden">
           {leituras.length === 0 ? (
             <p className="text-slate-300 text-center text-sm sm:text-base md:text-lg">
-              Nenhuma leitura registrada ainda.
+              No readings recorded yet.
             </p>
           ) : (
             <div className="w-full h-full overflow-hidden flex flex-col justify-center">
@@ -71,7 +71,7 @@ function InfoPage() {
 
         {/* Rodapé opcional */}
         <div className="text-center text-slate-400 text-xs sm:text-sm mt-2">
-          © 2025 Projeto AstroDivas
+          © 2025 Lunaris Project
         </div>
       </div>
     </div>

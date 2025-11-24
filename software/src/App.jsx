@@ -57,7 +57,7 @@ function App() {
           title: item.querySelector("title")?.textContent || "",
           description: item.querySelector("description")?.textContent || "",
           link: item.querySelector("link")?.textContent || "",
-          date: item.querySelector("pubDate")?.textContent || "",
+          pubDate: item.querySelector("pubDate")?.textContent || "",
         }));
         console.log("Parsed events:", items.length);
         setEvents(items);
