@@ -174,7 +174,7 @@ function EventPage() {
 
                   {errorImage && (
                     <p className="text-red-400 text-center">
-                      Erro ao carregar imagem: {errorImage}
+                      Error loading image: {errorImage}
                     </p>
                   )}
 
@@ -225,7 +225,7 @@ function EventPage() {
 
                 {errorCredit && (
                   <p className="text-red-400 text-center">
-                    Erro ao carregar credito: {errorCredit}
+                    Error loading credit: {errorCredit}
                   </p>
                 )}
                 {credit && (

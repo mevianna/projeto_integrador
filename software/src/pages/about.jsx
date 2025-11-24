@@ -26,26 +26,27 @@ function AboutPage() {
           {/* Texto principal */}
           <div className="bg-purple-950 rounded-2xl p-6 sm:p-10 space-y-8 w-full">
             <p className="text-slate-300 text-justify text-base sm:text-lg font-semibold">
-              Este projeto é uma iniciativa desenvolvida como trabalho
-              integrador do nosso curso de graduação. Ele representa a aplicação
-              prática dos conhecimentos acadêmicos em uma solução
-              interdisciplinar que combina diferentes áreas da tecnologia.
+              This project is an initiative developed as an integrative
+              assignment for our undergraduate program. It represents the
+              practical application of academic knowledge in an
+              interdisciplinary solution that combines different areas of
+              technology.
             </p>
 
             <p className="text-slate-300 text-justify text-base sm:text-lg font-semibold">
-              A proposta consiste em integrar APIs de dados astronômicos com uma
-              estação meteorológica própria e técnicas de machine learning para
-              criar um sistema de previsão de condições ideais para observação
-              celeste. O objetivo central é unir teoria e prática, abordando um
-              desafio real através da convergência entre software, hardware e
-              análise de dados.
+              The proposal consists of integrating astronomical data APIs with
+              our own weather station and machine learning techniques to create
+              a system capable of predicting ideal conditions for celestial
+              observation. The central objective is to bridge theory and
+              practice by addressing a real-world challenge through the
+              convergence of software, hardware, and data analysis.
             </p>
 
             <p className="text-slate-300 text-justify text-base sm:text-lg font-semibold">
-              Mais do que um produto final, o trabalho simboliza nosso esforço
-              acadêmico para consolidar aprendizados, promover a inovação e
-              explorar as possibilidades da tecnologia na solução de problemas
-              complexos e inspiradores.
+              More than a final product, this work symbolizes our academic
+              effort to consolidate learning, foster innovation, and explore the
+              possibilities of technology in solving complex and inspiring
+              problems.
             </p>
 
             <div className="flex flex-wrap justify-center relative mt-10">

@@ -5,7 +5,7 @@
  * cobertura de nuvens, índice UV e probabilidade de chuva prevista pelo modelo.
  *
  * @version 1.0.0
- * @date 
+ * @date
  * @lastmodified 2025-11-14
  *
  * @author
@@ -129,24 +129,29 @@ function Info() {
    * @returns {Promise<void>}
    */
   const handleRefresh = useCallback(async () => {
-  setIsRefreshing(true);
-  try {
-    const response = await fetch(`${API_URL}/dados/refresh`, { method: "POST" });
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error("Erro no refresh:", errorData.error || response.statusText);
-      alert("Erro ao gerar previsão. Tente novamente mais tarde.");
+    setIsRefreshing(true);
+    try {
+      const response = await fetch(`${API_URL}/dados/refresh`, {
+        method: "POST",
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error(
+          "Erro no refresh:",
+          errorData.error || response.statusText
+        );
+        alert("Erro ao gerar previsão. Tente novamente mais tarde.");
+        setIsRefreshing(false);
+        return;
+      }
+      await fetchLastData();
+    } catch (error) {
+      console.error("Erro no refresh:", error);
+      alert("Erro de conexão com o servidor.");
+    } finally {
       setIsRefreshing(false);
-      return;
     }
-    await fetchLastData();
-  } catch (error) {
-    console.error("Erro no refresh:", error);
-    alert("Erro de conexão com o servidor.");
-  } finally {
-    setIsRefreshing(false);
-  }
-}, [fetchLastData]);
+  }, [fetchLastData]);
 
   /**
    * Carrega os dados automaticamente ao montar o componente
@@ -159,7 +164,6 @@ function Info() {
 
     const interval = setInterval(fetchLastData, 20000);
     return () => clearInterval(interval);
-
   }, [fetchLastData]);
 
   /**
@@ -171,7 +175,7 @@ function Info() {
     navigate("/history");
   }
 
-   /**
+  /**
    * Formata a data/hora da última atualização para exibição no layout.
    *
    * @type {string}
@@ -190,10 +194,10 @@ function Info() {
   return (
     <div className="bg-purple-800 rounded-lg p-4 sm:p-6 md:p-8 mt-6 shadow w-full max-w-5xl mx-auto flex overflow-x-hidden flex-col">
       <div className="flex justify-between items-start">
-        <div className="flex text-sm md:text-xl font-bold text-slate-200 gap-4">
+        <div className="flex text-sm md:text-xl sm:text-sm font-bold text-slate-200 gap-4">
           <div>
             <p>Temperature: {sensorData.temperatura} °C</p>
-            <p>Humidity: {(sensorData.umidade)} %</p>
+            <p>Humidity: {sensorData.umidade} %</p>
           </div>
           <div>
             <p>UV Index: {sensorData.uvClassificacao}</p>
@@ -202,15 +206,19 @@ function Info() {
                 <p>Loading prediction...</p>
               ) : sensorData.prediction === null ? (
                 <p>No prediction available</p>
-              ): sensorData.prediction !== null ? (
-                <p>Rain probability now: {(sensorData.prediction * 100).toFixed(2)}%</p>
+              ) : sensorData.prediction !== null ? (
+                <p>
+                  Rain probability now:{" "}
+                  {(sensorData.prediction * 100).toFixed(2)}%
+                </p>
               ) : (
                 <p>Loading prediction...</p>
               )}
             </p>
           </div>
           <div>
-            <p>Atmospheric Pressure: {" "}
+            <p>
+              Atmospheric Pressure:{" "}
               {sensorData.pressaoAtm !== null
                 ? Number(sensorData.pressaoAtm).toFixed(2)
                 : "-"}{" "}
@@ -238,11 +246,11 @@ function Info() {
           </svg>
         </button>
       </div>
-      <div className="flex text-sm md:text-xl font-bold text-slate-200 gap-16">
-        
-      </div>
+      <div className="flex text-sm md:text-xl font-bold text-slate-200 gap-16"></div>
       <div className="flex justify-between items-center gap-3 mt-4 mb-2">
-        <small className="text-sm text-slate-400">Updated: {formattedDateTime}</small>
+        <small className="text-sm text-slate-400">
+          Updated: {formattedDateTime}
+        </small>
         <button
           onClick={ViewHistory}
           className="px-3 py-1 text-sm text-slate-200 bg-purple-600 hover:bg-purple-700 rounded-lg"
