@@ -45,6 +45,7 @@
  */
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useCallback } from "react";
+import { getWindData } from "../../services/windService.js";
 
 /**
  * Endereço base da API backend.
@@ -95,6 +96,7 @@ function Info() {
    */
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  const [wind, setWind] = useState({ speed: "-", direction: "-"});
   /**
    * Busca o último registro de dados armazenado no servidor.
    *
@@ -115,6 +117,16 @@ function Info() {
         prediction: data.rainProbability,
         precipitacao: data.precipitacao,
       });
+
+      try {
+        const windData = await getWindData();
+        setWind({
+          speed: windData.speed,
+          direction: windData.direction,
+        });
+      } catch (err) {
+        console.error("Erro ao buscar vento:", err);
+      }
 
       setLastUpdated(new Date(data.created_at));
     } catch (error) {
@@ -194,9 +206,9 @@ function Info() {
     : "-";
 
   return (
-    <div className="bg-purple-800 rounded-lg p-4 sm:p-6 md:p-8 mt-6 shadow w-full max-w-5xl mx-auto flex overflow-x-hidden flex-col">
+    <div className="bg-purple-800 rounded-lg p-4 sm:p-6 md:p-8 mt-6 shadow w-full max-w-7xl mx-auto flex overflow-x-hidden flex-col">
       <div className="flex justify-between items-start">
-        <div className="flex text-sm md:text-xl sm:text-sm font-bold text-slate-200 gap-4">
+        <div className="flex text-sm md:text-xl sm:text-sm font-bold text-slate-200 gap-10">
           <div>
             <p>Temperature: {sensorData.temperatura !== null
                 ? sensorData.temperatura
@@ -204,9 +216,25 @@ function Info() {
             <p>Humidity: {sensorData.umidade !== null
                 ? sensorData.umidade
                 : "-"}{" "} %</p>
+            <p>UV Index: {sensorData.uvClassificacao}</p>
           </div>
           <div>
-            <p>UV Index: {sensorData.uvClassificacao}</p>
+            <p>
+              Atmospheric Pressure:{" "}
+              {sensorData.pressaoAtm !== null
+                ? Number(sensorData.pressaoAtm).toFixed(2)
+                : "-"}{" "}
+              Pa
+            </p>
+            <p>Wind Speed: {wind.speed} km/h</p>
+            <p>Wind Direction: {wind.direction}°</p>
+          </div>
+          <div>
+            <p>
+              Precipitation: {sensorData.precipitacao !== null
+                ? sensorData.precipitacao
+                : "-"}{" "} mm
+            </p>
             <p>
               {isRefreshing ? (
                 <p>Loading prediction...</p>
@@ -223,18 +251,6 @@ function Info() {
             </p>
           </div>
           <div>
-            <p>
-              Atmospheric Pressure:{" "}
-              {sensorData.pressaoAtm !== null
-                ? Number(sensorData.pressaoAtm).toFixed(2)
-                : "-"}{" "}
-              Pa
-            </p>
-            <p>
-              Precipitation: {sensorData.precipitacao !== null
-                ? sensorData.precipitacao
-                : "-"}{" "} mm
-            </p>
           </div>
         </div>
         <button

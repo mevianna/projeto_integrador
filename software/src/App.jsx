@@ -91,7 +91,7 @@ function App() {
         </button>
       </div>
 
-      <div className="inset-0 sm:p-6 md:p-8 p-4 relative z-10 flex flex-col items-center space-y-6 w-full max-w-5xl">
+      <div className="inset-0 sm:p-6 md:p-8 p-4 relative z-10 flex flex-col items-center space-y-6 w-full max-w-6xl">
         <h1 className="text-xl sm:text-2xl md:text-3xl text-slate-200 font-bold text-center">
           Next Astronomical Events
         </h1>
