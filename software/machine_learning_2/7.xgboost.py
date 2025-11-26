@@ -1,6 +1,67 @@
-# PARTE 1: IMPORTS
-# Todas as bibliotecas necessárias para o processo completo.
-# ------------------------------------------------------------------------------
+"""
+***************************************************************************
+ * File name: xgboost.py
+ * Description: Attempts to reproduce the "old" model version (without a 
+ *              dedicated calibration split) using engineered features 
+ *              (temporal, lag, rolling window, and difference-based).
+ * Author: 
+ * Creation date:
+ * Last modified: 
+ * Contact: 
+ * ***************************************************************************
+ * Description:
+ * This script performs a full preprocessing and modeling pipeline intended to
+ * replicate an older version of a rain prediction model that did not use a 
+ * separate calibration dataset. It:
+ *   - Loads and sorts the raw dataset
+ *   - Builds engineered features (time-based, lagged values, rolling statistics)
+ *   - Splits the data chronologically (85% train, 15% test)
+ *   - Trains an XGBoost classifier
+ *   - Evaluates the probabilistic performance via Brier Score
+ *   - Generates and displays a calibration curve
+ *   - Saves the final model to disk (JSON format)
+ *
+ * Workflow:
+ * 1. Load the dataset and ensure chronological ordering.
+ * 2. Apply the create_features() function to generate additional inputs:
+ *      - Temporal features (hour, dayofweek, month)
+ *      - Lag features for key variables (1h, 3h, 6h)
+ *      - Rolling window statistics (e.g., mean/std)
+ *      - First-order differences for certain variables
+ * 3. Drop rows with NaN values produced by lag/rolling operations.
+ * 4. Separate processed features (X) from the target (y).
+ * 5. Split into train/test using time-based slicing (85% train).
+ * 6. Train a standard XGBoost classifier (no calibration split).
+ * 7. Generate probability predictions and compute the Brier score.
+ * 8. Plot calibration curves for model evaluation.
+ * 9. Save the trained model (`modelo_xgb.json`).
+ *
+ * Inputs:
+ *   - CSV file: "dataset_final_rain_binario.csv"
+ *       Required columns include:
+ *         - datetime (parseable)
+ *         - precip_mm (dropped)
+ *         - rain (binary target)
+ *         - cloudcover, pressure_mB, temp_C, rh_pct, wind_speed_m_s
+ *         - any additional original features
+ *
+ * Outputs:
+ *   - Printed messages indicating dataset size, feature list, Brier score
+ *   - Calibration curve displayed using matplotlib
+ *   - "modelo_xgb.json" saved containing the trained booster
+ *
+ * Requirements:
+ *   - Interpreter:
+ *       - Python 3.13.1
+ *   - Python libraries:
+ *       - pandas >= 1.5
+ *       - numpy >= 1.24
+ *       - xgboost >= 1.8
+ *       - scikit-learn >= 1.2
+ *       - imbalanced-learn (optional imports included)
+ *       - matplotlib >= 3.7
+ ***************************************************************************
+"""
 import pandas as pd
 import numpy as np
 from sklearn.impute import SimpleImputer
@@ -9,7 +70,6 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline as ImbPipeline
-#from sklearn.model_selection import GridSearchCV
 import xgboost as xgb
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.metrics import brier_score_loss
@@ -17,27 +77,18 @@ from sklearn.calibration import calibration_curve
 import matplotlib.pyplot as plt
 
 
-# ==============================================================================
-# TENTATIVA: VERIFICAR O MODELO "ANTIGO" (Sem split de Calibração)
-# ==============================================================================
+# TRY TO VERIFY THE OLD MODEL (Without calibration split)
 
-# ------------------------------------------------------------------------------
-# PARTE 2: FUNÇÃO PARA ENGENHARIA DE FEATURES
-# Esta função cria as features de tempo e de lag (defasagem).
-# ------------------------------------------------------------------------------
+# FEATURES ENGINEERING
 def create_features(df):
-    """
-    Cria features temporais e de defasagem (lags) a partir do DataFrame.
-    """
-    # Garante que estamos trabalhando com uma cópia para evitar avisos
     df = df.copy()
     
-    # Features Temporais (extraídas da coluna 'datetime')
+    # Timestamp features
     df['hour'] = df['datetime'].dt.hour
     df['dayofweek'] = df['datetime'].dt.dayofweek
     df['month'] = df['datetime'].dt.month
     
-    # Features de Defasagem (Lags) - a "memória" do modelo
+    # Lag features
     lag_features = ['cloudcover', 'pressure_mB', 'temp_C', 'rh_pct', 'wind_speed_m_s']
     
     for feature in lag_features:
@@ -45,37 +96,31 @@ def create_features(df):
         df[f'{feature}_lag3'] = df[feature].shift(3) # Lag de 3 horas
         df[f'{feature}_lag6'] = df[feature].shift(6) # Lag de 6 horas
         
-    # Features de Janela Móvel (Opcional, mas útil)
+    # Mobile features
     df['temp_C_roll_mean_3'] = df['temp_C'].rolling(window=3).mean()
     df['pressure_mB_roll_std_3'] = df['pressure_mB'].rolling(window=3).std()
 
     df['rh_pct_diff_1h'] = df['rh_pct'] - df['rh_pct_lag1']
     df['cloudcover_diff_1h'] = df['cloudcover'] - df['cloudcover_lag1']
 
-    # Remove as primeiras linhas que ficaram com valores NaN (vazios)
-    # devido à criação dos lags e janelas móveis.
+    # Remove all NaNs from the columns
     df.dropna(inplace=True)
     
     return df
 
-# ==============================================================================
-# PARTE 3: EXECUÇÃO PRINCIPAL
-# Aqui o fluxo acontece: carregar, criar features, treinar e avaliar.
-# ==============================================================================
+# MAIN EXECUTION
 
-# 1. Carrega os dados originais
+# Load original Data
 print("1. Carregando dados originais...")
-# Substitua "dataset_final_rain_binario.csv" pelo nome real do seu arquivo, se for diferente
 df_original = pd.read_csv("dataset_final_rain_binario.csv", parse_dates=["datetime"])
 df_original = df_original.sort_values("datetime").reset_index(drop=True)
 
-# 2. Cria as novas features
+# Create new features
 print("2. Criando features de tempo e lag...")
 df_processed = create_features(df_original)
 
-# 3. Separa as features (X) do alvo (y)
+# Split features (x) and target (y)
 print("3. Separando features (X) e alvo (y)...")
-# Usamos o dataframe processado, com as novas features
 X = df_processed.drop(columns=["datetime", "precip_mm", "rain"])
 y = df_processed["rain"]
 
@@ -84,13 +129,10 @@ print(X.columns.tolist())
 print(f"\nTotal de features: {len(X.columns)}")
 
 
-print("\n\n=======================================================")
 print("   Rodando a provável VERSÃO ANTIGA (sem calibração)")
-print("=======================================================\n")
 
-# 1. Split (85% treino, 15% teste)
-# O 'calib_end' do seu código original é o fim do treino aqui
-train_end_full = int(len(df_processed) * 0.85) # O mesmo que calib_end
+# Split (85% train, 15% tests)
+train_end_full = int(len(df_processed) * 0.85)
 
 X_train_v_antiga, y_train_v_antiga = X.iloc[:train_end_full], y.iloc[:train_end_full]
 X_test_v_antiga, y_test_v_antiga = X.iloc[train_end_full:], y.iloc[train_end_full:]
@@ -98,7 +140,7 @@ X_test_v_antiga, y_test_v_antiga = X.iloc[train_end_full:], y.iloc[train_end_ful
 print(f"Tamanho do treino (antigo): {len(X_train_v_antiga)} amostras")
 print(f"Tamanho do teste (antigo): {len(X_test_v_antiga)} amostras")
 
-# 2. Define o modelo (o mesmo XGBoost)
+# Define XGBoost
 modelo = xgb.XGBClassifier(
     n_estimators=100,
     max_depth=3,
@@ -109,18 +151,18 @@ modelo = xgb.XGBClassifier(
     use_label_encoder=False
 )
 
-# 3. Treina o modelo nos 85% dos dados
+# Train model with 85% of the data
 print("\nTreinando o modelo antigo (em 85% dos dados)...")
 modelo.fit(X_train_v_antiga, y_train_v_antiga)
 
-# 4. Gera previsões de probabilidade
+# Probability predictions
 y_proba_antigo = modelo.predict_proba(X_test_v_antiga)[:,1]
 
-# 5. Avalia o Brier Score
+# Evaluate Brier score
 brier_antigo = brier_score_loss(y_test_v_antiga, y_proba_antigo)
 print(f"\nBrier Score (Versão Antiga): {brier_antigo:.4f}")
 
-# 6. Plota a curva de calibração
+# Plot calibration curve
 print("Plotando a curva de calibração (Versão Antiga)...")
 prob_true_antigo, prob_pred_antigo = calibration_curve(y_test_v_antiga, y_proba_antigo, n_bins=10)
 

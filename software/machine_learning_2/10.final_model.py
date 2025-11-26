@@ -1,12 +1,49 @@
-# treinamento_sem_vento_xgboost.py
-# Versão: 1.1
-# Objetivo: treinar apenas o pipeline SEM_VENTO usando XGBClassifier (mais rápido e estável)
-
-import re
+"""
+ ****************************************************************************
+ * File name: final_model.py
+ * Description: Final rain prediction model.
+ * Author: Eduardo Abrahão Malateaux Takayama
+ * Creation date: 11/14/2025
+ * Last modified: 11/14/2025
+ * Contact: edumtk@gmail.com
+ * ***************************************************************************
+ * Description:
+ * This script uses climate data provided by databases and APIs
+ * to build an XGBoost predictive model for rain probability.
+ * After that, the model is saved in a JSON file.
+ *
+ * Workflow:
+ * 1. Receives and interprets the model features, and also computes engineered features.
+ * 2. Starts the training through adaptive thresholds and multiple decision-tree iterations.
+ * 3. Returns the model statistics and saves the model to a JSON file.
+ *
+ * Inputs:
+ *     - Feature data used in the model.
+ *
+ * Outputs:
+ *     - Trained model in JSON format
+ *     - Statistical plots of the model
+ *
+ * Requirements:
+ *    
+ *    - Interpreter:
+ *        - Python 3.13.1
+ *    - Python libraries:
+ *        - pandas >= 1.5
+ *        - numpy >= 1.24
+ *        - xgboost >= 1.8
+ *        - scikit-learn >= 1.2
+ *        - matplotlib >= 3.7
+ *    - Submodules / functions used:
+ *        - sklearn.calibration.calibration_curve
+ *        - sklearn.metrics: brier_score_loss, roc_auc_score, average_precision_score, f1_score
+ *        - sklearn.model_selection: TimeSeriesSplit, RandomizedSearchCV
+ ***************************************************************************
+"""
 import pandas as pd
 import numpy as np
 import xgboost as xgb
-from sklearn.calibration import CalibratedClassifierCV, calibration_curve
+from sklearn.calibration import calibration_curve
 from sklearn.metrics import (
     brier_score_loss,
     roc_auc_score,
@@ -17,38 +54,33 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import TimeSeriesSplit, RandomizedSearchCV
 import json
 
-# ----------------------
-# 1) Função de engenharia de features
-# ----------------------
+# 1) Features Engineering
 
 def create_features(df):
     df = df.copy()
 
-    # Garantir datetime
+    # Verify Datetime
     if not np.issubdtype(df['datetime'].dtype, np.datetime64):
         df['datetime'] = pd.to_datetime(df['datetime'])
 
-    # --- Componentes de tempo ---
+    # Time Components
     df['hour'] = df['datetime'].dt.hour
     df['dayofweek'] = df['datetime'].dt.dayofweek
     df['month'] = df['datetime'].dt.month
     df['hour_sin'] = np.sin(2 * np.pi * df['hour'] / 24)
     df['hour_cos'] = np.cos(2 * np.pi * df['hour'] / 24)
 
-    # --- Base features (sem vento) ---
-    base_cols = ['cloudcover', 'pressure_mB', 'temp_C', 'rh_pct']
-
-    # --- Features artificiais físicas ---
-    # Dew Point (Ponto de orvalho)
+    # Artificial Features 
+    # Dew Point
     a = 17.27
     b = 237.7
     gamma = (a * df['temp_C']) / (b + df['temp_C']) + np.log(df['rh_pct'] / 100)
     df['dew_point_C'] = (b * gamma) / (a - gamma)
 
-    # Heat Index (simplificado)
+    # Heat Index (simplified)
     df['heat_index_C'] = df['temp_C'] + 0.33 * df['rh_pct'] - 0.70 * df['pressure_mB']/100 + 4
 
-    # --- Flags binárias (thresholds físicos) ---
+    # Binary Flags (Physical Thresholds)
     df['is_overcast'] = (df['cloudcover'] > 80).astype(int)
     df['is_clear'] = (df['cloudcover'] < 20).astype(int)
     df['is_hot'] = (df['temp_C'] > 30).astype(int)
@@ -57,15 +89,13 @@ def create_features(df):
     df['is_dry'] = (df['rh_pct'] < 30).astype(int)
     df['low_pressure'] = (df['pressure_mB'] < 1010).astype(int)
 
-    # --- Preenchimento de valores faltantes ---
+    # Filling empty data 
     df = df.ffill().bfill()
 
     return df
 
 
-# ----------------------
-# 2) Função de treino e avaliação
-# ----------------------
+# 2) Train and Evaluation
 
 def train_and_evaluate(X_train, y_train, X_test, y_test,
                        random_state=42, cv_splits=5, n_iter=40):
@@ -136,9 +166,7 @@ def train_and_evaluate(X_train, y_train, X_test, y_test,
     return best, metrics, (t_base, p_base)
 
 
-# ----------------------
-# 3) Execução principal
-# ----------------------
+# 3) Main Execution
 
 if __name__ == '__main__':
     print("Carregando dados...")
