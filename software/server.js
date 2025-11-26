@@ -5,7 +5,7 @@
  *
  * @version 1.0.0
  * @date 2025-08-29
- * @lastmodified 2025-11-11
+ * @lastmodified 2025-11-26
  *
  * @author
  * Rafaela Fernandes Savaris <savarisf.rafaela@gmail.com>
@@ -32,7 +32,7 @@
  * - `POST /dados` - Recebe dados do ESP e inicia previsão inicial.
  * - `POST /dados/refresh` - Força nova geração de previsão.
  * - `GET /dados/ultimo` - Retorna o último registro do banco.
- * - `GET /dados/historico` - Retorna os últimos 50 registros.
+ * - `GET /dados/historico` - Retorna a quantidade indicada de registros.
  * - `POST /cloudcover` - Atualiza cobertura de nuvens atual.
  *
  * ### Variáveis globais
@@ -654,38 +654,53 @@ app.get("/dados/ultimo", (req, res) => {
 
 /**
  * @route GET /dados/historico
- * @summary Retorna os últimos 50 registros de leituras meteorológicas armazenados no banco de dados.
+ * @summary Retorna registros históricos de leituras meteorológicas com suporte a paginação.
  *
- * Esta rota consulta a tabela `dados_estacao_metereologica` no banco de dados SQLite e retorna
- * os 50 registros mais recentes em formato JSON.
- * 
- * Em caso de erro na consulta ao banco, retorna um status HTTP 500 com uma mensagem
- * de erro genérica, sem expor detalhes técnicos.
+ * Esta rota consulta a tabela `dados_estacao_metereologica` no banco SQLite e retorna
+ * um conjunto de registros ordenados do mais recente para o mais antigo.
  *
- * @param {express.Request} req - Objeto de requisição Express.
- * @param {express.Response} res - Objeto de resposta Express usado para enviar os dados ou erros.
+ * O usuário pode controlar a quantidade de itens retornados e o ponto de início da busca
+ * usando os parâmetros de query `limit` e `offset`.
+ *
+ * - `limit` (opcional): quantidade máxima de registros a serem retornados.
+ *   - Valor padrão: **50**
+ * - `offset` (opcional): quantos registros devem ser ignorados antes de começar a retornar resultados.
+ *   - Valor padrão: **0**
+ *
+ * Em caso de erro na consulta ao banco, a rota retorna status HTTP 500 com uma mensagem
+ * genérica, evitando exposição de detalhes internos.
+ *
+ * @param {express.Request} req - Objeto da requisição Express contendo `req.query.limit` e `req.query.offset`.
+ * @param {express.Response} res - Objeto de resposta Express usado para enviar dados ou erros.
  *
  * @returns {void} A resposta é enviada diretamente via `res.json()`.
  *
  * @example
- * // Requisição:
+ * // Requisição simples:
  * GET /dados/historico
  *
- * // Resposta de sucesso (200 OK):
+ * // Equivalente a:
+ * GET /dados/historico?limit=50&offset=0
+ *
+ * // Resposta (200 OK):
  * [
  *   {
- *     "id": 1,
- *     "temperatura": 22.5,
- *     "umidade": 75,
- *     "pressaoAtm": 1013,
- *     "uvClassificacao": 2,
- *     "cloudCover": 0.7,
- *     "rainProbability": 0.3,
+ *     "id": 71,
+ *     "temperatura": 23.1,
+ *     "umidade": 62,
+ *     "pressaoAtm": 1015,
+ *     "uvClassificacao": 3,
+ *     "cloudCover": 0.4,
+ *     "rainProbability": 0.1,
  *     "precipitacao": 0,
- *     "created_at": "2025-11-07T10:23:00.000Z"
+ *     "created_at": "2025-11-26T12:10:00.000Z"
  *   },
  *   ...
  * ]
+ *
+ * @example
+ * // Requisição paginada (20 por página):
+ * GET /dados/historico?limit=20&offset=20
  *
  * // Resposta de erro (500 Internal Server Error):
  * {
