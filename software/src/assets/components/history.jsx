@@ -1,14 +1,102 @@
+/**
+ * @file history.jsx
+ * @fileoverview Painel de historico dos dados meteorológicos salvos no database.
+ *
+ * @version 1.0.0
+ * @date 2025-09-19
+ * @lastmodified 2025-11-26
+ *
+ * @author
+ * Rafaela Fernandes Savaris <savarisf.rafaela@gmail.com>
+ *
+ * @license Proprietary
+ *
+ * @requires react Hooks do React (useState, useEffect, useCallback)
+ * @requires ../components/scrollbar.css Estilos personalizados para scrollbar.
+ *
+ * @description
+ * Os dados são carregados em blocos de 50 registros por requisição, utilizando
+ * paginação baseada em `offset`. Um botão “Carregar mais” permite buscar o próximo
+ * conjunto de registros. Quando não há mais itens disponíveis, o componente exibe uma
+ * mensagem informativa ao usuário.
+ *
+ * ### Informações exibidas na tabela
+ * Cada linha contém:
+ * - Temperatura (°C)
+ * - Umidade relativa (%)
+ * - Pressão atmosférica (Pa)
+ * - Índice UV (classificaçao em string)
+ * - Cobertura de nuvens (%)
+ * - Probabilidade de chuva (%)
+ * - Precipitação acumulada (mm)
+ * - Timestamp da leitura (`created_at`)
+ *
+ * ### Hooks utilizados
+ * - `useState`: Armazena: lista de dados carregados, estado de paginação, flag de fim de dados.
+ * - `useEffect`: Executa a primeira busca de dados ao montar o componente.
+ * - `useCallback`: Memoiza funções como `loadMore` e `fetchData` para evitar recriação desnecessária.
+ *
+ * ### Funções principais
+ * - `loadMore()`  
+ *   Realiza uma nova requisição ao backend usando o próximo `offset`.
+ *   Atualiza o estado da lista e detecta quando não há mais registros a carregar.
+ *
+ * ### Observações
+ * - O componente utiliza paginação simples baseada em `limit` e `offset`.
+ * - Estilos de rolagem personalizados são aplicados via `scrollbar.css`.
+ * - O componente foi projetado para ser eficiente em listas longas, carregando dados sob demanda.
+ */
+
 import { useEffect, useState, useCallback } from "react";
 import "../components/scrollbar.css";
 
+/**
+ * @component HistoryTable
+ * @description
+ * Componente que exibe uma tabela com o histórico de dados meteorológicos,
+ * carregando sob demanda.
+ * 
+ *
+ * @returns {JSX.Element} Interface com os dados históricos carregados.
+ */
 function HistoryTable() {
+  /**
+   * Armazena o histórico de dados carregados.
+   * @type {[Array, Function]}
+   */
   const [historico, setHistorico] = useState([]);
+
+  /**
+   * Estado de paginação do histórico.
+   * @type {[number, Function]}
+   */
   const [offset, setOffset] = useState(0);
+
+  /**
+   * Limite de registros por requisição.
+   * @type {number}
+   */
   const limit = 50;
 
+  /**
+   * Estado que armazena se há mais dados.
+   * @type {[boolean, Function]}
+   */
   const [hasMore, setHasMore] = useState(true);
+
+  /**
+   * Estado de carregamento.
+   * @type {[boolean, Function]}
+   */
   const [loading, setLoading] = useState(false);
 
+  /**
+   * Carrega mais dados do histórico do backend.
+   * @async
+   * @function loadMore
+   * @returns {Promise<void>}
+   * 
+   */
   const loadMore = useCallback(async () => {
     if (loading || !hasMore) return;
 
@@ -34,9 +122,11 @@ function HistoryTable() {
     }
   }, [offset, limit, loading, hasMore]);
 
-
+  /**
+   * Carrega os dados iniciais ao montar o componente.
+   * @effect
+   */
   useEffect(() => {
-    // chamada direta, sem usar loadMore
     (async () => {
       setLoading(true);
       try {
@@ -49,7 +139,7 @@ function HistoryTable() {
         if (data.length < limit) {
           setHasMore(false);
         } else {
-          setOffset(limit); // primeira página carregada
+          setOffset(limit);
         }
       } catch (err) {
         console.error("Erro ao carregar inicial:", err);
