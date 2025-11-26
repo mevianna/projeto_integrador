@@ -5,8 +5,8 @@
  * cobertura de nuvens, índice UV e probabilidade de chuva prevista pelo modelo.
  *
  * @version 1.0.0
- * @date
- * @lastmodified 2025-11-14
+ * @date 2025-08-29
+ * @lastmodified 2025-11-26
  *
  * @author
  * Rafaela Fernandes Savaris <savarisf.rafaela@gmail.com>
@@ -16,6 +16,7 @@
  *
  * @requires react-router-dom Navegação entre páginas (useNavigate)
  * @requires react Hooks do React (useState, useEffect, useCallback)
+ * @requires ../../services/windService.js Serviço para obter dados de vento
  *
  * @description
  * O componente `Info` é responsável por:
@@ -24,6 +25,7 @@
  * - Exibir os valores mais recentes, incluindo a probabilidade de chuva.
  * - Permitir atualização manual, que força o servidor a gerar uma nova previsão.
  * - Navegar para a tela de histórico completo.
+ * - Integrar dados de vento obtidos de um serviço externo.
  *
  * ### Variáveis globais
  * - `API_URL`: URL base da API backend.
@@ -74,7 +76,10 @@ function Info() {
    * @property {?number} prediction - Probabilidade de chuva (0 a 1).
    */
 
-  /** @type {[SensorData, Function]} */
+  /** 
+   * Armazena os dados do sensor.
+   * @type {[sensorData, Function]} 
+   * */
   const [sensorData, setSensorData] = useState({
     temperatura: null,
     umidade: null,
@@ -96,7 +101,20 @@ function Info() {
    */
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const [wind, setWind] = useState({ speed: "-", direction: "-"});
+  /**
+   * Dados de vento.
+   * @typedef {Object} wind
+   * @property {string} speed - Velocidade do vento em km/h.
+   * @property {string} direction - Direção do vento em graus.
+   */
+  /**
+   * Dados de vento obtidos do serviço externo.
+   * @type {[wind, Function]}
+   */
+  const [wind, setWind] = useState({ 
+    speed: "-", 
+    direction: "-"
+  });
   /**
    * Busca o último registro de dados armazenado no servidor.
    *
@@ -226,8 +244,12 @@ function Info() {
                 : "-"}{" "}
               Pa
             </p>
-            <p>Wind Speed: {wind.speed} km/h</p>
-            <p>Wind Direction: {wind.direction}°</p>
+            <p>
+              Wind Speed: {wind.speed} km/h
+            </p>
+            <p>
+              Wind Direction: {wind.direction}°
+            </p>
           </div>
           <div>
             <p>
