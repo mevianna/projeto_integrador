@@ -1,7 +1,54 @@
+/**
+ * @file about.jsx
+ * @fileoverview Página "About" do aplicativo, descrevendo o projeto,
+ * sua proposta, tecnologias utilizadas e os integrantes da equipe.
+ *
+ * @version 1.0.0
+ * @date 2025-09-19
+ * @lastmodified 2025-11-26
+ *
+ * @author
+ * Beatriz Schulter Tartare <beastartare@gmail.com>
+ * Rafaela Fernandes Savaris <savarisf.rafaela@gmail.com>
+ *
+ * @license Proprietary
+ *
+ * @requires lucide-react Biblioteca para ícones SVG utilizados na navegação (ChevronLeftIcon).
+ *
+ * @requires react-router-dom Responsável pela navegação entre páginas (useNavigate).
+ *
+ * @requires ../assets/components/stars.jsx Componente visual responsável por renderizar o fundo estrelado animado.
+ *
+ * @description
+ * Página "About" responsável por apresentar o contexto geral do projeto
+ * desenvolvido na disciplina Projeto Integrador do curso de Engenharia de
+ * Computação – UFSC. A página descreve:
+ * - O objetivo multidisciplinar do projeto;
+ * - A integração de APIs astronômicas, estação meteorológica própria
+ *   e técnicas de machine learning para previsão de condições de observação;
+ * - A motivação acadêmica e prática que fundamenta o desenvolvimento;
+ * - Uma galeria contendo a equipe envolvida, com links diretos para os
+ *   perfis do GitHub dos membros.
+ * 
+ * A interface utiliza animações sutis e um fundo temático (StarsBackground)
+ * para reforçar a identidade visual do projeto e proporcionar uma experiência
+ * mais imersiva ao usuário.
+ *
+ * @remarks
+ * - Os mapas de clique sobre a imagem da equipe utilizam posicionamento
+ *   absoluto; ajustes podem ser necessários em telas muito pequenas.
+ */
+
 import { ChevronLeftIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import StarsBackground from "../assets/components/stars.jsx";
 
+/**
+ * Componente da página "About".
+ * Exibe informações sobre o projeto, sua proposta e a equipe de desenvolvimento.
+ *
+ * @returns {JSX.Element} Estrutura visual completa da página About.
+ */
 function AboutPage() {
   const navigate = useNavigate();
 
