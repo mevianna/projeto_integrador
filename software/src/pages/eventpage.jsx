@@ -1,6 +1,6 @@
 /**
  * @file eventpage.jsx
- * @fileoverview Página "Event" do aplicativo, exibindo detalhes completos
+ * @fileoverview Página "Event" do site, exibindo detalhes completos
  * sobre um evento astronômico selecionado, incluindo título, descrição,
  * imagem, informações adicionais e créditos.
  *
@@ -46,6 +46,7 @@
  *   seu próprio estado de loading e error.
  * - Caso o link não seja informado, as requisições são ignoradas.
  */
+
 import { ChevronLeftIcon } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import StarsBackground from "../assets/components/stars.jsx";
