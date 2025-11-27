@@ -2,9 +2,6 @@
  * @file stars.jsx
  * @fileoverview Componente responsável por renderizar um fundo animado de estrelas.
  *
- * Este componente gera 100 estrelas com posições, tamanhos e animações aleatórias,
- * criando um efeito visual de cintilação no plano de fundo da página.
- *
  * @version 1.0.0
  * @date 2025-08-29
  * @lastmodified 2025-11-26
@@ -12,6 +9,9 @@
  * @author
  * Beatriz Schulter Tartare <beastartare@gmail.com>
  *
+ * @license Proprietary
+ * 
+ * @description
  * Este componente gera 100 estrelas com posições, tamanhos e animações aleatórias,
  * criando um efeito visual de cintilação no plano de fundo da página.
  *

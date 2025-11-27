@@ -1,17 +1,53 @@
+/**
+ * @file scrollbar.css
+ * @fileoverview Estilos personalizados para barras de rolagem em elementos com a classe `history-scrollbar`.
+ *
+ * @version 1.0.0
+ * @date 2025-09-19
+ * @lastmodified 2025-11-27
+ *
+ * @author 
+ * Rafaela Fernandes Savaris <savarisf.rafaela@gmail.com>
+ *
+ * @license Proprietary
+ *
+ * @description
+ * Estilização personalizada para barras de rolagem aplicadas a elementos
+ * que utilizam a classe `history-scrollbar`.  
+ * Compatível com navegadores baseados em WebKit (Chrome, Edge, Safari).
+ *
+ * - Redimensiona a largura da scrollbar.
+ * - Define cores e arredondamento da trilha.
+ * - Aplica cor personalizada ao polegar (thumb).
+ * - Modifica a cor do polegar ao passar o mouse.
+ */
+
+/** 
+ * Define a largura da barra de rolagem.
+*/
 .history-scrollbar::-webkit-scrollbar {
   width: 8px;
 }
 
+/**
+ * Estiliza a trilha da barra de rolagem.
+ */
 .history-scrollbar::-webkit-scrollbar-track {
   background: rgba(55, 0, 179, 0.3);
   border-radius: 9999px;
 }
 
+/**
+ * Estiliza o thumb da barra de rolagem.
+ */
 .history-scrollbar::-webkit-scrollbar-thumb {
   background-color: #7e22ce;
   border-radius: 9999px;
 }
 
+/**
+ * Estiliza o thumb da barra de rolagem ao passar o mouse.
+ */
 .history-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: #a855f7;
 }
