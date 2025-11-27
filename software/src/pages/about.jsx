@@ -14,9 +14,7 @@
  * @license Proprietary
  *
  * @requires lucide-react Biblioteca para ícones SVG utilizados na navegação (ChevronLeftIcon).
- *
  * @requires react-router-dom Responsável pela navegação entre páginas (useNavigate).
- *
  * @requires ../assets/components/stars.jsx Componente visual responsável por renderizar o fundo estrelado animado.
  *
  * @description
@@ -44,9 +42,11 @@ import { useNavigate } from "react-router-dom";
 import StarsBackground from "../assets/components/stars.jsx";
 
 /**
+ * @component AboutPage
+ * @description
  * Componente da página "About".
  * Exibe informações sobre o projeto, sua proposta e a equipe de desenvolvimento.
- *
+ * 
  * @returns {JSX.Element} Estrutura visual completa da página About.
  */
 function AboutPage() {
