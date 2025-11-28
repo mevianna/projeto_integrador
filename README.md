@@ -16,7 +16,7 @@ Essa integração entre sensores, análise de dados e astronomia busca oferecer 
 
 ---
 
-## PT – Requisitos de Hardware
+## Requisitos de Hardware
 
 - Sensores: DHT11, BMP280, Anemômetro, Pluviômetro, Sensor de Direção do vento  
 - Microcontrolador: ESP32  
@@ -27,7 +27,7 @@ Essa integração entre sensores, análise de dados e astronomia busca oferecer 
 
 ---
 
-## PT – Requisitos de Software
+## Requisitos de Software
 
 - Linguagens de programação: Python, Javascript, HTML, C/C++/C#, CSS  
 - Frameworks: Tailwind  
@@ -42,7 +42,7 @@ Essa integração entre sensores, análise de dados e astronomia busca oferecer 
 
 ---
 
-## PT – Esquema de Conexões
+## Esquema de Conexões
 
 - Diagrama de conexões (Fritzing/KiCad)  
 - Tabela de pinagem  
@@ -50,7 +50,7 @@ Essa integração entre sensores, análise de dados e astronomia busca oferecer 
 
 ---
 
-## PT – Configuração do Ambiente
+## Configuração do Ambiente
 
 - Versões de IDE/toolchain  
 - Dependências e bibliotecas  
@@ -58,7 +58,7 @@ Essa integração entre sensores, análise de dados e astronomia busca oferecer 
 
 ---
 
-## PT – Como Usar
+## Como Usar
 
 - Instruções de upload  
 - Configurações necessárias  
@@ -66,19 +66,19 @@ Essa integração entre sensores, análise de dados e astronomia busca oferecer 
 
 ---
 
-## PT – Estrutura do Projeto
+## Estrutura do Projeto
 
 - Explicação da organização dos arquivos  
 
 ---
 
-## PT – Troubleshooting
+## Troubleshooting
 
 - Problemas comuns e soluções  
 
 ---
 
-## PT – Contribuidores
+## Contribuidores
 Beatriz Schuelter Tartare (24103805) - Desenvolvimento Web
 Eduardo - Machine Learning
 Maria Eduarda Winkel de Mello Vianna (24102073) - Machine Learning
@@ -99,7 +99,7 @@ This integration of sensors, data analysis, and astronomy provides a complete to
 
 ---
 
-## EN – Hardware Requirements
+## Hardware Requirements
 
 - Sensors: DHT11, BMP280, Anemometer, Rain Gauge, Wind Direction Sensor  
 - Microcontroller: ESP32  
@@ -110,7 +110,7 @@ This integration of sensors, data analysis, and astronomy provides a complete to
 
 ---
 
-## EN – Software Requirements
+## Software Requirements
 
 - Programming languages: Python, Javascript, HTML, C/C++/C#, CSS  
 - Frameworks: Tailwind  
@@ -125,7 +125,7 @@ This integration of sensors, data analysis, and astronomy provides a complete to
 
 ---
 
-## EN – Wiring Scheme
+## Wiring Scheme
 
 - Connection diagram (Fritzing/KiCad)  
 - Pinout table  
@@ -133,7 +133,7 @@ This integration of sensors, data analysis, and astronomy provides a complete to
 
 ---
 
-## EN – Environment Setup
+## Environment Setup
 
 - IDE/toolchain versions  
 - Dependencies and libraries  
@@ -141,7 +141,7 @@ This integration of sensors, data analysis, and astronomy provides a complete to
 
 ---
 
-## EN – How to Use
+## How to Use
 
 - Upload instructions  
 - Required settings  
@@ -149,19 +149,19 @@ This integration of sensors, data analysis, and astronomy provides a complete to
 
 ---
 
-## EN – Project Structure
+## Project Structure
 
 - Explanation of file organization  
 
 ---
 
-## EN – Troubleshooting
+## Troubleshooting
 
 - Common problems and solutions  
 
 ---
 
-## EN – Contributors
+## Contributors
 Beatriz Schuelter Tartare (24103805) - Desenvolvimento Web
 Eduardo Takayama - Machine Learning
 Maria Eduarda Winkel de Mello Vianna (24102073) - Machine Learning
