@@ -1,8 +1,44 @@
+/**
+ * @file historypage.jsx
+ * @fileoverview Página "History" do site, exibindo o histórico de dados.
+ *
+ * @version 1.0.0
+ * @date 2025-09-26
+ * @lastmodified 2025-11-26
+ *
+ * @author
+ * Rafaela Fernandes Savaris <savarisf.rafaela@gmail.com>
+ *
+ * @license Proprietary
+ *
+ * @requires lucide-react Biblioteca responsável pela renderização de ícones SVG utilizados na navegação (ChevronLeftIcon).
+ * @requires react-router-dom Gerencia a navegação entre rotas e fornece acesso aos parâmetros da URL (useNavigate, useSearchParams).
+ * @requires ../assets/components/stars.jsx Componente visual para renderização do fundo animado de estrelas.
+ * @requires ../assets/components/history.jsx Componente que encapsula a lógica e visualização dos dados históricos.
+ *
+  * @description
+ * A página **HistoryPage** exibe uma tabela com os dados históricos coletados.  
+ * Ela faz parte da interface principal do sistema e integra:
+ * - Navegação via `useNavigate`
+ * - Componente `HistoryTable`, que encapsula toda a lógica da tabela de histórico
+ *
+ * @remarks
+ * - Esta página não realiza chamadas diretas à API. Os dados são carregados
+ *   internamente pelo componente <History />, mantendo a responsabilidade isolada.
+ */
+
 import { ChevronLeftIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import StarsBackground from "../assets/components/stars.jsx";
 import HistoryTable from "../assets/components/history.jsx";
 
+/**
+ * @component Historypage
+ * @description
+ * Componente da página "History".
+ * Exibe histórico de dados coletados.
+ * @returns {JSX.Element} Estrutura visual completa da página History.
+ */
 function Historypage() {
   const navigate = useNavigate();
 

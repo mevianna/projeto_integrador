@@ -15,7 +15,7 @@
  * @requires lucide-react Biblioteca responsável pela renderização de ícones SVG utilizados na navegação (ChevronLeftIcon).
  * @requires react-router-dom Gerencia a navegação entre rotas e fornece acesso aos parâmetros da URL (useNavigate, useSearchParams).
  * @requires ../assets/components/stars.jsx Componente visual para renderização do fundo animado de estrelas.
- * @requires ../assets/components/graphs.jsx
+ * @requires ../assets/components/graphs.jsx Componente que encapsula a lógica e visualização dos gráficos.
  *
   * @description
  * A página **GraphsPage** exibe gráficos interativos e totalmente responsivos que
