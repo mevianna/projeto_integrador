@@ -5,7 +5,7 @@
  * a interface raiz dentro do DOM.
  *
  * @version 1.0.0
- * @date 2025-09-19
+ * @date 2025-08-29
  * @lastmodified 2025-11-27
  *
  * @author

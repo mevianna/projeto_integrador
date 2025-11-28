@@ -1,7 +1,37 @@
+/**
+ * @file index.css
+ * @fileoverview Arquivo principal de estilos que integra o TailwindCSS,
+ * define utilitários globais e adiciona animações customizadas utilizadas
+ * pela interface do aplicativo.
+ *
+ * @version 1.0.0
+ * @date 2025-08-29
+ * @lastmodified 2025-11-27
+ *
+ * @author
+ * Beatriz Schulter Tartare <beastartare@gmail.com>
+ *
+ * @license Proprietary
+ *
+ * @description
+ * Este arquivo importa as camadas principais do TailwindCSS
+ * (`base`, `components`, `utilities`) e define animações personalizadas.
+ *
+ * ### Conteúdo principal
+ * - Importação das camadas essenciais do Tailwind.
+ * - Criação da animação `twinkle`, usada para efeitos de brilho em estrelas.
+ */
+
+/** 
+ * Importação das camadas essenciais do TailwindCSS
+ */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/**
+ * Animação personalizada `twinkle` para efeito de brilho.
+ */
 @keyframes twinkle {
   0%,
   100% {
