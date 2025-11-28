@@ -191,12 +191,12 @@ async function gerarFeatures() {
   }
 
   return [
-    dadosESP.pressaoAtm,
-    dadosESP.temperatura,
-    dadosESP.umidade,
-    dadosESP.uvClassificacao,
+    dadosESP.pressure,
+    dadosESP.temperature,
+    dadosESP.humidity,
+    dadosESP.uvIndex,
     cloudCover ?? 0, // cloudCover or 0 if undefined
-    dadosESP.precipitacao, // precipitation
+    dadosESP.precipitation, // precipitation
   ];
 }
 /**
@@ -330,12 +330,12 @@ async function salvarUltimoDado(features = null) {
 
   // correct destructuring following the feature order
   const [
-    pressaoAtm,
-    temperatura,
-    umidade,
-    uvClassificacao,
-    cloud,
-    precipitacao,
+    pressure,
+    temperature,
+    humidity,
+    uvIndex,
+    cloudCover,
+    precipitation,
   ] = features;
 
   // Retrieves the rain probability from the most recent forecast (fallback: 0 if unavailable)
@@ -343,45 +343,45 @@ async function salvarUltimoDado(features = null) {
 
   const last = db
     .prepare(
-      "SELECT * FROM dados_estacao_metereologica ORDER BY id DESC LIMIT 1"
+      "SELECT * FROM weather_data_final ORDER BY id DESC LIMIT 1"
     )
     .get();
 
   if (
     last &&
-    last.temperatura === temperatura &&
-    last.umidade === umidade &&
-    last.pressaoAtm === pressaoAtm &&
-    last.uvClassificacao === uvClassificacao &&
-    last.cloudCover === cloud &&
+    last.temperature === temperature &&
+    last.humidity === humidity &&
+    last.pressure === pressure &&
+    last.uvIndex === uvIndex &&
+    last.cloudCover === cloudCover &&
     last.rainProbability === probabilidadeChuva &&
-    last.precipitacao === precipitacao
+    last.precipitacao === precipitation
   ) {
     console.log("Último registro é igual, não salvou");
     return;
   }
 
   const stmt = db.prepare(`
-    INSERT INTO dados_estacao_metereologica (temperatura, umidade, pressaoAtm, uvClassificacao, created_at, cloudCover, rainProbability, precipitacao)
+    INSERT INTO weather_data_final (temperature, humidity, pressure, uvIndex, created_at, cloudCover, rainProbability, precipitation)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   stmt.run(
-    temperatura,
-    umidade,
-    pressaoAtm,
-    uvClassificacao,
+    temperature,
+    humidity,
+    pressure,
+    uvIndex,
     new Date().toISOString(),
-    cloud,
+    cloudCover,
     probabilidadeChuva,
-    precipitacao
+    precipitation
   );
 
   console.log(`Salvou dado: ${new Date().toISOString()}`);
   const ultimo = db
     .prepare(
       `
-    SELECT * FROM dados_estacao_metereologica ORDER BY id DESC LIMIT 1
+    SELECT * FROM weather_data_final ORDER BY id DESC LIMIT 1
   `
     )
     .get();
@@ -525,7 +525,7 @@ app.post("/cloudcover", (req, res) => {
  *   "ignorado": true
  * }
  */
-app.post("/dados", async (req, res) => {
+app.post("/data", async (req, res) => {
   const agora = Date.now();
   if (agora - ultimaAtualizacao < 5000) {
     console.log("Ignorando atualização duplicada /dados");
@@ -666,7 +666,7 @@ app.get("/dados/ultimo", (req, res) => {
     const ultimoDado = db
       .prepare(
         `
-      SELECT * FROM dados_estacao_metereologica
+      SELECT * FROM weather_data_final
       ORDER BY datetime(created_at) DESC
       LIMIT 1
     `
@@ -742,7 +742,7 @@ app.get("/dados/historico", (req, res) => {
   try {
     const rows = db
       .prepare(
-        "SELECT * FROM dados_estacao_metereologica ORDER BY id DESC LIMIT ? OFFSET ?"
+        "SELECT * FROM weather_data_final ORDER BY id DESC LIMIT ? OFFSET ?"
       )
       .all(limit, offset);
     res.json(rows);

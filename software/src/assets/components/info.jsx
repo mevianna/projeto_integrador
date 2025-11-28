@@ -73,8 +73,8 @@ function Info() {
    * @typedef {Object} SensorData
    * @property {?number} temperature - Temperature in degrees Celsius.
    * @property {?number} humidity - Relative humidity in percentage.
-   * @property {?number} pressureAtm - Atmospheric pressure in Pascal.
-   * @property {string} uvClassification - UV index classification.
+   * @property {?number} pressure - Atmospheric pressure in Pascal.
+   * @property {string} uvIndex - UV index classification.
    * @property {?number} prediction - Rain probability (0 to 1).
    */
 
@@ -86,8 +86,8 @@ function Info() {
   const [sensorData, setSensorData] = useState({
     temperature: null,
     humidity: null,
-    pressureAtm: null,
-    uvClassification: "-",
+    pressure: null,
+    uvIndex: "-",
     prediction: null,
     precipitation: null,
   });
@@ -136,8 +136,8 @@ function Info() {
       setSensorData({
         temperature: data.temperature,
         humidity: data.humidity,
-        pressureAtm: data.pressureAtm,
-        uvClassification: data.uvClassification,
+        pressure: data.pressure,
+        uvIndex: data.uvIndex,
         prediction: data.rainProbability,
         precipitation: data.precipitation,
       });
@@ -244,13 +244,13 @@ function Info() {
               Humidity:{" "}
               {sensorData.humidity !== null ? sensorData.humidity : "-"} %
             </p>
-            <p>UV Index: {sensorData.uvClassification}</p>
+            <p>UV Index: {sensorData.uvIndex}</p>
           </div>
           <div>
             <p>
               Atmospheric Pressure:{" "}
-              {sensorData.pressureAtm !== null
-                ? Number(sensorData.pressureAtm).toFixed(2)
+              {sensorData.pressure !== null
+                ? Number(sensorData.pressure).toFixed(2)
                 : "-"}{" "}
               Pa
             </p>

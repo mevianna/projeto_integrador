@@ -102,9 +102,9 @@ const CustomTooltip = ({ active, payload, label }) => {
     const key = payload[0].name;
     const value = payload[0].value;
 
-    const labelName = key === "temperatura" ? "Temperature" : "Humidity";
+    const labelName = key === "temperature" ? "Temperature" : "Humidity";
 
-    const unit = key === "temperatura" ? "°C" : "%";
+    const unit = key === "temperature" ? "°C" : "%";
 
     return (
       <div
@@ -234,7 +234,7 @@ function Graphs() {
                 <Tooltip content={<CustomTooltip />} />
                 <Line
                   type="monotone"
-                  dataKey="temperatura"
+                  dataKey="temperature"
                   stroke="#f2ff00"
                   strokeWidth={3}
                   dot={{ fill: "#f2ff00" }}
@@ -284,7 +284,7 @@ function Graphs() {
                 <Tooltip content={<CustomTooltip />} />
                 <Line
                   type="monotone"
-                  dataKey="umidade"
+                  dataKey="humidity"
                   stroke="#00b8cb"
                   strokeWidth={3}
                   dot={{ fill: "#00b8cb" }}

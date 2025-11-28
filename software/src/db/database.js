@@ -1,10 +1,10 @@
 /**
  * @file database.js
  * @fileoverview
- * Módulo responsável pela criação e manutenção do banco de dados SQLite utilizado
- * pela estação meteorológica. Ele garante a existência da tabela principal de
- * leituras, adiciona ou remove colunas conforme versões anteriores do sistema e
- * exporta a instância de conexão com o banco.
+ * Module responsible for creating and maintaining the SQLite database used
+ * by the weather station. It ensures the existence of the main readings table,
+ * adds or removes columns according to previous system versions, and
+ * exports the database connection instance.
  *
  * @version 1.0.0
  * @date 2025-09-19
@@ -15,57 +15,62 @@
  *
  * @license Proprietary
  *
- * @requires better-sqlite3 Para criação e manipulação do banco de dados SQLite.
- * @requires path Para manipulação e resolução de caminhos de diretórios e arquivos.
- * @requires fs Para criação de diretórios, garantindo a estrutura de armazenamento.
+ * @requires better-sqlite3 For creating and managing the SQLite database.
+ * @requires path For manipulating and resolving directory and file paths.
+ * @requires fs For creating directories, ensuring storage structure.
  *
  * @description
- * Este módulo assegura que o banco de dados `sensores.db` exista dentro da pasta
- * `data/` e que a tabela `leituras` possua as colunas necessárias para armazenar
- * informações meteorológicas atualizadas. Também remove colunas obsoletas de
- * versões anteriores do sistema.
+ * This module ensures that the `sensores.db` database exists inside the
+ * `data/` folder and that the `leituras` table contains the necessary columns
+ * to store up-to-date meteorological information. It also removes obsolete
+ * columns from previous versions of the system.
  *
- * A configuração `journal_mode = WAL` é utilizada para permitir acesso concorrente
- * e maior segurança nas transações.
+ * The `journal_mode = WAL` setting is used to allow concurrent access
+ * and greater transaction safety.
  *
- * ### Estrutura da tabela `leituras`
+ * ### Table `leituras` structure
  * - `id` (INTEGER, PK, AUTOINCREMENT)
- * - `temperatura` (REAL)
- * - `umidade` (REAL)
- * - `pressaoAtm` (REAL)
- * - `uvClassificacao` (TEXT)
+ * - `temperature` (REAL)
+ * - `humidity` (REAL)
+ * - `pressure` (REAL)
+ * - `uvIndex` (TEXT)
  * - `cloudCover` (REAL)
  * - `rainProbability` (REAL)
- * - `precipitacao` (REAL)
+ * - `precipitation` (REAL)
  * - `created_at` (TEXT)
  *
- * ### Variáveis globais
- * - `dbPath` - Caminho absoluto do arquivo do banco de dados.
- * - `db` - Instância do banco SQLite aberta ou criada.
+ * ### Global variables
+ * - `dbPath` - Absolute path to the database file.
+ * - `db` - SQLite database instance, opened or created.
  *
- * ### Funções principais
+ * ### Main functions
  * - `addColumnIfNotExists(column, type, defaultValue = null)`  
- *   Verifica se uma coluna existe na tabela e, caso não exista,
- *   adiciona a coluna com o tipo e valor padrão especificados.
+ *   Checks if a column exists in the table and, if it does not exist,
+ *   adds the column with the specified type and default value.
  *
  * - `deleteColumn(column)`  
- *   Verifica se uma coluna existe na tabela e, caso exista,
- *   remove-a do banco de dados.
+ *   Checks if a column exists in the table and, if it exists,
+ *   removes it from the database.
  * 
- * - `tableExists()`
- *   Verifica se a tabela `leituras` existe no banco de dados. Retorna true
- *   se existir, false caso contrário.
+ * - `tableExists(tableName)`
+ *   Checks if a table exists in the database. Returns true if it exists,
+ *   false otherwise.
  *
- * ### Comportamento em tempo de execução
- * - Garante a criação da tabela `leituras` caso não exista.
- * - Adiciona as colunas `cloudCover`, `rainProbability` e `precipitacao` se ausentes.
- * - Remove colunas obsoletas `ventoVelocidade` e `ventoDirecao` se presentes.
+ * - `renameColumn(oldName, newName)`
+ *   Renames a column from `oldName` to `newName` if it exists and has not
+ *   already been renamed.
+ *
+ * ### Runtime behavior
+ * - Ensures the creation of the `leituras` table if it does not exist.
+ * - Adds the columns `cloudCover`, `rainProbability`, and `precipitacao` if missing.
+ * - Removes obsolete columns `ventoVelocidade` and `ventoDirecao` if present.
+ * - Renames Portuguese columns to English equivalents for consistency.
  *
  * @example
- * // Importando e utilizando o banco:
+ * // Importing and using the database:
  * import db from "./src/db/database.js";
- * const dados = db.prepare("SELECT * FROM leituras").all();
- * console.log(dados);
+ * const data = db.prepare("SELECT * FROM leituras").all();
+ * console.log(data);
  */
 
 import Database from "better-sqlite3";
@@ -73,116 +78,144 @@ import path from "path";
 import fs from "fs";
 
 /**
- * Caminho absoluto do arquivo do banco de dados SQLite.
+ * Absolute path to the SQLite database file.
  * @type {string}
  */
 const dbPath = path.resolve("data", "sensores.db");
 
 /**
- * Garante que a pasta existe. Se não existir, cria
+ * Ensures the folder exists. If not, creates it.
  */
 fs.mkdirSync(path.dirname(dbPath), { recursive: true });
 
 /**
- * Instância do banco de dados SQLite.
+ * SQLite database instance.
  * @type {Database}
  */
 const db = new Database(dbPath);
 
 /**
- * Configuração do modo de journal para Write-Ahead Logging (WAL).
- * Isso permite ações concorrentes de leitura e escrita no banco de dados.
+ * Sets the journal mode to Write-Ahead Logging (WAL).
+ * This allows concurrent read/write actions on the database.
  */
 db.pragma("journal_mode = WAL");
 
-// ************************************* FUNÇÕES ************************************* //
+// ************************************* FUNCTIONS ************************************* //
 /**
- * Adiciona uma coluna à tabela "dados_estacao_metereologica" se ela não existir.
+ * Adds a column to the "weather_data" table if it does not exist.
  *
  * @function addColumnIfNotExists
- * @param {string} column - Nome da coluna a ser adicionada.
- * @param {string} type - Tipo de dado da coluna.
- * @param {any} [defaultValue=null] - Valor padrão para a nova coluna (opcional).
+ * @param {string} column - Column name to be added.
+ * @param {string} type - Data type of the column.
+ * @param {any} [defaultValue=null] - Default value for the new column (optional).
  * 
  * @returns {void} 
  */
 function addColumnIfNotExists(column, type, defaultValue = null) {
-  const info = db.prepare(`PRAGMA table_info("dados_estacao_metereologica");`).all();
+  const info = db.prepare(`PRAGMA table_info("weather_data_final");`).all();
   const exists = info.some(col => col.name === column);
   
   if (!exists) {
-    console.log(`Adicionando coluna '${column}' à tabela 'dados_estacao_metereologica'...`);
+    console.log(`Adding column '${column}' to table 'weather_data_final'...`);
     const defaultClause =
       defaultValue !== null
         ? `DEFAULT ${typeof defaultValue === "string" ? `'${defaultValue}'` : defaultValue}`
         : "";
-    db.exec(`ALTER TABLE "dados_estacao_metereologica" ADD COLUMN ${column} ${type} ${defaultClause}`);
+    db.exec(`ALTER TABLE "weather_data_final" ADD COLUMN ${column} ${type} ${defaultClause}`);
   }
 };
 
 /**
- * Remove uma coluna da tabela "dados_estacao_metereologica" se ela existir.
+ * Removes a column from the "weather_data" table if it exists.
  *
  * @function deleteColumn
- * @param {string} column - Nome da coluna a ser removida.
+ * @param {string} column - Column name to be removed.
  * 
  * @returns {void} 
  */
 function deleteColumn(column) {
-  const info = db.prepare(`PRAGMA table_info("dados_estacao_metereologica");`).all();
+  const info = db.prepare(`PRAGMA table_info("weather_data_final");`).all();
   const exists = info.some(col => col.name === column);
 
   if(exists)
   {
-    console.log(`Removendo coluna '${column}' da tabela 'dados_estacao_metereologica'...`);
-    db.exec(`ALTER TABLE "dados_estacao_metereologica" DROP COLUMN ${column}`);
+    console.log(`Removing column '${column}' from table 'weather_data_final'...`);
+    db.exec(`ALTER TABLE "weather_data_final" DROP COLUMN ${column}`);
   }
 }
 
 /**
- * Verifica se a tabela "leituras" existe no banco de dados.
- * Se existe, retorna true; caso contrário, false.
- *
- * @function tableExists
- * 
- * @returns {boolean} Indica se a tabela "leituras" existe.
+ * Renames a column from oldName to newName if it exists.
+ * @param {string} oldName - Existing column name
+ * @param {string} newName - New column name
  */
-function tableExists() {
-  const stmt = db.prepare(`
-    SELECT name FROM sqlite_master 
-    WHERE type='table' AND name = ?
-  `);
-  const result = stmt.get("leituras");
-  return !!result; // as duas exclamações convertem para boolean
-}
+function renameColumn(oldName, newName) {
+  const info = db.prepare(`PRAGMA table_info("weather_data_final");`).all();
+  const exists = info.some(col => col.name === oldName);
+  const alreadyRenamed = info.some(col => col.name === newName);
 
-// Cria tabela "dados_estacao_metereologica" se não existir
+  if (exists && !alreadyRenamed) {
+    console.log(`Renaming column '${oldName}' to '${newName}'...`);
+    db.exec(`ALTER TABLE weather_data_final RENAME COLUMN ${oldName} TO ${newName}`);
+  }
+}
+renameTableIfExists("dados_estacao_metereologica", "weather_data_final");
+
+// Creates "weather_data" table if it does not exist
 db.exec(`
-  CREATE TABLE IF NOT EXISTS dados_estacao_metereologica (
+  CREATE TABLE IF NOT EXISTS weather_data_final (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    temperatura REAL,
-    umidade REAL,
-    pressaoAtm REAL,
-    uvClassificacao TEXT,
+    temperature REAL,
+    humidity REAL,
+    pressure REAL,
+    uvIndex TEXT,
     cloudCover REAL,
     rainProbability REAL,
-    precipitacao REAL,
+    precipitation REAL,
     created_at TEXT
   )
 `);
 
-// Renomeia a tabela "leituras" para "dados_estacao_metereologica", se existir
-if (tableExists()) {
-  db.exec("ALTER TABLE leituras RENAME TO dados_meteorologicos");
+function renameTableIfExists(oldName, newName) {
+  // Verifica se a tabela original existe
+  const tableExists = db.prepare(`
+    SELECT name FROM sqlite_master
+    WHERE type='table' AND name = ?
+  `).get(oldName);
+
+  if (!tableExists) return; // nada para renomear
+
+  // Verifica se a tabela destino já existe
+  const newTableExists = db.prepare(`
+    SELECT name FROM sqlite_master
+    WHERE type='table' AND name = ?
+  `).get(newName);
+
+  if (newTableExists) {
+    console.log(`Tabela '${newName}' já existe. Ignorando renomeação de '${oldName}'.`);
+    return; // evita o erro "there is already another table..."
+  }
+
+  // Faz o rename com segurança
+  db.prepare(`ALTER TABLE ${oldName} RENAME TO ${newName}`).run();
+  console.log(`Tabela '${oldName}' renomeada para '${newName}'.`);
 }
 
-// Caso alguma versão antiga do database não tenha essas colunas, adiciona elas, garantindo compatibilidade
+// Adds missing columns for backward compatibility
 addColumnIfNotExists("cloudCover", "REAL", 0);
 addColumnIfNotExists("rainProbability", "REAL", 0);
-addColumnIfNotExists("precipitacao", "REAL", 0);
+addColumnIfNotExists("precipitation", "REAL", 0);
 
-// Remove colunas obsoletas de versões anteriores
+// Removes obsolete columns from previous versions
 deleteColumn("ventoVelocidade");
 deleteColumn("ventoDirecao");
+deleteColumn("precipitacao");
+
+// Renames columns from Portuguese to English
+renameColumn("temperatura", "temperature");
+renameColumn("umidade", "humidity");
+renameColumn("pressaoAtm", "pressure");
+renameColumn("uvClassificacao", "uvIndex");
+renameColumn("precipitacao", "precipitation");
 
 export default db;

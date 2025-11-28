@@ -178,15 +178,15 @@ function HistoryTable() {
                     className="hover:bg-purple-700/60 transition-colors"
                   >
                     <td className="p-3">{row.id}</td>
-                    <td className="p-3">{row.temperatura ?? "-"}</td>
-                    <td className="p-3">{row.umidade ?? "-"}</td>
-                    <td className="p-3">{row.pressaoAtm ?? "-"}</td>
-                    <td className="p-3">{row.uvClassificacao ?? "-"}</td>
+                    <td className="p-3">{row.temperature ?? "-"}</td>
+                    <td className="p-3">{row.humidity ?? "-"}</td>
+                    <td className="p-3">{row.pressure ?? "-"}</td>
+                    <td className="p-3">{row.uvIndex ?? "-"}</td>
                     <td className="p-3">{row.cloudCover ?? "-"}</td>
                     <td className="p-3">
                       {(row.rainProbability * 100).toFixed(2) ?? "-"}
                     </td>
-                    <td className="p-3">{row.precipitacao ?? "-"}</td>
+                    <td className="p-3">{row.precipitation ?? "-"}</td>
                     <td className="p-3">
                       {row.created_at
                         ? new Date(row.created_at).toLocaleString()
