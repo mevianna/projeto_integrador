@@ -2,6 +2,7 @@
 * **************************************************************************
 * Nome do arquivo: server.py
 * Descrição: Script de predição usando modelo XGBoost.
+*
 * Autora: Rafaela Fernandes Savaris
 * Data de criação: 29/10/2025
 * Última modificação: 29/10/2025
