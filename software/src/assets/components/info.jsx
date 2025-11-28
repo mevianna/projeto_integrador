@@ -1,8 +1,8 @@
 /**
  * @file info.jsx
- * @fileoverview Painel meteorológico da página principal. Exibe os dados mais
- * recentes coletados pelo servidor, incluindo temperatura, umidade, pressão,
- * cobertura de nuvens, índice UV e probabilidade de chuva prevista pelo modelo.
+ * @fileoverview Meteorological panel of the main page. Displays the most recent
+ * data collected by the server, including temperature, humidity, pressure,
+ * cloud coverage, UV index, and rain probability predicted by the model.
  *
  * @version 1.0.0
  * @date 2025-08-29
@@ -10,47 +10,48 @@
  *
  * @author
  * Rafaela Fernandes Savaris <savarisf.rafaela@gmail.com>
- * Beatriz Schulter Tartare <email_bia@gmail.com>
+ * Beatriz Schulter Tartare <beastartareufsc@gmail.com>
  *
  * @license Proprietary
  *
- * @requires react-router-dom Navegação entre páginas (useNavigate)
- * @requires react Hooks do React (useState, useEffect, useCallback)
- * @requires ../../services/windService.js Serviço para obter dados de vento
+ * @requires react-router-dom Page navigation (useNavigate)
+ * @requires react React Hooks (useState, useEffect, useCallback)
+ * @requires ../../services/windService.js Service for retrieving wind data
  *
  * @description
- * O componente `Info` é responsável por:
- * - Buscar periodicamente (a cada 20 segundos) o último registro de dados
- *   meteorológicos armazenados no backend.
- * - Exibir os valores mais recentes, incluindo a probabilidade de chuva.
- * - Permitir atualização manual, que força o servidor a gerar uma nova previsão.
- * - Navegar para a tela de histórico completo.
- * - Integrar dados de vento obtidos de um serviço externo.
+ * The `Info` component is responsible for:
+ * - Periodically fetching (every 20 seconds) the latest meteorological record
+ *   stored in the backend.
+ * - Displaying the most recent values, including rain probability.
+ * - Allowing manual refresh, which forces the server to generate a new forecast.
+ * - Navigating to the full history screen.
+ * - Integrating wind data obtained from an external service.
  *
- * ### Variáveis globais
- * - `API_URL`: URL base da API backend.
+ * ### Global variables
+ * - `API_URL`: Base URL of the backend API.
  *
- * ### Hooks utilizados
- * - `useState`: armazena dados do sensor, horário da última atualização e estado do botão de refresh.
- * - `useEffect`: inicializa o carregamento automático e define o intervalo periódico.
- * - `useCallback`: memoiza funções internas (`fetchLastData`, `handleRefresh`).
+ * ### Hooks used
+ * - `useState`: stores sensor data, last update timestamp, and refresh button state.
+ * - `useEffect`: initializes automatic loading and sets the periodic interval.
+ * - `useCallback`: memoizes internal functions (`fetchLastData`, `handleRefresh`).
  *
- * ### Funções principais
- * - `fetchLastData()`: Busca o último registro do servidor e atualiza o estado.
- * - `handleRefresh()`: Solicita ao servidor que gere uma nova previsão e atualiza os dados.
- * - `ViewHistory()`: Redireciona o usuário para a página de histórico.
- * - `Info()`: Componente React principal responsável pela renderização dos dados.
+ * ### Main functions
+ * - `fetchLastData()`: Fetches the latest record from the server and updates the state.
+ * - `handleRefresh()`: Requests the server to generate a new forecast and refreshes the data.
+ * - `ViewHistory()`: Redirects the user to the history page.
+ * - `Info()`: Main React component responsible for rendering the data.
  *
- * ### Observações
- * - Caso o servidor não retorne previsão, o componente exibe "No prediction available".
- * - O botão de atualização exibe animação com base no estado `isRefreshing`.
+ * ### Notes
+ * - If the server does not return a forecast, the component displays "No prediction available".
+ * - The refresh button displays an animation based on the `isRefreshing` state.
  */
+
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useCallback } from "react";
 import { getWindData } from "../../services/windService.js";
 
 /**
- * Endereço base da API backend.
+ * Base address of the backend API.
  * @constant {string}
  */
 const API_URL = "http://localhost:4000";
@@ -58,82 +59,87 @@ const API_URL = "http://localhost:4000";
 /**
  * @component Info
  * @description
- * Exibe as últimas medições da estação meteorológica e permite atualizar
- * manualmente a previsão, além de acessar o histórico de registros.
+ * Displays the latest measurements from the weather station and allows
+ * manually refreshing the forecast, as well as accessing the record history.
  *
- * @returns {JSX.Element} Interface com os dados mais recentes.
+ * @returns {JSX.Element} Interface with the most recent data.
  */
+
 function Info() {
   const navigate = useNavigate();
 
   /**
-   * Dados mais recentes obtidos do servidor.
+   * Most recent data obtained from the server.
    * @typedef {Object} SensorData
-   * @property {?number} temperatura - Temperatura em graus Celsius.
-   * @property {?number} umidade - Umidade relativa em porcentagem.
-   * @property {?number} pressaoAtm - Pressão atmosférica em Pascal.
-   * @property {string} uvClassificacao - Classificação do índice UV.
-   * @property {?number} prediction - Probabilidade de chuva (0 a 1).
+   * @property {?number} temperature - Temperature in degrees Celsius.
+   * @property {?number} humidity - Relative humidity in percentage.
+   * @property {?number} pressureAtm - Atmospheric pressure in Pascal.
+   * @property {string} uvClassification - UV index classification.
+   * @property {?number} prediction - Rain probability (0 to 1).
    */
 
-  /** 
-   * Armazena os dados do sensor.
-   * @type {[sensorData, Function]} 
-   * */
+  /**
+   * Stores the sensor data.
+   * @type {[SensorData, Function]}
+   */
+
   const [sensorData, setSensorData] = useState({
-    temperatura: null,
-    umidade: null,
-    pressaoAtm: null,
-    uvClassificacao: "-",
+    temperature: null,
+    humidity: null,
+    pressureAtm: null,
+    uvClassification: "-",
     prediction: null,
-    precipitacao: null,
+    precipitation: null,
   });
 
   /**
-   * Armazena a data/hora da última atualização recebida.
+   * Stores the date/time of the last received update.
    * @type {[Date|null, Function]}
    */
   const [lastUpdated, setLastUpdated] = useState(null);
 
   /**
-   * Indica se o sistema está no processo de atualização/refresh.
+   * Indicates whether the system is currently performing an update/refresh.
    * @type {[boolean, Function]}
    */
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   /**
-   * Dados de vento.
-   * @typedef {Object} wind
-   * @property {string} speed - Velocidade do vento em km/h.
-   * @property {string} direction - Direção do vento em graus.
+   * Wind data.
+   * @typedef {Object} Wind
+   * @property {string} speed - Wind speed in km/h.
+   * @property {string} direction - Wind direction in degrees.
    */
+
   /**
-   * Dados de vento obtidos do serviço externo.
-   * @type {[wind, Function]}
+   * Wind data obtained from the external service.
+   * @type {[Wind, Function]}
    */
-  const [wind, setWind] = useState({ 
-    speed: "-", 
-    direction: "-"
+
+  const [wind, setWind] = useState({
+    speed: "-",
+    direction: "-",
   });
   /**
-   * Busca o último registro de dados armazenado no servidor.
+   * Fetches the latest stored data record from the server.
    *
    * @async
    * @function fetchLastData
    * @returns {Promise<void>}
    */
+
   const fetchLastData = useCallback(async () => {
     try {
       const response = await fetch(`${API_URL}/dados/ultimo`);
       const data = await response.json();
 
       setSensorData({
-        temperatura: data.temperatura,
-        umidade: data.umidade,
-        pressaoAtm: data.pressaoAtm,
-        uvClassificacao: data.uvClassificacao,
+        temperature: data.temperature,
+        humidity: data.humidity,
+        pressureAtm: data.pressureAtm,
+        uvClassification: data.uvClassification,
         prediction: data.rainProbability,
-        precipitacao: data.precipitacao,
+        precipitation: data.precipitation,
       });
 
       try {
@@ -143,23 +149,24 @@ function Info() {
           direction: windData.direction,
         });
       } catch (err) {
-        console.error("Erro ao buscar vento:", err);
+        console.error("Error fetching wind data:", err);
       }
 
       setLastUpdated(new Date(data.created_at));
     } catch (error) {
-      console.error("Erro ao buscar último dado:", error);
+      console.error("Error fetching last data:", error);
     }
   }, []);
 
   /**
-   * Realiza manualmente a atualização dos dados chamando o endpoint
-   * de geração de previsão e depois recarregando os valores mais recentes.
+   * Manually performs a data refresh by calling the forecast-generation endpoint
+   * and then reloading the most recent values.
    *
    * @async
    * @function handleRefresh
    * @returns {Promise<void>}
    */
+
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
     try {
@@ -168,17 +175,14 @@ function Info() {
       });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error(
-          "Erro no refresh:",
-          errorData.error || response.statusText
-        );
+        console.error("Refresh error:", errorData.error || response.statusText);
         alert("Erro ao gerar previsão. Tente novamente mais tarde.");
         setIsRefreshing(false);
         return;
       }
       await fetchLastData();
     } catch (error) {
-      console.error("Erro no refresh:", error);
+      console.error("Refresh error", error);
       alert("Erro de conexão com o servidor.");
     } finally {
       setIsRefreshing(false);
@@ -186,11 +190,12 @@ function Info() {
   }, [fetchLastData]);
 
   /**
-   * Carrega os dados automaticamente ao montar o componente
-   * e atualiza a cada 20 segundos.
+   * Automatically loads the data when the component mounts
+   * and updates it every 20 seconds.
    *
    * @effect
    */
+
   useEffect(() => {
     fetchLastData();
 
@@ -199,19 +204,21 @@ function Info() {
   }, [fetchLastData]);
 
   /**
-   * Navega para a página de histórico de medições.
+   * Navigates to the measurement history page.
    *
    * @function ViewHistory
    */
+
   function ViewHistory() {
     navigate("/history");
   }
 
   /**
-   * Formata a data/hora da última atualização para exibição no layout.
+   * Formats the date/time of the last update for display in the layout.
    *
    * @type {string}
    */
+
   const formattedDateTime = lastUpdated
     ? lastUpdated.toLocaleString([], {
         day: "2-digit",
@@ -228,34 +235,35 @@ function Info() {
       <div className="flex justify-between items-start">
         <div className="flex text-sm md:text-xl sm:text-sm font-bold text-slate-200 gap-10">
           <div>
-            <p>Temperature: {sensorData.temperatura !== null
-                ? sensorData.temperatura
-                : "-"}{" "} °C</p>
-            <p>Humidity: {sensorData.umidade !== null
-                ? sensorData.umidade
-                : "-"}{" "} %</p>
-            <p>UV Index: {sensorData.uvClassificacao}</p>
+            <p>
+              Temperature:{" "}
+              {sensorData.temperature !== null ? sensorData.temperature : "-"}{" "}
+              °C
+            </p>
+            <p>
+              Humidity:{" "}
+              {sensorData.humidity !== null ? sensorData.humidity : "-"} %
+            </p>
+            <p>UV Index: {sensorData.uvClassification}</p>
           </div>
           <div>
             <p>
               Atmospheric Pressure:{" "}
-              {sensorData.pressaoAtm !== null
-                ? Number(sensorData.pressaoAtm).toFixed(2)
+              {sensorData.pressureAtm !== null
+                ? Number(sensorData.pressureAtm).toFixed(2)
                 : "-"}{" "}
               Pa
             </p>
-            <p>
-              Wind Speed: {wind.speed} km/h
-            </p>
-            <p>
-              Wind Direction: {wind.direction}°
-            </p>
+            <p>Wind Speed: {wind.speed} km/h</p>
+            <p>Wind Direction: {wind.direction}°</p>
           </div>
           <div>
             <p>
-              Precipitation: {sensorData.precipitacao !== null
-                ? sensorData.precipitacao
-                : "-"}{" "} mm
+              Precipitation:{" "}
+              {sensorData.precipitation !== null
+                ? sensorData.precipitation
+                : "-"}{" "}
+              mm
             </p>
             <p>
               {isRefreshing ? (
@@ -272,8 +280,7 @@ function Info() {
               )}
             </p>
           </div>
-          <div>
-          </div>
+          <div></div>
         </div>
         <button
           onClick={handleRefresh}

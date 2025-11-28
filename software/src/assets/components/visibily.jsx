@@ -1,61 +1,61 @@
 /**
  * @file visibily.jsx
- * @fileoverview Componente de painel que exibe a visibilidade do céu com base
- * nos dados de cobertura de nuvens obtidos por API.
+ * @fileoverview Panel component that displays sky visibility based on
+ * cloud coverage data obtained from an API.
  *
  * @version 1.0.0
  * @date 2025-08-29
  * @lastmodified 2025-11-26
  *
  * @author
- * Beatriz Schulter Tartare <beastartare@gmail.com>
+ * Beatriz Schulter Tartare <beastartareufsc@gmail.com>
  *
  * @license Proprietary
  *
- * @requires react Hooks do React (`useState`, `useEffect`)
- * @requires ../../services/cloudService Função para obter dados de cobertura de nuvens
+ * @requires react React Hooks (`useState`, `useEffect`)
+ * @requires ../../services/cloudService Function to fetch cloud coverage data
  *
  * @description
- * O componente consulta periodicamente a API de cobertura de nuvens e exibe uma barra
- * de visibilidade baseada na quantidade de nuvens presente no céu.
+ * The component periodically queries the cloud coverage API and displays a
+ * visibility bar based on the amount of clouds present in the sky.
  *
- * O valor obtido é enviado também para o backend local, que utiliza a informação
- * para geração de previsões.
+ * The obtained value is also sent to the local backend, which uses this
+ * information for forecast generation.
  *
- * A lógica de atualização funciona da seguinte forma:
- * - Ao montar o componente, uma requisição inicial é feita imediatamente.
- * - Em seguida, calcula-se o tempo restante até o próximo horário cheio.
- * - Quando a hora muda, inicia-se uma atualização automática a cada 1 hora.
+ * The update logic works as follows:
+ * - When the component mounts, an initial request is executed immediately.
+ * - Then, the remaining time until the next full hour is calculated.
+ * - When the hour changes, an automatic update begins running every 1 hour.
  *
- *  ### Variáveis globais
- * - `API_URL`: URL base da API backend.
- * 
- * ### Dados exibidos
- * O painel apresenta:
- * - Indicador visual de visibilidade (barra horizontal)
- * - Data atual formatada
- * - Percentual de cobertura de nuvens
- * - Horário da última atualização
+ *  ### Global variables
+ * - `API_URL`: Base URL of the backend API.
  *
- * ### Hooks utilizados
- * - `useState`: Armazena o estado atual de `{ value, time }` referente à cobertura de nuvens.
- * - `useEffect`: Controla a busca inicial e o agendamento das atualizações futuras.
+ * ### Displayed data
+ * The panel shows:
+ * - Visual visibility indicator (horizontal bar)
+ * - Formatted current date
+ * - Cloud coverage percentage
+ * - Timestamp of the last update
  *
- * ### Funções principais
- * - `fetchCloud()`: Obtém a cobertura de nuvens via API, atualiza o estado e envia
- *   o valor para o backend (`/cloudcover`).
+ * ### Hooks used
+ * - `useState`: Stores the current `{ value, time }` state related to cloud coverage.
+ * - `useEffect`: Controls the initial fetch and schedules future updates.
  *
- * ### Observações
- * - O valor de visibilidade é calculado como inverso da cobertura de nuvens:
- *   quanto maior a cobertura, menor a visibilidade (limitado entre 0 e 100).
- * - Em caso de erro nas requisições, mensagens são registradas no console.
+ * ### Main functions
+ * - `fetchCloud()`: Fetches cloud coverage data via API, updates the state, and sends
+ *   the value to the backend (`/cloudcover`).
+ *
+ * ### Notes
+ * - The visibility value is calculated as the inverse of cloud coverage:
+ *   the higher the coverage, the lower the visibility (bounded between 0 and 100).
+ * - In case of request errors, messages are logged to the console.
  */
 
 import { useEffect, useState } from "react";
 import { getCloudCover } from "../../services/cloudService";
 
 /**
- * Endereço base da API backend.
+ * Base address of the backend API.
  * @constant {string}
  */
 const API_URL = "http://localhost:4000";
@@ -63,52 +63,53 @@ const API_URL = "http://localhost:4000";
 /**
  * @component Visibility
  * @description
- * Componente que exibe a visibilidade do céu com base na cobertura de nuvens.
- * 
- * @returns {JSX.Element} Interface do painel de visibilidade.
+ * Component that displays sky visibility based on cloud coverage.
+ *
+ * @returns {JSX.Element} Visibility panel interface.
  */
+
 function Visibility() {
   /**
-   * Estado que armazena o valor de cobertura de nuvens e o timestamp da leitura.
+   * State that stores the cloud coverage value and the reading timestamp.
    * @type {[Object, Function]}
-   * @property {number} value Percentual de cobertura de nuvens (0-100).
-   * @property {string} time Timestamp da última leitura.
+   * @property {number} value Cloud coverage percentage (0–100).
+   * @property {string} time Timestamp of the last reading.
    */
   const [cloud, setCloud] = useState({ value: 0, time: null });
 
   /**
-   * Busca a cobertura de nuvens via API e envia o valor para o backend.
-   * Atualiza o estado local com os dados obtidos.
+   * Fetches cloud coverage data from the API and sends the value to the backend.
+   * Updates the local state with the retrieved data.
    * @async
    * @function fetchCloud
    * @returns {Promise<void>}
    */
+
   async function fetchCloud() {
     try {
-    const data = await getCloudCover();
-    setCloud(data);
+      const data = await getCloudCover();
+      setCloud(data);
 
-    console.log("Enviando cloudCover:", data.value);
+      console.log("Enviando cloudCover:", data.value);
 
-    const response = await fetch(`${API_URL}/cloudcover`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ cloudCover: data.value }),
-    });
+      const response = await fetch(`${API_URL}/cloudcover`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cloudCover: data.value }),
+      });
 
-    if (!response.ok) throw new Error("Falha ao enviar cloudCover");
-
-  } catch (err) {
-    console.error("Erro ao buscar cloud cover ou enviar para predição:", err);
+      if (!response.ok) throw new Error("Falha ao enviar cloudCover");
+    } catch (err) {
+      console.error("Erro ao buscar cloud cover ou enviar para predição:", err);
+    }
   }
-}
   /**
-   * Efeito que gerencia a busca inicial e o agendamento de atualizações
+   * Effect that handles the initial fetch and schedules future updates.
    * @effect
    */
   useEffect(() => {
     fetchCloud();
-     const now = new Date();
+    const now = new Date();
     const msAteProximaHora =
       (60 - now.getMinutes()) * 60 * 1000 -
       now.getSeconds() * 1000 -
@@ -124,39 +125,40 @@ function Visibility() {
   }, []);
 
   /**
- * Data e nível calculado de visibilidade.
- *
- * @constant
- * @type {Date}
- * @description
- * `data` armazena o horário atual no momento da renderização do componente.
- */
-  let data = new Date();
+   * Current date and calculated visibility level.
+   *
+   * @constant
+   * @type {Date}
+   * @description
+   * `data` stores the current timestamp at the moment the component renders.
+   */
+  let date = new Date();
 
   /**
- * Nível de visibilidade do céu calculado a partir da cobertura de nuvens.
- *
- * @constant
- * @type {number}
- * @description
- * Converte o valor de `cloud.value` (cobertura de nuvens em %) para um nível
- * de visibilidade entre **0 e 100**, onde:
- * - 100% de nuvens = visibilidade **0**
- * - 0% de nuvens = visibilidade **100**
- *
- * A fórmula `-(cloud.value - 100)` equivale a `100 - cloud.value`.
- *  
- * `Math.min(100, ...)` garante que o valor não ultrapasse 100.
- *  
- * `Math.max(0, ...)` garante que o valor não fique abaixo de 0.
- */
+   * Sky visibility level calculated from cloud coverage.
+   *
+   * @constant
+   * @type {number}
+   * @description
+   * Converts the value of `cloud.value` (cloud coverage in %) into a visibility
+   * level between **0 and 100**, where:
+   * - 100% cloud coverage = **0** visibility
+   * - 0% cloud coverage = **100** visibility
+   *
+   * The formula `-(cloud.value - 100)` is equivalent to `100 - cloud.value`.
+   *
+   * `Math.min(100, ...)` ensures the value does not exceed 100.
+   *
+   * `Math.max(0, ...)` ensures the value does not drop below 0.
+   */
+
   const level = Math.max(0, Math.min(100, -(cloud.value - 100)));
 
   return (
     <div className="bg-purple-800 rounded-3xl p-4 sm:p-6 md:p-8 mt-6 shadow  w-full max-h-5xl mx-auto space-y-4">
       <div className="flex justify-between text-white mb-2">
         <span className="font-bold">Today</span>
-        <span>{data.toString().slice(0, 11)}</span>
+        <span>{date.toString().slice(0, 11)}</span>
       </div>
       <div className="w-100 bg-purple-900 h-6 rounded-full text-slate-200 font-bold ">
         <div

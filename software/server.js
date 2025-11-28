@@ -1,7 +1,7 @@
 /**
  * @file server.js
- * @fileoverview Servidor meteorológico para receber dados do ESP, gerar previsões
- * de chuva via script Python (modelo XGBoost) e armazenar leituras em banco SQLite.
+ * @fileoverview Weather server to receive data from the ESP, generate rain forecasts
+ * via a Python script (XGBoost model) and store readings in a SQLite database.
  *
  * @version 1.0.0
  * @date 2025-08-29
@@ -9,33 +9,33 @@
  *
  * @author
  * Rafaela Fernandes Savaris <savarisf.rafaela@gmail.com>
- * Beatriz Schulter Tartare <email_bia@gmail.com>
+ * Beatriz Schulter Tartare <beastartareufsc@gmail.com>
  *
  * @license Proprietary
  *
- * @requires express Criação do servidor e definição de rotas HTTP.
- * @requires cors Habilita requisições entre origens diferentes (CORS).
- * @requires node-fetch Realiza requisições externas (ex: feeds RSS).
- * @requires node-cron Agenda tarefas periódicas (como geração horária de previsão).
- * @requires child_process Execução de scripts Python para previsão.
- * @requires path Manipulação de caminhos de arquivos.
- * @requires url Resolução de caminhos e URLs.
- * @requires ./src/db/database.js Módulo de acesso ao banco SQLite.
+ * @requires express Creation of the server and definition of HTTP routes.
+ * @requires cors Enables cross-origin requests (CORS).
+ * @requires node-fetch Performs external requests (e.g., RSS feeds).
+ * @requires node-cron Schedules periodic tasks (such as hourly forecast generation).
+ * @requires child_process Executes Python scripts for forecasting.
+ * @requires path File path manipulation.
+ * @requires url Resolution of paths and URLs.
+ * @requires ./src/db/database.js Module for SQLite database access.
  *
  * @description
- * Este servidor recebe leituras meteorológicas enviadas por um dispositivo ESP,
- * processa e armazena esses dados, gera previsões de chuva com um modelo Python (XGBoost)
- * e fornece rotas REST para consulta de dados, histórico e eventos astronômicos.
+ * This server receives meteorological readings sent by an ESP device,
+ * processes and stores that data, generates rain forecasts with a Python model (XGBoost),
+ * and exposes REST routes for querying data, history, and astronomical events.
  *
- * ### Principais rotas
- * - `GET /events` - Retorna feed RSS de eventos astronômicos.
- * - `POST /dados` - Recebe dados do ESP e inicia previsão inicial.
- * - `POST /dados/refresh` - Força nova geração de previsão.
- * - `GET /dados/ultimo` - Retorna o último registro do banco.
- * - `GET /dados/historico` - Retorna a quantidade indicada de registros.
- * - `POST /cloudcover` - Atualiza cobertura de nuvens atual.
+ * ### Main routes
+ * - `GET /events` - Returns an RSS feed of astronomical events.
+ * - `POST /dados` - Receives data from the ESP and triggers an initial forecast.
+ * - `POST /dados/refresh` - Forces generation of a new forecast.
+ * - `GET /dados/ultimo` - Returns the latest record from the database.
+ * - `GET /dados/historico` - Returns the requested number of records.
+ * - `POST /cloudcover` - Updates current cloud coverage.
  *
- * ### Variáveis globais
+ * ### Global variables
  * - `__filename`
  * - `__dirname`
  * - `dadosESP`
@@ -43,15 +43,15 @@
  * - `ultimaPrevisao`
  * - `ultimaAtualizacao`
  *
- * ### Funções principais
- * - `esperarCloudCover()` - Aguarda definição da cobertura de nuvens.
- * - `gerarFeatures()` - Gera features meteorológicas para previsão.
- * - `gerarPrevisao(features = null)` - Executa script Python e retorna previsão de chuva.
- * - `salvarUltimoDado(features = null)` - Salva leituras e previsão no banco de dados.
+ * ### Main functions
+ * - `esperarCloudCover()` - Waits for cloud coverage to be defined.
+ * - `gerarFeatures()` - Generates meteorological features for forecasting.
+ * - `gerarPrevisao(features = null)` - Runs the Python script and returns a rain forecast.
+ * - `salvarUltimoDado(features = null)` - Saves readings and forecast to the database.
  *
- * ### Observações
- * - Inclui agendamento automático de previsão horária via node-cron.
- * - Requisições são compatíveis com front-end React e ESP via JSON.
+ * ### Notes
+ * - Includes automatic scheduling of hourly forecasts via node-cron.
+ * - Requests are compatible with a React front-end and ESP using JSON.
  */
 
 import { spawn } from "child_process";
@@ -68,78 +68,80 @@ import db from "./src/db/database.js";
 const app = express();
 
 /**
- * Habilita requisições Cross-Origin.
+ * Enables Cross-Origin requests.
  */
 app.use(cors());
 
 /**
- * Porta em que o servidor irá escutar.
+ * Port on which the server will listen.
  * @constant {number}
  */
 const PORT = 4000;
 
 /**
- * Habilita o parsing de JSON no corpo das requisições.
+ * Enables JSON parsing in request bodies.
  */
 app.use(express.json());
 
 /**
- * Caminho do arquivo atual (equivalente a __filename do CommonJS).
+ * Path of the current file (equivalent to CommonJS __filename).
  * @constant {string}
  */
 const __filename = fileURLToPath(import.meta.url);
 
 /**
- * Diretório do arquivo atual (equivalente a __dirname do CommonJS).
+ * Directory of the current file (equivalent to CommonJS __dirname).
  * @constant {string}
  */
 const __dirname = path.dirname(__filename);
 
 /**
- * Último dado meteorológico recebido do ESP.
+ * Latest meteorological data received from the ESP.
  * @type {Object}
  */
 let dadosESP = {};
 
 /**
- * Cobertura de nuvens atual (cloudCover), atualizada via rota /cloudcover.
+ * Current cloud coverage (cloudCover), updated via the /cloudcover route.
  * @type {number|null}
  */
 let cloudCover = null;
 
 /**
- * Última previsão gerada pelo modelo Python.
+ * Last forecast generated by the Python model.
  * @type {Object|null}
  */
 let ultimaPrevisao = null;
 
 /**
- * Timestamp da última atualização recebida do ESP, em milissegundos.
+ * Timestamp of the last update received from the ESP, in milliseconds.
  * @type {number}
  */
 let ultimaAtualizacao = 0;
 
 /**
- * Última precipitação registrada.
+ * Last recorded precipitation.
  * @type {number}
  */
 let ultimaPrecipitacao = 0;
 
 /**
- * Flag para controlar se a previsão inicial está em execução.
+ * Flag used to control whether the initial forecast is running.
  * @type {boolean}
  */
 app.locals.executandoPrevisaoInicial = false;
 
-// ************************************* FUNÇÕES ************************************* //
+// ************************************* FUNCTIONS ************************************* //
 /**
- * Espera até que a variável global `cloudCover` seja definida.
- * Faz verificações a cada 1 segundo até obter um valor válido.
+ * Waits until the global variable `cloudCover` is defined.
+ * Performs checks every 1 second until a valid value is obtained.
  *
  * @function esperarCloudCover
  * @async
- * @returns {Promise<number>} Retorna uma Promise que resolve com o valor de "cloudCover" assim que ele for definido.
+ * @returns {Promise<number>} Returns a Promise that resolves with the value of "cloudCover"
+ * as soon as it becomes defined.
  */
+
 async function esperarCloudCover() {
   const intervalo = 1000; // checa a cada 1 segundo
 
@@ -152,33 +154,35 @@ async function esperarCloudCover() {
 }
 
 /**
- * Gera as features necessárias para a previsão e para o salvamento no banco, atualizando
- * o valor da última precipitação.
+ * Generates the features required for forecasting and for saving into the database,
+ * updating the value of the last recorded precipitation.
  *
- * A função aguarda até que a variável `cloudCover` esteja definida, garantindo que
- * todos os dados necessários estejam disponíveis. Em seguida, valida se os dados
- * recebidos do dispositivo ESP estão presentes e, caso contrário, lança um erro.
- * 
- * Salva a última precipitação registrada e retorna um array contendo as principais variáveis
- * meteorológicas que serão usadas pelo modelo de previsão e para o registro no banco de dados.
+ * The function waits until the `cloudCover` variable is defined, ensuring that all
+ * necessary data is available. It then validates whether the data received from the
+ * ESP device is present; if not, it throws an error.
+ *
+ * It stores the last recorded precipitation and returns an array containing the main
+ * meteorological variables that will be used by the forecasting model and for database
+ * insertion.
  *
  * @async
  * @function gerarFeatures
- * 
- * @returns {Promise<Array<number|string>>} Uma Promise que resolve com um array de features,
- * incluindo pressão atmosférica, temperatura, umidade, classificação UV, cobertura de nuvens
- * e precipitação.
- * 
- * @throws {Error} Se `dadosESP` não estiver definido ou estiver vazio.
+ *
+ * @returns {Promise<Array<number|string>>} A Promise that resolves with an array of
+ * features, including atmospheric pressure, temperature, humidity, UV classification,
+ * cloud coverage, and precipitation.
+ *
+ * @throws {Error} If `dadosESP` is not defined or is empty.
  *
  * @example
  * try {
  *   const features = await gerarFeatures();
- *   console.log("Features geradas:", features);
+ *   console.log("Generated features:", features);
  * } catch (error) {
- *   console.error("Erro ao gerar features:", error.message);
+ *   console.error("Error generating features:", error.message);
  * }
  */
+
 async function gerarFeatures() {
   await esperarCloudCover();
 
@@ -191,64 +195,65 @@ async function gerarFeatures() {
     dadosESP.temperatura,
     dadosESP.umidade,
     dadosESP.uvClassificacao,
-    cloudCover ?? 0, // cloudCover ou 0 se nao definido
-    dadosESP.precipitacao, // precipitação
+    cloudCover ?? 0, // cloudCover or 0 if undefined
+    dadosESP.precipitacao, // precipitation
   ];
 }
-
 /**
- * Gera a previsão de chuva com base nas *features* meteorológicas,
- * executando um script Python externo responsável pelo modelo de previsão.
+ * Generates a rain forecast based on the meteorological *features*, executing an external
+ * Python script responsible for the prediction model.
  *
- * A função valida o conjunto de *features* fornecido, normaliza os dados e, caso
- * a precipitação atual seja maior que zero e diferente da última registrada,
- * os envia ao script Python (`server.py`) por meio de um processo filho.
- * O resultado retornado pelo Python é lido via *stdout*, interpretado em JSON
- * e resolvido como objeto JavaScript.
- * A previsão resultante é armazenada na variável global `ultimaPrevisao`.
+ * The function validates the provided *features*, normalizes the data, and, if the current
+ * precipitation is greater than zero and different from the last recorded value, it sends the
+ * values to the Python script (`server.py`) through a child process.
  *
- * Em caso de falha na validação das *features* ou erro na execução/interpretação
- * do script Python, a Promise é rejeitada com uma mensagem descritiva.
+ * The result returned by Python is read via *stdout*, parsed as JSON, and resolved as a
+ * JavaScript object. The resulting forecast is stored in the global variable `ultimaPrevisao`.
+ *
+ * In case of validation failure or an error during execution/parsing of the Python script,
+ * the Promise is rejected with a descriptive message.
  *
  * @async
  * @function gerarPrevisao
- * @param {Array<number>} [features=null] - Array contendo as *features* meteorológicas
- * necessárias para a previsão, na seguinte ordem:
+ * @param {Array<number>} [features=null] - Array containing the meteorological *features*
+ * required for prediction, in the following order:
  * `[pressaoAtm, temperatura, umidade, uvClassificacao, cloudCover, precipitacao]`.
  *
- * @returns {Promise<Object>} Retorna uma Promise que resolve com o objeto de previsão gerado
- * pelo script Python, contendo os resultados do modelo.
+ * @returns {Promise<Object>} Returns a Promise that resolves with the forecast object generated
+ * by the Python script, containing the model's results.
  *
- * @throws {Error} Caso as *features* estejam ausentes, inválidas ou ocorra erro ao interpretar
- * a resposta do script Python.
+ * @throws {Error} If the *features* are missing, invalid, or if an error occurs while interpreting
+ * the Python script output.
  *
  * @example
  * try {
  *   const previsao = await gerarPrevisao(features);
- *   console.log("Previsão gerada:", previsao);
+ *   console.log("Generated forecast:", previsao);
  * } catch (error) {
- *   console.error("Erro ao gerar previsão:", error);
+ *   console.error("Error generating forecast:", error);
  * }
  */
+
 async function gerarPrevisao(features = null) {
   return new Promise((resolve, reject) => {
     try {
       if (!features) {
-          return reject("Sem dados atuais disponíveis");
-      } else if(!Array.isArray(features) || features.length < 6) {
+        return reject("Sem dados atuais disponíveis");
+      } else if (!Array.isArray(features) || features.length < 6) {
         return reject("Features inválidas para previsão");
       } else {
         const input = [
-        features[0] * 0.01, // pressao_mbar
-        features[1], // temperatura
-        features[2], // umidade
-        0, // ventoVelocidade
-        0, // ventoDirecao
-        features[4], // cloudCover
-        ]
-        if(features[5] > 0 && features[5] != ultimaPrecipitacao) {
+          features[0] * 0.01, // pressure_mbar
+          features[1], // temperature
+          features[2], // humidity
+          0, // windSpeed
+          0, // windDirection
+          features[4], // cloudCover
+        ];
+
+        if (features[5] > 0 && features[5] != ultimaPrecipitacao) {
           console.log("Precipitação detectada!");
-          ultimaPrevisao = ({prediction: [[0, 1]]});
+          ultimaPrevisao = { prediction: [[0, 1]] };
           ultimaPrecipitacao = features[5];
           return resolve(ultimaPrevisao);
         }
@@ -262,7 +267,9 @@ async function gerarPrevisao(features = null) {
 
       let resultData = "";
       py.stdout.on("data", (data) => (resultData += data.toString()));
-      py.stderr.on("data", (data) => console.error("Python stderr:", data.toString()));
+      py.stderr.on("data", (data) =>
+        console.error("Python stderr:", data.toString())
+      );
 
       py.on("close", (code) => {
         console.log(`Processo Python finalizado com código: ${code}`);
@@ -280,7 +287,6 @@ async function gerarPrevisao(features = null) {
       py.stdin.write(JSON.stringify({ features }));
       py.stdin.end();
       ultimaPrecipitacao = features[5];
-
     } catch (error) {
       console.error("Erro ao gerar previsão:", error);
       reject(error);
@@ -289,19 +295,22 @@ async function gerarPrevisao(features = null) {
 }
 
 /**
- * Salva no banco de dados as últimas leituras meteorológicas e a previsão de chuva associada.
+ * Saves the latest meteorological readings and the associated rain prediction
+ * into the database.
  *
- * A função valida o conjunto de *features* recebido, compara com o último registro salvo
- * e insere um novo dado apenas se houver alterações significativas.
- * A probabilidade de chuva é obtida a partir da variável global `ultimaPrevisao`.
+ * The function validates the received *features* array, compares it with the last
+ * saved record, and inserts a new entry only if there are significant changes.
+ * The rain probability is obtained from the global variable `ultimaPrevisao`.
  *
  * @async
  * @function salvarUltimoDado
- * @param {Array<number>} [features=null] - Lista de *features* meteorológicas, na seguinte ordem:
+ * @param {Array<number>} [features=null] - List of meteorological *features*, in the following order:
  * `[pressaoAtm, temperatura, umidade, uvClassificacao, cloudCover, precipitacao]`.
  *
- * @returns {Promise<void>} Uma Promise que é resolvida após a operação de salvamento (ou ignorada se os dados forem idênticos).
- * @throws {Error} Se ocorrer falha ao acessar ou gravar no banco de dados.
+ * @returns {Promise<void>} A Promise resolved after the save operation
+ * (or skipped if the data is identical).
+ *
+ * @throws {Error} If a failure occurs while accessing or writing to the database.
  *
  * @example
  * await salvarUltimoDado([
@@ -315,18 +324,27 @@ async function gerarPrevisao(features = null) {
  */
 async function salvarUltimoDado(features = null) {
   if (!features || !Array.isArray(features)) {
-    console.log("Nenhum dado válido recebido para salvar.");
+    console.log("No valid data received to save.");
     return;
   }
 
-  // desestruturação correta conforme a ordem das features
-  const [pressaoAtm, temperatura, umidade, uvClassificacao, cloud, precipitacao] = features;
+  // correct destructuring following the feature order
+  const [
+    pressaoAtm,
+    temperatura,
+    umidade,
+    uvClassificacao,
+    cloud,
+    precipitacao,
+  ] = features;
 
-  // pega a probabilidade de chuva da última previsão (ou 0)
+  // Retrieves the rain probability from the most recent forecast (fallback: 0 if unavailable)
   const probabilidadeChuva = ultimaPrevisao?.prediction?.[0]?.[1] ?? 0;
-  
+
   const last = db
-    .prepare("SELECT * FROM dados_estacao_metereologica ORDER BY id DESC LIMIT 1")
+    .prepare(
+      "SELECT * FROM dados_estacao_metereologica ORDER BY id DESC LIMIT 1"
+    )
     .get();
 
   if (
@@ -360,9 +378,13 @@ async function salvarUltimoDado(features = null) {
   );
 
   console.log(`Salvou dado: ${new Date().toISOString()}`);
-  const ultimo = db.prepare(`
+  const ultimo = db
+    .prepare(
+      `
     SELECT * FROM dados_estacao_metereologica ORDER BY id DESC LIMIT 1
-  `).get();
+  `
+    )
+    .get();
 
   console.log("Dado salvo no banco:", ultimo);
 }
@@ -378,7 +400,7 @@ async function salvarUltimoDado(features = null) {
  *
  * @async
  * @function
- * 
+ *
  * @param {express.Request} req - Objeto da requisição Express.
  * @param {express.Response} res - Objeto da resposta Express usada para enviar o XML ou o erro.
  *
@@ -419,9 +441,9 @@ app.get("/events", async (req, res) => {
 /**
  * @route POST /cloudcover
  * @summary Atualiza o valor da cobertura de nuvens (*cloudCover*).
- * 
+ *
  * Recebe um valor de cobertura de nuvens no corpo da requisição (`req.body.cloudCover`)
- * e o atualiza na variável global `cloudCover`. 
+ * e o atualiza na variável global `cloudCover`.
  * Retorna o novo valor definido, ou um erro caso o campo não seja enviado.
  *
  * @param {express.Request} req - Objeto da requisição Express contendo `cloudCover` no corpo (`body`).
@@ -447,7 +469,7 @@ app.get("/events", async (req, res) => {
  * }
  */
 app.post("/cloudcover", (req, res) => {
-   const { cloudCover: novoValor } = req.body;
+  const { cloudCover: novoValor } = req.body;
 
   if (novoValor == null) {
     return res.status(400).json({ error: "cloudCover não enviado" });
@@ -582,7 +604,9 @@ app.post("/dados", async (req, res) => {
 app.post("/dados/refresh", async (req, res) => {
   try {
     if (app.locals.executandoPrevisao) {
-      return res.status(429).json({ error: "Previsão em execução, tente novamente." });
+      return res
+        .status(429)
+        .json({ error: "Previsão em execução, tente novamente." });
     }
 
     app.locals.executandoPrevisao = true;
@@ -639,11 +663,15 @@ app.post("/dados/refresh", async (req, res) => {
  */
 app.get("/dados/ultimo", (req, res) => {
   try {
-    const ultimoDado = db.prepare(`
+    const ultimoDado = db
+      .prepare(
+        `
       SELECT * FROM dados_estacao_metereologica
       ORDER BY datetime(created_at) DESC
       LIMIT 1
-    `).get();
+    `
+      )
+      .get();
 
     res.json(ultimoDado);
   } catch (error) {
@@ -713,7 +741,9 @@ app.get("/dados/historico", (req, res) => {
 
   try {
     const rows = db
-      .prepare("SELECT * FROM dados_estacao_metereologica ORDER BY id DESC LIMIT ? OFFSET ?")
+      .prepare(
+        "SELECT * FROM dados_estacao_metereologica ORDER BY id DESC LIMIT ? OFFSET ?"
+      )
       .all(limit, offset);
     res.json(rows);
   } catch (error) {
@@ -724,7 +754,7 @@ app.get("/dados/historico", (req, res) => {
 
 /**
  * Tarefa agendada para gerar e salvar previsões meteorológicas a cada hora cheia.
- * 
+ *
  * Esta função é executada automaticamente pelo `node-cron` no minuto zero de cada hora.
  * O fluxo da tarefa é:
  * 1. Gera as *features* meteorológicas atuais chamando `gerarFeatures()`.
@@ -746,7 +776,7 @@ app.get("/dados/historico", (req, res) => {
  * // Em caso de erro:
  * Erro ao gerar previsão programada: [Error details]
  */
-cron.schedule("0 * * * *", async() => {
+cron.schedule("0 * * * *", async () => {
   console.log("Gerando nova previsão programada...");
   try {
     const features = await gerarFeatures();

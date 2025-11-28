@@ -1,6 +1,6 @@
 /**
  * @file history.jsx
- * @fileoverview Painel de historico dos dados meteorológicos salvos no database.
+ * @fileoverview Panel displaying the historical meteorological data saved in the database.
  *
  * @version 1.0.0
  * @date 2025-09-19
@@ -11,40 +11,39 @@
  *
  * @license Proprietary
  *
- * @requires react Hooks do React (useState, useEffect, useCallback)
- * @requires ../components/scrollbar.css Estilos personalizados para scrollbar.
+ * @requires react React Hooks (useState, useEffect, useCallback)
+ * @requires ../components/scrollbar.css Custom scrollbar styles.
  *
  * @description
- * Os dados são carregados em blocos de 50 registros por requisição, utilizando
- * paginação baseada em `offset`. Um botão “Carregar mais” permite buscar o próximo
- * conjunto de registros. Quando não há mais itens disponíveis, o componente exibe uma
- * mensagem informativa ao usuário.
+ * Data is loaded in blocks of 50 records per request, using pagination based on `offset`.
+ * A “Load more” button retrieves the next batch of records. When no additional items are
+ * available, the component displays an informational message to the user.
  *
- * ### Informações exibidas na tabela
- * Cada linha contém:
- * - Temperatura (°C)
- * - Umidade relativa (%)
- * - Pressão atmosférica (Pa)
- * - Índice UV (classificaçao em string)
- * - Cobertura de nuvens (%)
- * - Probabilidade de chuva (%)
- * - Precipitação acumulada (mm)
- * - Timestamp da leitura (`created_at`)
+ * ### Information displayed in the table
+ * Each row contains:
+ * - Temperature (°C)
+ * - Relative humidity (%)
+ * - Atmospheric pressure (Pa)
+ * - UV index (string classification)
+ * - Cloud coverage (%)
+ * - Rain probability (%)
+ * - Accumulated precipitation (mm)
+ * - Reading timestamp (`created_at`)
  *
- * ### Hooks utilizados
- * - `useState`: Armazena: lista de dados carregados, estado de paginação, flag de fim de dados.
- * - `useEffect`: Executa a primeira busca de dados ao montar o componente.
- * - `useCallback`: Memoiza funções como `loadMore` e `fetchData` para evitar recriação desnecessária.
+ * ### Hooks used
+ * - `useState`: Stores the loaded data list, pagination state, and end-of-data flag.
+ * - `useEffect`: Performs the initial data fetch when the component mounts.
+ * - `useCallback`: Memoizes functions such as `loadMore` and `fetchData` to avoid unnecessary recreation.
  *
- * ### Funções principais
- * - `loadMore()`  
- *   Realiza uma nova requisição ao backend usando o próximo `offset`.
- *   Atualiza o estado da lista e detecta quando não há mais registros a carregar.
+ * ### Main functions
+ * - `loadMore()`
+ *   Performs a new backend request using the next `offset`.
+ *   Updates the list state and detects when there are no more records to load.
  *
- * ### Observações
- * - O componente utiliza paginação simples baseada em `limit` e `offset`.
- * - Estilos de rolagem personalizados são aplicados via `scrollbar.css`.
- * - O componente foi projetado para ser eficiente em listas longas, carregando dados sob demanda.
+ * ### Notes
+ * - The component uses simple pagination based on `limit` and `offset`.
+ * - Custom scrolling styles are applied through `scrollbar.css`.
+ * - The component is designed to be efficient with long lists, loading data on demand.
  */
 
 import { useEffect, useState, useCallback } from "react";
@@ -53,49 +52,51 @@ import "../components/scrollbar.css";
 /**
  * @component HistoryTable
  * @description
- * Componente que exibe uma tabela com o histórico de dados meteorológicos,
- * carregando sob demanda.
- * 
+ * Component that displays a table with historical meteorological data,
+ * loading entries on demand.
  *
- * @returns {JSX.Element} Interface com os dados históricos carregados.
+ * @returns {JSX.Element} Interface containing the loaded historical data.
  */
+
 function HistoryTable() {
   /**
-   * Armazena o histórico de dados carregados.
+   * Stores the history of loaded data.
    * @type {[Array, Function]}
    */
-  const [historico, setHistorico] = useState([]);
+
+  const [history, setHistory] = useState([]);
 
   /**
-   * Estado de paginação do histórico.
+   * Pagination state for the historical data.
    * @type {[number, Function]}
    */
+
   const [offset, setOffset] = useState(0);
 
   /**
-   * Limite de registros por requisição.
+   * Limit of records per request.
    * @type {number}
    */
   const limit = 50;
 
   /**
-   * Estado que armazena se há mais dados.
+   * State that stores whether more data is available.
    * @type {[boolean, Function]}
    */
   const [hasMore, setHasMore] = useState(true);
 
   /**
-   * Estado de carregamento.
+   * Loading state.
    * @type {[boolean, Function]}
    */
   const [loading, setLoading] = useState(false);
 
   /**
-   * Carrega mais dados do histórico do backend.
+   * Loads more historical data from the backend.
    * @async
    * @function loadMore
    * @returns {Promise<void>}
-   * 
+   *
    */
   const loadMore = useCallback(async () => {
     if (loading || !hasMore) return;
@@ -108,12 +109,12 @@ function HistoryTable() {
       );
       const data = await res.json();
 
-      setHistorico(prev => [...prev, ...data]);
+      setHistory((prev) => [...prev, ...data]);
 
       if (data.length < limit) {
         setHasMore(false);
       } else {
-        setOffset(prev => prev + limit);
+        setOffset((prev) => prev + limit);
       }
     } catch (err) {
       console.error("Erro ao buscar histórico:", err);
@@ -123,7 +124,7 @@ function HistoryTable() {
   }, [offset, limit, loading, hasMore]);
 
   /**
-   * Carrega os dados iniciais ao montar o componente.
+   * Loads the initial data when the component mounts.
    * @effect
    */
   useEffect(() => {
@@ -134,7 +135,7 @@ function HistoryTable() {
           `http://localhost:4000/dados/historico?limit=${limit}&offset=0`
         );
         const data = await res.json();
-        setHistorico(data);
+        setHistory(data);
 
         if (data.length < limit) {
           setHasMore(false);
@@ -142,7 +143,7 @@ function HistoryTable() {
           setOffset(limit);
         }
       } catch (err) {
-        console.error("Erro ao carregar inicial:", err);
+        console.error("Error loading initial data:", err);
       } finally {
         setLoading(false);
       }
@@ -151,54 +152,54 @@ function HistoryTable() {
 
   return (
     <div>
-    <div className="flex justify-center items-start px-6 bg-transparent">
-      <div className="bg-purple-800/80 backdrop-blur-md p-6 rounded-2xl shadow-lg w-full max-w-[1000px] max-h-[80vh] overflow-y-auto border border-purple-700 history-scrollbar">
-        {historico.length === 0 ? (
-          <p className="text-slate-300 text-center">No data recorded yet.</p>
-        ) : (
-          <table className="w-full text-slate-200">
-            <thead className="sticky top-0 bg-purple-900/90 backdrop-blur-md z-10">
-              <tr className="border-b border-slate-600">
-                <th className="p-3 text-left">ID</th>
-                <th className="p-3 text-left">Temperature (°C)</th>
-                <th className="p-3 text-left">Humidity (%)</th>
-                <th className="p-3 text-left">Pressure (Pa)</th>
-                <th className="p-3 text-left">UV Index</th>
-                <th className="p-3 text-left">Cloud Cover (%)</th>
-                <th className="p-3 text-left">Raind Probability (%)</th>
-                <th className="p-3 text-left">Precipitation (mm)</th>
-                <th className="p-3 text-left">Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {historico.map((row) => (
-                <tr
-                  key={row.id}
-                  className="hover:bg-purple-700/60 transition-colors"
-                >
-                  <td className="p-3">{row.id}</td>
-                  <td className="p-3">{row.temperatura ?? "-"}</td>
-                  <td className="p-3">{row.umidade ?? "-"}</td>
-                  <td className="p-3">{row.pressaoAtm ?? "-"}</td>
-                  <td className="p-3">{row.uvClassificacao ?? "-"}</td>
-                  <td className="p-3">{row.cloudCover ?? "-"}</td>
-                  <td className="p-3">
-                    {(row.rainProbability * 100).toFixed(2) ?? "-"}
-                  </td>
-                  <td className="p-3">{row.precipitacao ?? "-"}</td>
-                  <td className="p-3">
-                    {row.created_at
-                      ? new Date(row.created_at).toLocaleString()
-                      : "-"}
-                  </td>
+      <div className="flex justify-center items-start px-6 bg-transparent">
+        <div className="bg-purple-800/80 backdrop-blur-md p-6 rounded-2xl shadow-lg w-full max-w-[1000px] max-h-[80vh] overflow-y-auto border border-purple-700 history-scrollbar">
+          {history.length === 0 ? (
+            <p className="text-slate-300 text-center">No data recorded yet.</p>
+          ) : (
+            <table className="w-full text-slate-200">
+              <thead className="sticky top-0 bg-purple-900/90 backdrop-blur-md z-10">
+                <tr className="border-b border-slate-600">
+                  <th className="p-3 text-left">ID</th>
+                  <th className="p-3 text-left">Temperature (°C)</th>
+                  <th className="p-3 text-left">Humidity (%)</th>
+                  <th className="p-3 text-left">Pressure (Pa)</th>
+                  <th className="p-3 text-left">UV Index</th>
+                  <th className="p-3 text-left">Cloud Cover (%)</th>
+                  <th className="p-3 text-left">Raind Probability (%)</th>
+                  <th className="p-3 text-left">Precipitation (mm)</th>
+                  <th className="p-3 text-left">Date</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+              </thead>
+              <tbody>
+                {history.map((row) => (
+                  <tr
+                    key={row.id}
+                    className="hover:bg-purple-700/60 transition-colors"
+                  >
+                    <td className="p-3">{row.id}</td>
+                    <td className="p-3">{row.temperatura ?? "-"}</td>
+                    <td className="p-3">{row.umidade ?? "-"}</td>
+                    <td className="p-3">{row.pressaoAtm ?? "-"}</td>
+                    <td className="p-3">{row.uvClassificacao ?? "-"}</td>
+                    <td className="p-3">{row.cloudCover ?? "-"}</td>
+                    <td className="p-3">
+                      {(row.rainProbability * 100).toFixed(2) ?? "-"}
+                    </td>
+                    <td className="p-3">{row.precipitacao ?? "-"}</td>
+                    <td className="p-3">
+                      {row.created_at
+                        ? new Date(row.created_at).toLocaleString()
+                        : "-"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
-    </div>
-    <div className="flex justify-center relative mt-4">
+      <div className="flex justify-center relative mt-4">
         {hasMore && (
           <div className="justify-end flex gap-3 mt-9">
             <button
@@ -206,15 +207,17 @@ function HistoryTable() {
               disabled={loading}
               className="px-3 py-1 absolute right-0 top-0 bottom-0 text-sm text-slate-200 bg-purple-600 hover:bg-purple-700 rounded-lg"
             >
-              {loading ? "Carregando..." : "Carregar mais"}
+              {loading ? "Loading..." : "Load more"}
             </button>
           </div>
         )}
 
-        {!hasMore && historico.length > 0 && (
-          <p className="text-center text-slate-300 mt-4">Todos os dados foram carregados.</p>
+        {!hasMore && history.length > 0 && (
+          <p className="text-center text-slate-300 mt-4">
+            All data has been loaded.
+          </p>
         )}
-    </div>
+      </div>
     </div>
   );
 }

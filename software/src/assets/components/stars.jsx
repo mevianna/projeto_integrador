@@ -1,37 +1,38 @@
 /**
  * @file stars.jsx
- * @fileoverview Componente responsável por renderizar um fundo animado de estrelas.
+ * @fileoverview Component responsible for rendering an animated star background.
  *
  * @version 1.0.0
  * @date 2025-08-29
  * @lastmodified 2025-11-26
  *
  * @author
- * Beatriz Schulter Tartare <beastartare@gmail.com>
+ * Beatriz Schulter Tartare <beastartareufsc@gmail.com>
  *
  * @license Proprietary
- * 
+ *
  * @description
- * Este componente gera 100 estrelas com posições, tamanhos e animações aleatórias,
- * criando um efeito visual de cintilação no plano de fundo da página.
+ * This component generates 100 stars with random positions, sizes, and animations,
+ * creating a twinkling visual effect in the page background.
  *
  * @component
  *
- * @returns {JSX.Element} Um container absoluto contendo múltiplas estrelas animadas.
+ * @returns {JSX.Element} An absolute container containing multiple animated stars.
  *
  * @example
- * // Uso simples:
+ * // Simple usage:
  * <StarsBackground />
  */
+
 export default function StarsBackground() {
   /**
-   * Lista de estrelas geradas aleatoriamente.
-   * Cada estrela possui:
-   * - posição vertical (`top`)
-   * - posição horizontal (`left`)
-   * - tamanho (`size`)
-   * - duração da animação (`duration`)
-   * - tempo inicial de atraso (`delay`)
+   * List of randomly generated stars.
+   * Each star contains:
+   * - vertical position (`top`)
+   * - horizontal position (`left`)
+   * - size (`size`)
+   * - animation duration (`duration`)
+   * - initial delay time (`delay`)
    *
    * @type {Array<{
    *   top: string,
@@ -41,6 +42,7 @@ export default function StarsBackground() {
    *   delay: string
    * }>}
    */
+
   const stars = Array.from({ length: 100 }).map(() => ({
     top: Math.random() * 100 + "%",
     left: Math.random() * 100 + "%",

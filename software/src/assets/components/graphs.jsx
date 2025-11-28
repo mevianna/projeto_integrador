@@ -1,8 +1,8 @@
 /**
  * @file graphs.jsx
- * @fileoverview Componente de visualização que exibe gráficos históricos de temperatura e umidade
- * utilizando a biblioteca Recharts. Os dados são obtidos do backend e organizados
- * em ordem cronológica antes da renderização.
+ * @fileoverview Visualization component that displays historical temperature and humidity
+ * charts using the Recharts library. Data is fetched from the backend and organized
+ * in chronological order prior to rendering.
  *
  * @version 1.1.0
  * @date 2025-09-26
@@ -13,43 +13,42 @@
  *
  * @license Proprietary
  *
- * @requires prop-types Para validação de tipos das props do componente.
- * @requires react Hooks do React (`useState`, `useEffect`)
- * @requires recharts Componentes de visualização de gráficos para React.
+ * @requires prop-types For component prop type validation.
+ * @requires react React Hooks (`useState`, `useEffect`)
+ * @requires recharts Chart visualization components for React.
  *
  * @description
- * O componente **Graphs** faz uma requisição ao endpoint `/dados/historico`
- * e transforma os dados retornados em uma estrutura adequada para exibição.
+ * The **Graphs** component makes a request to the `/dados/historico` endpoint
+ * and transforms the returned data into a suitable structure for display.
  *
- * São renderizados dois gráficos independentes:
- *  - **Temperatura (°C)**: gráfico de linha amarelo.
- *  - **Umidade (%)**: gráfico de linha azul.
+ * Two independent charts are rendered:
+ *  - **Temperature (°C)**: yellow line chart.
+ *  - **Humidity (%)**: blue line chart.
  *
- * Cada gráfico utiliza um tooltip customizado (*CustomTooltip*), exibindo:
- *  - Data da leitura formatada (dd/mm HH:MM)
- *  - Valor correspondente ao ponto selecionado
+ * Each chart uses a custom tooltip (*CustomTooltip*), displaying:
+ *  - Formatted reading date (dd/mm HH:MM)
+ *  - Value corresponding to the selected point
  *
- * Os eixos X exibem datas convertidas para objetos `Date`. Os dados são
- * automaticamente ordenados do mais antigo para o mais recente para garantir
- * uma linha contínua temporalmente coerente.
+ * The X axes display dates converted into `Date` objects. Data is automatically
+ * sorted from oldest to newest to ensure a continuous and temporally coherent line.
  *
- * ### Hooks utilizados
- * - `useState`: Gerencia o estado local contendo o histórico já convertido em objetos Date.
+ * ### Hooks used
+ * - `useState`: Manages the local state containing the history already converted into Date objects.
  *
- * - `useEffect`: Executa a chamada ao backend na montagem do componente e processa a resposta.
+ * - `useEffect`: Performs the backend request on component mount and processes the response.
  *
- * ### Funções principais
- * `CustomTooltip(props)`: Renderiza um tooltip estilizado contendo data e valor do ponto selecionado.
+ * ### Main functions
+ * `CustomTooltip(props)`: Renders a styled tooltip containing the date and value of the selected point.
  *
- * ### Comportamento
- * - Caso não existam dados, o componente exibe uma mensagem informativa.
- * - Os gráficos são responsivos graças ao componente `ResponsiveContainer`.
- * - O histórico é automaticamente ordenado por timestamp (`created_at`).
+ * ### Behavior
+ * - If no data exists, the component displays an informational message.
+ * - Charts are responsive thanks to the `ResponsiveContainer` component.
+ * - The history is automatically ordered by timestamp (`created_at`).
  *
- * ### Observações
- * - O endpoint deve retornar a data em formato compatível com `new Date()`.
- * - Este componente não recebe props externas; todo o carregamento é interno.
- * - Os estilos externos (Tailwind + CSS personalizado) controlam layout e cores.
+ * ### Notes
+ * - The endpoint must return the date in a format compatible with `new Date()`.
+ * - This component does not receive external props; all loading is internal.
+ * - External styles (Tailwind + custom CSS) control layout and colors.
  */
 
 import PropTypes from "prop-types";
@@ -67,29 +66,30 @@ import {
 /**
  * @component CustomTooltip
  * @description
- * Tooltip customizado utilizado nos gráficos do Recharts para exibir
- * informações detalhadas ao passar o mouse sobre um ponto da linha.
+ * Custom tooltip used in Recharts charts to display detailed information
+ * when hovering over a data point.
  *
- * O tooltip exibe:
- * - A data formatada no padrão brasileiro (dd/mm - hh:mm)
- * - O valor da temperatura ou umidade, dependendo do ponto selecionado
+ * The tooltip displays:
+ * - The date formatted in the Brazilian standard (dd/mm - hh:mm)
+ * - The temperature or humidity value, depending on the selected point
  *
- * A aparência do tooltip é estilizada manualmente via inline styles,
- * utilizando um fundo roxo escuro e texto branco.
+ * The tooltip's appearance is manually styled via inline styles,
+ * using a dark purple background and white text.
  *
  * @param {Object} props
- * @param {boolean} props.active - Indica se o tooltip deve ser exibido.
- * @param {Array} props.payload - Dados do ponto selecionado enviados pelo Recharts.
- * @param {string|number|Date} props.label - Rótulo do eixo X (timestamp do dado).
+ * @param {boolean} props.active - Indicates whether the tooltip should be displayed.
+ * @param {Array} props.payload - Data of the selected point provided by Recharts.
+ * @param {string|number|Date} props.label - X-axis label (data timestamp).
  *
- * @returns {JSX.Element|null} Um tooltip formatado ou `null` se inativo.
+ * @returns {JSX.Element|null} A formatted tooltip or `null` if inactive.
  *
  * @example
  * <Tooltip content={<CustomTooltip />} />
  *
- * @requires PropTypes Para validação dos tipos das props.
- * @requires Intl.DateTimeFormat Para formatação de datas.
+ * @requires PropTypes For prop type validation.
+ * @requires Intl.DateTimeFormat For date formatting.
  */
+
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     const formattedDate = new Intl.DateTimeFormat("pt-BR", {
@@ -128,18 +128,19 @@ const CustomTooltip = ({ active, payload, label }) => {
  * @static
  * @name CustomTooltip.propTypes
  * @description
- * Especificação dos tipos esperados para as propriedades do componente
- * `CustomTooltip`, garantindo validação em tempo de desenvolvimento.
+ * Specification of the expected types for the `CustomTooltip` component
+ * properties, ensuring validation during development.
  *
- * PropTypes utilizados:
- * - `active`: Define se o tooltip está visível (booleano).
- * - `payload`: Array contendo os dados do ponto do gráfico atualmente selecionado.
- * - `label`: Representa o valor associado ao eixo X naquele ponto (timestamp), podendo ser
- *    uma string, número ou objeto `Date`.
+ * PropTypes used:
+ * - `active`: Indicates whether the tooltip is visible (boolean).
+ * - `payload`: Array containing the data of the currently selected chart point.
+ * - `label`: Represents the value associated with the X-axis at that point (timestamp),
+ *    which may be a string, number, or `Date` object.
  *
- * Esta validação ajuda a detectar usos incorretos do componente e facilita
- * a manutenção do código.
+ * This validation helps detect incorrect component usage and facilitates
+ * code maintainability.
  */
+
 CustomTooltip.propTypes = {
   active: PropTypes.bool,
   payload: PropTypes.array,
@@ -152,23 +153,24 @@ CustomTooltip.propTypes = {
 
 /**
  * @component Graphs
- * 
+ *
  * @description
- * Componente que exibe gráficos históricos de temperatura e umidade
- * utilizando a biblioteca Recharts. Os dados são obtidos do backend e organizados
- * em ordem cronológica antes da renderização.
- * 
- * @returns {<Jsx.Element>} Interface com os gráficos de temperatura e umidade.
+ * Component that displays historical temperature and humidity charts
+ * using the Recharts library. Data is fetched from the backend and organized
+ * in chronological order before rendering.
+ *
+ * @returns {JSX.Element} Interface containing the temperature and humidity charts.
  */
+
 function Graphs() {
   /**
-   * Armazena o histórico de dados carregados.
+   * Stores the loaded data history.
    * @type {[Array, Function]}
    */
   const [historico, setHistorico] = useState([]);
 
   /**
-   * Carrega os dados iniciais ao montar o componente.
+   * Loads the initial data when the component mounts.
    * @effect
    */
   useEffect(() => {
@@ -193,7 +195,7 @@ function Graphs() {
         <p className="text-slate-300 text-center">No data recorded yet.</p>
       ) : (
         <div className="flex flex-col w-full space-y-6 p-4 sm:p-6 md:p-8">
-          {/* TEMPERATURA */}
+          {/* Temperature */}
           <div className="bg-purple-800 rounded-md shadow h-[475px] w-full">
             <h2 className="text-slate-200 text-center text-lg font-bold mb-2">
               Temperature (°C)
@@ -243,7 +245,7 @@ function Graphs() {
             </ResponsiveContainer>
           </div>
 
-          {/* UMIDADE */}
+          {/* Humidity */}
           <div className="bg-purple-800 p-6 rounded-md shadow h-[475px] w-full">
             <h2 className="text-slate-200 text-center text-lg font-bold mb-2">
               Humidity (%)
