@@ -82,7 +82,6 @@ function EventPage() {
   /**
    * Expressão regular gerada a partir das chaves do mapa de conversão.
    * Usada para substituir entidades HTML encontradas na descrição.
-   *
    * @type {RegExp}
    */
   const regex = new RegExp(Object.keys(mapa).join("|"), "g");
@@ -143,7 +142,6 @@ function EventPage() {
    * Efeito responsável por buscar a primeira imagem do evento.
    * Roda sempre que o `link` mudar.
    * Faz requisição POST para `/get_first_image`.
-   *
    * @async
    * @effect
    * @returns {Promise<void>}
