@@ -5,8 +5,13 @@
  *              combined cloud cover dataset from Open-Meteo, aligning both
  *              by timestamp and producing a unified three-year dataset.
  *
- * Overview:
- * This script loads:
+ * Author: Maria Eduarda Vianna
+ * Creation date: 10-05-2025
+ * Last modified: 11-28-2025
+ * Contact: mewmvianna@gmail.com
+ * *************************************************************************
+ * Description:
+ * This script reads two CSV files containing 3-year datasets:
  *     - inmet_3_years.csv       -> cleaned meteorological observations from INMET  
  *     - cloudcover_3_years.csv  -> multi-year cloud-cover data from Open-Meteo  
  *
@@ -22,11 +27,11 @@
  * 5. Save the final combined dataset as cloudcover_inmet_3_years_merged.csv.
  * 6. Print the first few rows for verification.
  *
- * Input files (included in this folder):
+ * Inputs:
  *   - inmet_3_years.csv
  *   - cloudcover_3_years.csv
  *
- * Output file:
+ * Output:
  *   - cloudcover_inmet_3_years_merged.csv
  *
  * Requirements:
