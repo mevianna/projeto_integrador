@@ -1,13 +1,13 @@
 """
 ***************************************************************************
- * File name: binary_rain.py
+ * File name: final_dataset_rain_binary.py
  * Description: Preprocessing script to generate the final binary rain dataset
  *              used in downstream machine learning models.
  * Author: 
  * Creation date: 
  * Last modified: 
  * Contact: 
- * ***************************************************************************
+ * *************************************************************************** 
  * Description:
  * This script loads a historical weather dataset containing precipitation
  * values, cleans and converts the precipitation column, and produces a new
@@ -15,7 +15,7 @@
  * The script outputs a clean, ready-to-use CSV dataset for model training.
  *
  * Workflow:
- * 1. Load the original dataset containing:
+ * 1. Load the input dataset:
  *        - datetime timestamps
  *        - precipitation measurements (precip_mm)
  *        - other weather attributes
@@ -25,18 +25,18 @@
  * 3. Create a binary rain column:
  *        - rain = 1 when precip_mm > 0
  *        - rain = 0 otherwise
- * 4. Save the processed dataset as "dataset_final_rain_binario.csv".
+ * 4. Save the processed dataset as "final_dataset_rain_binary.csv".
  * 5. Print the first few rows for inspection.
  *
- * Inputs:
- *   - CSV file: "cloudcover_e_inmet_3_anos.csv"
+ * Input file:
+ *   - "cloudcover_inmet_3_years.csv"
  *       Required columns:
  *         - datetime (parseable)
  *         - precip_mm (string or numeric)
  *         - additional weather features (any)
  *
- * Outputs:
- *   - "dataset_final_rain_binario.csv": cleaned dataset with binary target
+ * Output file:
+ *   - "final_dataset_rain_binary.csv": cleaned dataset with binary target
  *   - Console preview of the processed DataFrame (`df.head()`)
  *
  * Requirements:
@@ -47,15 +47,16 @@
 
 import pandas as pd
 
-df = pd.read_csv("cloudcover_e_inmet_3_anos.csv", parse_dates=["datetime"])
+# Load input dataset
+df = pd.read_csv("cloudcover_inmet_3_years_merged.csv", parse_dates=["datetime"])
 
-# Remove empty spaces and convert to Float
+# Clean and convert precipitation
 df["precip_mm"] = df["precip_mm"].astype(str).str.strip().astype(float)
 
-# Creation of the colum "binary rain"
+# Create binary rain column
 df["rain"] = (df["precip_mm"] > 0).astype(int)
 
-df.to_csv("dataset_final_rain_binario.csv", index=False)
+# Save final processed dataset
+df.to_csv("final_dataset_rain_binary.csv", index=False)
 
 print(df.head())
-

@@ -170,7 +170,7 @@ def train_and_evaluate(X_train, y_train, X_test, y_test,
 
 if __name__ == '__main__':
     print("Carregando dados...")
-    df = pd.read_csv("dataset_final_rain_binario.csv", parse_dates=["datetime"])
+    df = pd.read_csv("final_dataset_rain_binary.csv", parse_dates=["datetime"])
     df = df.sort_values("datetime").reset_index(drop=True)
 
     df_proc = create_features(df)
