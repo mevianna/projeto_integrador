@@ -1,40 +1,40 @@
 /**
  * @file about.jsx
- * @fileoverview Página "About" do aplicativo, descrevendo o projeto,
- * sua proposta, tecnologias utilizadas e os integrantes da equipe.
+ * @fileoverview "About" page of the application, describing the project,
+ * its purpose, technologies used, and team members.
  *
  * @version 1.0.0
  * @date 2025-09-19
  * @lastmodified 2025-11-26
  *
  * @author
- * Beatriz Schulter Tartare <beastartare@gmail.com>
+ * Beatriz Schulter Tartare <beastartareufsc@gmail.com>
  * Rafaela Fernandes Savaris <savarisf.rafaela@gmail.com>
  *
  * @license Proprietary
  *
- * @requires lucide-react Biblioteca para ícones SVG utilizados na navegação (ChevronLeftIcon).
- * @requires react-router-dom Responsável pela navegação entre páginas (useNavigate).
- * @requires ../assets/components/stars.jsx Componente visual responsável por renderizar o fundo estrelado animado.
+ * @requires lucide-react Library for SVG icons used in navigation (ChevronLeftIcon).
+ * @requires react-router-dom Responsible for navigation between pages (useNavigate).
+ * @requires ../assets/components/stars.jsx Visual component responsible for rendering the animated starry background.
  *
  * @description
- * Página "About" responsável por apresentar o contexto geral do projeto
- * desenvolvido na disciplina Projeto Integrador do curso de Engenharia de
- * Computação – UFSC. A página descreve:
- * - O objetivo multidisciplinar do projeto;
- * - A integração de APIs astronômicas, estação meteorológica própria
- *   e técnicas de machine learning para previsão de condições de observação;
- * - A motivação acadêmica e prática que fundamenta o desenvolvimento;
- * - Uma galeria contendo a equipe envolvida, com links diretos para os
- *   perfis do GitHub dos membros.
- * 
- * A interface utiliza animações sutis e um fundo temático (StarsBackground)
- * para reforçar a identidade visual do projeto e proporcionar uma experiência
- * mais imersiva ao usuário.
+ * "About" page responsible for presenting the overall context of the project
+ * developed in the Integrated Project course of the Computer Engineering program – UFSC.
+ * The page describes:
+ * - The multidisciplinary goal of the project;
+ * - The integration of astronomical APIs, an in-house weather station,
+ *   and machine learning techniques for predicting observation conditions;
+ * - The academic and practical motivation behind the development;
+ * - A gallery containing the team members, with direct links to their
+ *   GitHub profiles.
+ *
+ * The interface uses subtle animations and a thematic background (StarsBackground)
+ * to reinforce the project’s visual identity and provide a more immersive
+ * user experience.
  *
  * @remarks
- * - Os mapas de clique sobre a imagem da equipe utilizam posicionamento
- *   absoluto; ajustes podem ser necessários em telas muito pequenas.
+ * - The clickable maps over the team image use absolute positioning;
+ *   adjustments may be necessary on very small screens.
  */
 
 import { ChevronLeftIcon } from "lucide-react";
@@ -44,11 +44,12 @@ import StarsBackground from "../assets/components/stars.jsx";
 /**
  * @component AboutPage
  * @description
- * Componente da página "About".
- * Exibe informações sobre o projeto, sua proposta e a equipe de desenvolvimento.
- * 
- * @returns {JSX.Element} Estrutura visual completa da página About.
+ * "About" page component.
+ * Displays information about the project, its purpose, and the development team.
+ *
+ * @returns {JSX.Element} Complete visual structure of the About page.
  */
+
 function AboutPage() {
   const navigate = useNavigate();
 

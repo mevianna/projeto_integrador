@@ -1,54 +1,54 @@
 /**
  * @file eventpage.jsx
- * @fileoverview Página "Event" do site, exibindo detalhes completos
- * sobre um evento astronômico selecionado, incluindo título, descrição,
- * imagem, informações adicionais e créditos.
+ * @fileoverview "Event" page of the site, displaying full details
+ * about a selected astronomical event, including title, description,
+ * image, additional information, and credits.
  *
- * Esta página obtém informações dinâmicas por meio de parâmetros de URL
- * e faz requisições às APIs internas do backend para recuperar a primeira
- * imagem relacionada ao evento, ícone alternativo e dados de crédito.
+ * This page retrieves dynamic information through URL parameters
+ * and makes requests to internal backend APIs to fetch the first
+ * related event image, alternative icon text, and credit data.
  *
  * @version 1.0.0
  * @date 2025-09-19
  * @lastmodified 2025-11-26
  *
  * @author
- * Beatriz Schulter Tartare <beastartare@gmail.com>
+ * Beatriz Schulter Tartare <beastartareufsc@gmail.com>
  *
  * @license Proprietary
  *
- * @requires lucide-react Biblioteca responsável pela renderização de ícones SVG utilizados na navegação (ChevronLeftIcon).
- * @requires react-router-dom Gerencia a navegação entre rotas e fornece acesso aos parâmetros da URL (useNavigate, useSearchParams).
- * @requires ../assets/components/stars.jsx Componente visual para renderização do fundo animado de estrelas.
- * @requires react Hooks do React (useState, useEffect)
+ * @requires lucide-react Library responsible for rendering SVG icons used in navigation (ChevronLeftIcon).
+ * @requires react-router-dom Manages route navigation and provides access to URL parameters (useNavigate, useSearchParams).
+ * @requires ../assets/components/stars.jsx Visual component for rendering the animated starry background.
+ * @requires react React hooks (useState, useEffect)
  *
  * @description
- * A página "Event" é responsável por exibir ao usuário uma visualização
- * completa de um evento astronômico selecionado na lista principal.  
- * Ela apresenta:
- * - Título processado do evento;
- * - Descrição formatada e tratada para remover entidades HTML;
- * - Imagem principal obtida pela API interna;
- * - Texto alternativo do ícone (quando disponível);
- * - Créditos oficiais da imagem;
- * - Mensagens de carregamento e erros para cada requisição;
- * - Aviso de segurança sobre observação astronômica.
+ * The "Event" page displays to the user a complete visualization
+ * of an astronomical event selected from the main list.
+ * It presents:
+ * - Processed event title;
+ * - Formatted description cleaned from HTML entities;
+ * - Main image retrieved from an internal API;
+ * - Alternative text for the icon (when available);
+ * - Official image credits;
+ * - Loading and error messages for each request;
+ * - A safety notice about astronomical observation.
  *
- * O componente executa três chamadas assíncronas ao backend:
- * 1. `/get_first_image` — retorna a imagem principal do evento;
- * 2. `/get_icon` — retorna texto alternativo ou legenda do ícone associado;
- * 3. `/get_credits` — retorna o texto de créditos da imagem.
+ * The component performs three asynchronous backend calls:
+ * 1. `/get_first_image` — returns the event's main image;
+ * 2. `/get_icon` — returns alternative text or caption of the associated icon;
+ * 3. `/get_credits` — returns the image credit text.
  *
- * ### Hooks utilizados:
- * - `useState`: Armazena estados locais como URL da imagem, créditos, estados de loading e erros.
- * - `useEffect`: Executa as requisições assíncronas sempre que o link do evento muda.
- * 
+ * ### Hooks used:
+ * - `useState`: Stores local states such as the image URL, credits, and loading/error states.
+ * - `useEffect`: Executes asynchronous requests whenever the event link changes.
+ *
  * @remarks
- * - Parâmetros como *title*, *description* e *link* são recebidos via URL.
- * - O texto da descrição pode conter entidades HTML, tratadas por regex.
- * - A imagem e créditos são carregados de forma independente, cada qual com
- *   seu próprio estado de loading e error.
- * - Caso o link não seja informado, as requisições são ignoradas.
+ * - Parameters such as *title*, *description*, and *link* are received via URL.
+ * - The description text may contain HTML entities, which are processed via regex.
+ * - The image and credits are loaded independently, each with
+ *   its own loading and error state.
+ * - If the link is not provided, the requests are ignored.
  */
 
 import { ChevronLeftIcon } from "lucide-react";
@@ -59,20 +59,21 @@ import { useState, useEffect } from "react";
 /**
  * @component EventPage
  * @description
- * Componente da página "Event".
- * Exibe informações sobre o evento astronomico escolhido.
- * 
- * @returns {JSX.Element} Estrutura visual completa da página Events.
+ * "Event" page component.
+ * Displays information about the selected astronomical event.
+ *
+ * @returns {JSX.Element} Complete visual structure of the Event page.
  */
 function EventPage() {
   const navigate = useNavigate();
 
   /**
-   * Mapa de entidades HTML para caracteres especiais.
-   * Utilizado para substituir entidades na descrição do evento.
+   * Map of HTML entities to special characters.
+   * Used to replace entities in the event description.
    * @constant
    * @type {Object.<string, string>}
    */
+
   const mapa = {
     "&deg;": "°",
     "&#39;": "'",
@@ -80,48 +81,48 @@ function EventPage() {
   };
 
   /**
-   * Expressão regular gerada a partir das chaves do mapa de conversão.
-   * Usada para substituir entidades HTML encontradas na descrição.
+   * Regular expression generated from the keys of the conversion map.
+   * Used to replace HTML entities found in the description.
    * @type {RegExp}
    */
   const regex = new RegExp(Object.keys(mapa).join("|"), "g");
 
-   /** @type {[URLSearchParams]} */
+  /** @type {[URLSearchParams]} */
   const [searchParams] = useSearchParams();
 
   /**
-   * Título bruto do evento recebido pela URL.
+   * Raw event title received via URL.
    * @type {string}
    */
   const title = searchParams.get("title") || "";
 
   /**
-   * Descrição bruta do evento recebido pela URL.
+   * Raw event description received via URL.
    * @type {string}
    */
   const description = searchParams.get("description") || "";
 
   /**
-   * Link para a página oficial do evento astronômico.
-   * Utilizado para solicitar dados adicionais ao backend.
+   * Link to the official page of the astronomical event.
+   * Used to request additional data from the backend.
    * @type {string}
    */
   const link = searchParams.get("link") || "";
 
   /**
-   * URL da imagem principal do evento obtida pela API.
+   * URL of the main event image returned by the API.
    * @type {[string|null, Function]}
    */
   const [imageUrl, setImageUrl] = useState(null);
 
   /**
-   * Texto alternativo ou descrição do ícone do evento.
+   * Alternative text or description of the event icon.
    * @type {[string|null, Function]}
    */
   const [iconalt, setIconAlt] = useState(null);
 
   /**
-   * Texto de créditos da imagem.
+   * Image credit text.
    * @type {[string|null, Function]}
    */
   const [credit, setCredit] = useState(null);
@@ -139,13 +140,14 @@ function EventPage() {
   const [errorCredit, setErrorCredit] = useState(null);
 
   /**
-   * Efeito responsável por buscar a primeira imagem do evento.
-   * Roda sempre que o `link` mudar.
-   * Faz requisição POST para `/get_first_image`.
+   * Effect responsible for fetching the event’s first image.
+   * Runs whenever `link` changes.
+   * Sends a POST request to `/get_first_image`.
    * @async
    * @effect
    * @returns {Promise<void>}
    */
+
   useEffect(() => {
     if (link) {
       setLoadingImage(true);
@@ -185,15 +187,16 @@ function EventPage() {
   }, [link]);
 
   /**
-   * Efeito responsável por buscar o texto alternativo do ícone do evento.
-   * Roda sempre que o `link` mudar.
+   * Effect responsible for fetching the alternative text of the event icon.
+   * Runs whenever `link` changes.
    *
-   * Faz requisição POST para `/get_icon`.
+   * Sends a POST request to `/get_icon`.
    *
    * @async
    * @effect
    * @returns {Promise<void>}
    */
+
   useEffect(() => {
     if (link) {
       const fetchIcon = async () => {
@@ -221,15 +224,16 @@ function EventPage() {
   }, [link]);
 
   /**
-   * Efeito responsável por buscar os créditos da imagem.
-   * Roda sempre que o `link` mudar.
+   * Effect responsible for fetching the image credits.
+   * Runs whenever `link` changes.
    *
-   * Faz requisição POST para `/get_credits`.
+   * Sends a POST request to `/get_credits`.
    *
    * @async
    * @effect
    * @returns {Promise<void>}
    */
+
   useEffect(() => {
     if (link) {
       setLoadingCredit(true);
@@ -265,11 +269,12 @@ function EventPage() {
   }, [link]);
 
   /**
-   * Processa o título bruto removendo prefixos antes dos ":".
+   * Processes the raw title by removing prefixes before ":".
    *
    * @function
-   * @returns {string} Título tratado e legível.
+   * @returns {string} Clean and readable title.
    */
+
   const getProcessedTitle = () => {
     if (!title) return "Título não disponível";
 
@@ -278,12 +283,13 @@ function EventPage() {
   };
 
   /**
-   * Processa e limpa a descrição do evento.
-   * Remove artefatos HTML e recortes desnecessários.
+   * Processes and cleans the event description.
+   * Removes HTML artifacts and unnecessary fragments.
    *
    * @function
-   * @returns {string} Descrição tratada.
+   * @returns {string} Processed description.
    */
+
   const getProcessedDescription = () => {
     if (!description) return "Descrição não disponível";
 

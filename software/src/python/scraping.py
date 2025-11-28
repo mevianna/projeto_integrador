@@ -1,48 +1,48 @@
 """
 * ***************************************************************************
-* Nome do arquivo: scraping.py
-* Descrição: Servidor Flask para extração de imagens, ícones e créditos de páginas web.
-* Cria endpoints para permitir que o front-end obtenha informações de páginas externas fornecidas via JSON.
+* File name: scraping.py
+* Description: Flask server for extracting images, icons, and credits from web pages.
+* Creates endpoints to allow the front-end to obtain information from external pages provided via JSON.
 *
-* Autora: Beatriz Schulter Tartare
-* Data de criação: 29/10/2025
-* Última modificação: 27/11/2025
-* Contato: beastartare@gmail.com
+* Author: Beatriz Schulter Tartare
+* Creation date: 10/29/2025
+* Last modification: 11/27/2025
+* Contact: beastartareufsc@gmail.com
 * ***************************************************************************
-* Descrição detalhada:
-* Este script cria um servidor Flask com três endpoints principais:
+* Detailed description:
+* This script creates a Flask server with three main endpoints:
 * 
-* 1. /get_first_image  : Retorna a URL completa da primeira imagem encontrada na página informada.
-* 2. /get_icon         : Retorna o atributo 'alt' da segunda imagem da página.
-* 3. /get_credits      : Retorna o texto do crédito de imagem associado.
+* 1. /get_first_image  : Returns the full URL of the first image found on the given page.
+* 2. /get_icon         : Returns the 'alt' attribute of the second image on the page.
+* 3. /get_credits      : Returns the associated image credit text.
 *
-* Todos os endpoints esperam receber um JSON com a chave "link" contendo a URL do site.
-* Retornam JSON com os dados solicitados ou mensagens de erro apropriadas (400, 404 ou 500).
+* All endpoints expect to receive a JSON containing the key "link" with the site URL.
+* They return JSON with the requested data or appropriate error messages (400, 404, or 500).
 *
-* Fluxo de cada endpoint:
-* - Recebe JSON da requisição POST.
-* - Valida a presença do link.
-* - Faz requisição HTTP GET para o site.
-* - Processa o HTML usando BeautifulSoup.
-* - Extrai a informação requerida (imagem, ícone, crédito).
-* - Retorna JSON com resultado ou mensagem de erro.
+* Flow of each endpoint:
+* - Receives JSON from the POST request.
+* - Validates the presence of the link.
+* - Makes an HTTP GET request to the site.
+* - Processes the HTML using BeautifulSoup.
+* - Extracts the required information (image, icon, credit).
+* - Returns JSON with the result or an error message.
 *
-* Tratamento de erros:
-* - Link não fornecido: retorna 400 com {"error": "..."}.
-* - Elementos não encontrados na página: retorna 404 com {"error": "..."}.
-* - Erros de requisição HTTP: retorna 500 com {"error": "..."}.
+* Error handling:
+* - Link not provided: returns 400 with {"error": "..."}.
+* - Elements not found on the page: returns 404 with {"error": "..."}.
+* - HTTP request errors: returns 500 with {"error": "..."}.
 *
-* Requisitos:
+* Requirements:
 * - Python 3.13.1
-* - Bibliotecas:
+* - Libraries:
 *     - Flask
 *     - Flask-CORS
 *     - requests
 *     - BeautifulSoup (bs4)
 *
-* Observações:
-* - Habilita CORS para permitir requisições de qualquer origem.
-* - Rodar o servidor em modo debug para desenvolvimento.
+* Notes:
+* - Enables CORS to allow requests from any origin.
+* - Run the server in debug mode for development.
 * ***************************************************************************
 """
 
@@ -94,10 +94,10 @@ def get_icon():
         res.raise_for_status() 
         
         dados = BeautifulSoup(res.text, "html.parser")
-        imagens = dados.find_all('img')  # pega todas as imagens
+        imagens = dados.find_all('img') 
 
         if len(imagens) > 1:
-            segundo_icon = imagens[1]   # segunda imagem
+            segundo_icon = imagens[1]  
             alt_text = segundo_icon.get('alt', '')
             return jsonify({'icon_alt': alt_text})
         else:

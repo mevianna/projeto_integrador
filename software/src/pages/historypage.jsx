@@ -1,6 +1,6 @@
 /**
  * @file historypage.jsx
- * @fileoverview Página "History" do site, exibindo o histórico de dados.
+ * @fileoverview "History" page of the site, displaying the data history.
  *
  * @version 1.0.0
  * @date 2025-09-26
@@ -11,20 +11,20 @@
  *
  * @license Proprietary
  *
- * @requires lucide-react Biblioteca responsável pela renderização de ícones SVG utilizados na navegação (ChevronLeftIcon).
- * @requires react-router-dom Gerencia a navegação entre rotas e fornece acesso aos parâmetros da URL (useNavigate, useSearchParams).
- * @requires ../assets/components/stars.jsx Componente visual para renderização do fundo animado de estrelas.
- * @requires ../assets/components/history.jsx Componente que encapsula a lógica e visualização dos dados históricos.
+ * @requires lucide-react Library responsible for rendering SVG icons used in navigation (ChevronLeftIcon).
+ * @requires react-router-dom Manages navigation between routes and provides access to URL parameters (useNavigate, useSearchParams).
+ * @requires ../assets/components/stars.jsx Visual component for rendering the animated starry background.
+ * @requires ../assets/components/history.jsx Component that encapsulates the logic and visualization of historical data.
  *
-  * @description
- * A página **HistoryPage** exibe uma tabela com os dados históricos coletados.  
- * Ela faz parte da interface principal do sistema e integra:
- * - Navegação via `useNavigate`
- * - Componente `HistoryTable`, que encapsula toda a lógica da tabela de histórico
+ * @description
+ * The **HistoryPage** displays a table with collected historical data.
+ * It is part of the main system interface and integrates:
+ * - Navigation via `useNavigate`
+ * - The `HistoryTable` component, which encapsulates all logic for the history table
  *
  * @remarks
- * - Esta página não realiza chamadas diretas à API. Os dados são carregados
- *   internamente pelo componente <History />, mantendo a responsabilidade isolada.
+ * - This page does not make direct API calls.
+ *   Data is loaded internally by the <History /> component, keeping responsibility isolated.
  */
 
 import { ChevronLeftIcon } from "lucide-react";
@@ -35,10 +35,11 @@ import HistoryTable from "../assets/components/history.jsx";
 /**
  * @component Historypage
  * @description
- * Componente da página "History".
- * Exibe histórico de dados coletados.
- * @returns {JSX.Element} Estrutura visual completa da página History.
+ * "History" page component.
+ * Displays collected historical data.
+ * @returns {JSX.Element} Complete visual structure of the History page.
  */
+
 function Historypage() {
   const navigate = useNavigate();
 
@@ -64,7 +65,7 @@ function Historypage() {
               </h1>
               <div className="justify-end flex gap-3 mt-3">
                 <button
-                  onClick={ViewGraphs} // redireciona para graficos
+                  onClick={ViewGraphs} //Redirects the user to the charts page.
                   className="px-3 py-1 absolute right-0 top-0 bottom-0 text-sm text-slate-200 bg-purple-600 hover:bg-purple-700 rounded-lg"
                 >
                   View Graphs

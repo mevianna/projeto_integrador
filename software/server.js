@@ -329,22 +329,14 @@ async function salvarUltimoDado(features = null) {
   }
 
   // correct destructuring following the feature order
-  const [
-    pressure,
-    temperature,
-    humidity,
-    uvIndex,
-    cloudCover,
-    precipitation,
-  ] = features;
+  const [pressure, temperature, humidity, uvIndex, cloudCover, precipitation] =
+    features;
 
   // Retrieves the rain probability from the most recent forecast (fallback: 0 if unavailable)
   const probabilidadeChuva = ultimaPrevisao?.prediction?.[0]?.[1] ?? 0;
 
   const last = db
-    .prepare(
-      "SELECT * FROM weather_data_final ORDER BY id DESC LIMIT 1"
-    )
+    .prepare("SELECT * FROM weather_data_final ORDER BY id DESC LIMIT 1")
     .get();
 
   if (
@@ -389,45 +381,47 @@ async function salvarUltimoDado(features = null) {
   console.log("Dado salvo no banco:", ultimo);
 }
 
-// ************************************* ROTAS *************************************** //
+// ************************************* ROUTES *************************************** //
 /**
  * @route GET /events
- * @summary Retorna um feed RSS de eventos astronômicos.
+ * @summary Returns an RSS feed of astronomical events.
  *
- * Esta rota realiza uma requisição HTTP para o feed público de eventos astronômicos
- * disponível em `https://in-the-sky.org/rss.php` e retorna o conteúdo XML recebido
- * diretamente ao cliente. Em caso de falha na requisição, retorna um status HTTP 500 com uma mensagem de erro.
+ * This route performs an HTTP request to the public astronomical events feed
+ * available at `https://in-the-sky.org/rss.php` and returns the received XML
+ * content directly to the client. In case of a request failure, it returns an HTTP 500
+ * status with an error message.
  *
  * @async
  * @function
  *
- * @param {express.Request} req - Objeto da requisição Express.
- * @param {express.Response} res - Objeto da resposta Express usada para enviar o XML ou o erro.
+ * @param {express.Request} req - Express request object.
+ * @param {express.Response} res - Express response object used to send the XML or error.
  *
- * @returns {void} A resposta é enviada via `res.send()`, contendo o conteúdo XML do feed.
+ * @returns {void} The response is sent via `res.send()`, containing the XML feed content.
  *
  * @example
- * // Requisição:
+ * // Request:
  * GET /events
  *
- * // Resposta de sucesso (200 OK):
+ * // Successful response (200 OK):
  * <?xml version="1.0" encoding="UTF-8"?>
  * <rss version="2.0">
  *   <channel>
  *     <title>Astronomical Events</title>
  *     <item>
- *       <title>Conjunção da Lua com Marte</title>
+ *       <title>Conjunction of the Moon with Mars</title>
  *       <pubDate>Fri, 08 Nov 2025 03:00:00 GMT</pubDate>
  *       ...
  *     </item>
  *   </channel>
  * </rss>
  *
- * // Resposta de erro (500 Internal Server Error):
+ * // Error response (500 Internal Server Error):
  * {
  *   "error": "Failed to fetch astronomical events feed."
  * }
  */
+
 app.get("/events", async (req, res) => {
   try {
     const response = await fetch("https://in-the-sky.org/rss.php");
@@ -440,34 +434,35 @@ app.get("/events", async (req, res) => {
 
 /**
  * @route POST /cloudcover
- * @summary Atualiza o valor da cobertura de nuvens (*cloudCover*).
+ * @summary Updates the cloud cover value (*cloudCover*).
  *
- * Recebe um valor de cobertura de nuvens no corpo da requisição (`req.body.cloudCover`)
- * e o atualiza na variável global `cloudCover`.
- * Retorna o novo valor definido, ou um erro caso o campo não seja enviado.
+ * Receives a cloud cover value in the request body (`req.body.cloudCover`)
+ * and updates it in the global variable `cloudCover`.
+ * Returns the new defined value, or an error if the field is not provided.
  *
- * @param {express.Request} req - Objeto da requisição Express contendo `cloudCover` no corpo (`body`).
- * @param {express.Response} res - Objeto da resposta Express usado para enviar o status e o JSON de retorno.
+ * @param {express.Request} req - Express request object containing `cloudCover` in the request body.
+ * @param {express.Response} res - Express response object used to send the status and return JSON.
  *
- * @returns {void} A resposta é enviada diretamente via `res.json()`.
+ * @returns {void} The response is sent directly via `res.json()`.
  *
  * @example
- * // Requisição (JSON):
+ * // Request (JSON):
  * {
  *   "cloudCover": 75
  * }
  *
- * // Resposta (200 OK):
+ * // Response (200 OK):
  * {
  *   "ok": true,
  *   "cloudCover": 75
  * }
  *
- * // Resposta (400 Bad Request):
+ * // Response (400 Bad Request):
  * {
- *   "error": "cloudCover não enviado"
+ *   "error": "cloudCover not provided"
  * }
  */
+
 app.post("/cloudcover", (req, res) => {
   const { cloudCover: novoValor } = req.body;
 
@@ -480,30 +475,31 @@ app.post("/cloudcover", (req, res) => {
 
 /**
  * @route POST /dados
- * @summary Recebe dados meteorológicos do dispositivo ESP e inicia a geração de previsão inicial.
+ * @summary Receives meteorological data from the ESP device and starts generating the initial prediction.
  *
- * Esta rota é chamada pelo dispositivo ESP para enviar leituras meteorológicas.
- * Ao receber os dados, o servidor:
- * 1. Evita atualizações duplicadas em um intervalo menor que 5 segundos;
- * 2. Armazena os dados recebidos em `dadosESP`;
- * 3. Retorna uma resposta imediata (`{ ok: true }`);
- * 4. Executa, de forma assíncrona, a chamada da função `gerarFeatures`, salvando na variável local `features`
- * 5. Realiza, também de forma assíncrona, o processo de previsão inicial, chamando o modelo Python (a função `gerarPrevisao`)
- *    e salvando o resultado no banco (o módulo `salvarUltimoDado`).
+ * This route is called by the ESP device to send meteorological readings.
+ * Upon receiving the data, the server:
+ * 1. Prevents duplicate updates within an interval shorter than 5 seconds;
+ * 2. Stores the received data in `dadosESP`;
+ * 3. Returns an immediate response (`{ ok: true }`);
+ * 4. Asynchronously executes the `gerarFeatures` function, saving the result in the local variable `features`;
+ * 5. Also asynchronously runs the initial prediction process by calling the Python model (`gerarPrevisao`)
+ *    and saving the result in the database (via the `salvarUltimoDado` module).
  *
- * A execução da previsão inicial é controlada por flags internas (`app.locals.executandoPrevisaoInicial`
- * e `app.locals.primeiraConexao`) para evitar múltiplas execuções simultâneas.
+ * The execution of the initial prediction is controlled by internal flags
+ * (`app.locals.executandoPrevisaoInicial` and `app.locals.primeiraConexao`)
+ * to avoid multiple simultaneous executions.
  *
  * @async
  * @function
  *
- * @param {express.Request} req - Objeto da requisição Express contendo os dados meteorológicos enviados pelo ESP no corpo (`req.body`).
- * @param {express.Response} res - Objeto da resposta Express usado para enviar o status e a confirmação em JSON.
+ * @param {express.Request} req - Express request object containing the meteorological data sent by the ESP in the body (`req.body`).
+ * @param {express.Response} res - Express response object used to send the status and JSON confirmation.
  *
- * @returns {void} A resposta é enviada via `res.json()`. Em caso de erro na geração da previsão, o erro é apenas registrado no console.
+ * @returns {void} The response is sent via `res.json()`. In case of an error during prediction generation, the error is only logged to the console.
  *
  * @example
- * // Requisição:
+ * // Request:
  * POST /dados
  * Content-Type: application/json
  * {
@@ -514,17 +510,18 @@ app.post("/cloudcover", (req, res) => {
  *   "precipitacao": 0.2
  * }
  *
- * // Resposta imediata (200 OK):
+ * // Immediate response (200 OK):
  * {
  *   "ok": true
  * }
  *
- * // Exemplo de resposta ignorada (duplicada):
+ * // Example of ignored (duplicate) response:
  * {
  *   "ok": true,
  *   "ignorado": true
  * }
  */
+
 app.post("/data", async (req, res) => {
   const agora = Date.now();
   if (agora - ultimaAtualizacao < 5000) {
@@ -561,28 +558,28 @@ app.post("/data", async (req, res) => {
 
 /**
  * @route POST /dados/refresh
- * @summary Gera uma nova previsão de chuva com base nos dados meteorológicos atuais do ESP.
+ * @summary Generates a new rain prediction based on the current meteorological data from the ESP.
  *
- * Esta rota força a atualização da previsão de chuva usando as *features* mais recentes
- * armazenadas em `dadosESP`. Antes de iniciar, verifica se já existe uma previsão em execução
- * para evitar sobrecarga do servidor. Caso não haja previsão em andamento:
- * 1. As *features* são geradas via `gerarFeatures()`;
- * 2. O modelo Python é chamado para gerar a previsão (`gerarPrevisao()`);
- * 3. Os dados e a previsão são salvos no banco (`salvarUltimoDado()`).
+ * This route forces an update of the rain prediction using the most recent *features*
+ * stored in `dadosESP`. Before starting, it checks whether a prediction is already running
+ * to prevent server overload. If no prediction is in progress:
+ * 1. The *features* are generated via `gerarFeatures()`;
+ * 2. The Python model is called to generate the prediction (`gerarPrevisao()`);
+ * 3. The data and prediction are saved to the database (`salvarUltimoDado()`).
  *
  * @async
  * @function
  *
- * @param {express.Request} req - Objeto da requisição Express. Os dados meteorológicos podem ser enviados no corpo (`req.body`), mas não são obrigatórios.
- * @param {express.Response} res - Objeto da resposta Express usado para enviar status e resultado em JSON.
+ * @param {express.Request} req - Express request object. Meteorological data may be sent in the body (`req.body`), but it is not mandatory.
+ * @param {express.Response} res - Express response object used to send status and JSON results.
  *
- * @returns {void} A resposta é enviada via `res.json()`. Em caso de erro, retorna status HTTP 500 com uma mensagem descritiva. Se já houver previsão em execução, retorna 429.
+ * @returns {void} The response is sent via `res.json()`. In case of error, returns HTTP status 500 with a descriptive message. If a prediction is already running, returns 429.
  *
  * @example
- * // Requisição:
+ * // Request:
  * POST /dados/refresh
  *
- * // Resposta de sucesso (200 OK):
+ * // Success response (200 OK):
  * {
  *   "ok": true,
  *   "previsao": {
@@ -591,16 +588,17 @@ app.post("/data", async (req, res) => {
  *   }
  * }
  *
- * // Resposta se previsão já estiver em execução (429):
+ * // Response when a prediction is already running (429):
  * {
- *   "error": "Previsão em execução, tente novamente."
+ *   "error": "Prediction in progress, please try again."
  * }
  *
- * // Resposta de erro genérico (500):
+ * // Generic error response (500):
  * {
- *   "error": "Erro ao gerar previsão ou salvar dado"
+ *   "error": "Error generating prediction or saving data"
  * }
  */
+
 app.post("/dados/refresh", async (req, res) => {
   try {
     if (app.locals.executandoPrevisao) {
@@ -626,24 +624,24 @@ app.post("/dados/refresh", async (req, res) => {
 
 /**
  * @route GET /dados/ultimo
- * @summary Retorna o último registro de leituras meteorológicas armazenadas no banco de dados.
+ * @summary Returns the most recent record of meteorological readings stored in the database.
  *
- * Esta rota consulta a tabela `dados_estacao_metereologica` do banco SQLite e retorna o registro mais recente
- * em formato JSON. É usada pelo front-end para obter os dados atuais do dispositivo ESP,
- * incluindo temperatura, umidade, pressão atmosférica, UV, cobertura de nuvens, probabilidade de chuva, etc.
+ * This route queries the `dados_estacao_metereologica` table in the SQLite database and returns
+ * the latest record in JSON format. It is used by the front-end to obtain the current ESP device data,
+ * including temperature, humidity, atmospheric pressure, UV, cloud cover, rain probability, etc.
  *
- * Em caso de falha na consulta ao banco, a rota retorna um status HTTP 500 com uma mensagem de erro genérica.
+ * In case of a database query failure, the route returns an HTTP 500 status with a generic error message.
  *
- * @param {express.Request} req - Objeto da requisição Express.
- * @param {express.Response} res - Objeto da resposta Express usado para enviar o registro ou o erro.
+ * @param {express.Request} req - Express request object.
+ * @param {express.Response} res - Express response object used to send the record or the error.
  *
- * @returns {void} A resposta é enviada diretamente via `res.json()`.
+ * @returns {void} The response is sent directly via `res.json()`.
  *
  * @example
- * // Requisição:
+ * // Request:
  * GET /dados/ultimo
  *
- * // Resposta de sucesso (200 OK):
+ * // Successful response (200 OK):
  * {
  *   "id": 42,
  *   "temperatura": 25.5,
@@ -656,11 +654,12 @@ app.post("/dados/refresh", async (req, res) => {
  *   "created_at": "2025-11-07T12:15:00.000Z"
  * }
  *
- * // Resposta de erro (500 Internal Server Error):
+ * // Error response (500 Internal Server Error):
  * {
  *   "error": "Erro ao buscar último dado"
  * }
  */
+
 app.get("/dados/ultimo", (req, res) => {
   try {
     const ultimoDado = db
@@ -682,35 +681,35 @@ app.get("/dados/ultimo", (req, res) => {
 
 /**
  * @route GET /dados/historico
- * @summary Retorna registros históricos de leituras meteorológicas com suporte a paginação.
+ * @summary Returns historical records of meteorological readings with pagination support.
  *
- * Esta rota consulta a tabela `dados_estacao_metereologica` no banco SQLite e retorna
- * um conjunto de registros ordenados do mais recente para o mais antigo.
+ * This route queries the `dados_estacao_metereologica` table in the SQLite database and returns
+ * a set of records ordered from newest to oldest.
  *
- * O usuário pode controlar a quantidade de itens retornados e o ponto de início da busca
- * usando os parâmetros de query `limit` e `offset`.
+ * The user can control the number of returned items and the starting point of the query
+ * using the query parameters `limit` and `offset`.
  *
- * - `limit` (opcional): quantidade máxima de registros a serem retornados.
- *   - Valor padrão: **50**
- * - `offset` (opcional): quantos registros devem ser ignorados antes de começar a retornar resultados.
- *   - Valor padrão: **0**
+ * - `limit` (optional): maximum number of records to be returned.
+ *   - Default value: **50**
+ * - `offset` (optional): how many records should be skipped before results start being returned.
+ *   - Default value: **0**
  *
- * Em caso de erro na consulta ao banco, a rota retorna status HTTP 500 com uma mensagem
- * genérica, evitando exposição de detalhes internos.
+ * In case of an error during the database query, the route returns an HTTP 500 status
+ * with a generic message, avoiding exposure of internal details.
  *
- * @param {express.Request} req - Objeto da requisição Express contendo `req.query.limit` e `req.query.offset`.
- * @param {express.Response} res - Objeto de resposta Express usado para enviar dados ou erros.
+ * @param {express.Request} req - Express request object containing `req.query.limit` and `req.query.offset`.
+ * @param {express.Response} res - Express response object used to send data or errors.
  *
- * @returns {void} A resposta é enviada diretamente via `res.json()`.
+ * @returns {void} The response is sent directly via `res.json()`.
  *
  * @example
- * // Requisição simples:
+ * // Simple request:
  * GET /dados/historico
  *
- * // Equivalente a:
+ * // Equivalent to:
  * GET /dados/historico?limit=50&offset=0
  *
- * // Resposta (200 OK):
+ * // Successful response (200 OK):
  * [
  *   {
  *     "id": 71,
@@ -727,14 +726,15 @@ app.get("/dados/ultimo", (req, res) => {
  * ]
  *
  * @example
- * // Requisição paginada (20 por página):
+ * // Paginated request (20 per page):
  * GET /dados/historico?limit=20&offset=20
  *
- * // Resposta de erro (500 Internal Server Error):
+ * // Error response (500 Internal Server Error):
  * {
  *   "error": "Erro ao buscar histórico de leituras."
  * }
  */
+
 app.get("/dados/historico", (req, res) => {
   const limit = parseInt(req.query.limit) || 50;
   const offset = parseInt(req.query.offset) || 0;
@@ -753,38 +753,40 @@ app.get("/dados/historico", (req, res) => {
 });
 
 /**
- * Tarefa agendada para gerar e salvar previsões meteorológicas a cada hora cheia.
+ * Scheduled task responsible for generating and saving weather forecasts every full hour.
  *
- * Esta função é executada automaticamente pelo `node-cron` no minuto zero de cada hora.
- * O fluxo da tarefa é:
- * 1. Gera as *features* meteorológicas atuais chamando `gerarFeatures()`.
- * 2. Executa o modelo de previsão Python via `gerarPrevisao(features)`.
- * 3. Salva as leituras e a previsão no banco de dados com `salvarUltimoDado(features)`.
+ * This function is automatically executed by `node-cron` at the zero minute of each hour.
+ * The task flow is:
+ * 1. Generates the current weather *features* by calling `gerarFeatures()`.
+ * 2. Runs the Python prediction model via `gerarPrevisao(features)`.
+ * 3. Saves the readings and the forecast into the database using `salvarUltimoDado(features)`.
  *
- * Em caso de erro em qualquer etapa, o erro é registrado no console.
+ * If an error occurs at any step, it is logged to the console.
  *
  * @async
  * @function gerarPrevisaoAgendada
  *
  * @example
- * // Exemplo de execução automática:
- * // No cron: "0 * * * *" → executa todo dia, na hora cheia.
- * // Console output esperado:
- * Gerando nova previsão programada...
- * Nova previsão gerada: { ... }
- * Previsão e dados salvos com sucesso na hora cheia.
- * // Em caso de erro:
- * Erro ao gerar previsão programada: [Error details]
+ * // Example of automatic execution:
+ * // In cron: "0 * * * *" → runs every day, at the beginning of each hour.
+ * // Expected console output:
+ * Generating scheduled forecast...
+ * New forecast generated: { ... }
+ * Forecast and data successfully saved at the top of the hour.
+ *
+ * // In case of error:
+ * Error generating scheduled forecast: [Error details]
  */
+
 cron.schedule("0 * * * *", async () => {
   console.log("Gerando nova previsão programada...");
   try {
     const features = await gerarFeatures();
 
-    // gera a previsão com os dados atuais
+    // generates the forecast using the current data
     await gerarPrevisao(features);
 
-    // salva os dados + previsão
+    // saves the data + forecast
     await salvarUltimoDado(features);
 
     console.log("Previsão e dados salvos com sucesso na hora cheia.");
@@ -794,22 +796,23 @@ cron.schedule("0 * * * *", async () => {
 });
 
 /**
- * Inicializa o servidor Express e inicia o agendamento de tarefas.
+ * Initializes the Express server and starts task scheduling.
  *
- * O servidor escuta na porta definida em `PORT` e no endereço "0.0.0.0",
- * permitindo acesso em toda a rede local. Ao iniciar, registra uma mensagem
- * no console confirmando que o servidor está ativo.
+ * The server listens on the port defined in `PORT` and on the address "0.0.0.0",
+ * allowing access across the entire local network. Upon starting, it logs a message
+ * to the console confirming that the server is active.
  *
- * Também indica que o agendamento de salvamento de previsões a cada hora
- * já foi iniciado pelo cron.
+ * It also indicates that the hourly forecast-saving schedule
+ * has already been started by the cron.
  *
  * @function iniciarServidor
  *
  * @example
- * // Console output esperado após iniciar o servidor:
- * Servidor rodando na rede na porta 4000
- * Agendamento de salvamento a cada hora cheia iniciado
+ * // Expected console output after starting the server:
+ * Server running on the network on port 4000
+ * Hourly full-hour saving schedule started
  */
+
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Servidor rodando na rede na porta ${PORT}`);
 });

@@ -1,8 +1,8 @@
 /**
  * @file App.jsx
- * @fileoverview Página principal da aplicação web, responsável por exibir
- * eventos astronômicos, visibilidade do céu e informações adicionais.  
- * Também integra chamada ao backend para buscar o feed RSS de eventos.
+ * @fileoverview Main page of the web application, responsible for displaying
+ * astronomical events, sky visibility, and additional information.
+ * It also integrates backend calls to fetch the RSS events feed.
  *
  * @version 1.0.0
  * @date 2025-09-26
@@ -10,47 +10,47 @@
  *
  * @author
  * Rafaela Fernandes Savaris <savarisf.rafaela@gmail.com>
- * Beatriz Schulter Tartare <email_bia@gmail.com>
+ * Beatriz Schulter Tartare <beastartareufsc@gmail.com>
  *
  * @license Proprietary
  *
- * @requires react Hooks do React (`useState`, `useEffect`)
- * @requires lucide-react Ícone utilizado no botão de informações (`InfoIcon`)
- * @requires react-router-dom Navegação entre rotas (`useNavigate`)
- * @requires ./assets/components/events Componente responsável por renderizar a lista de eventos
- * @requires ./assets/components/stars Fundo animado de estrelas
- * @requires ./assets/components/visibily Indicador de visibilidade do céu
- * @requires ./assets/components/info Informações adicionais exibidas na página
+ * @requires react React Hooks (`useState`, `useEffect`)
+ * @requires lucide-react Icon used in the information button (`InfoIcon`)
+ * @requires react-router-dom Route navigation (`useNavigate`)
+ * @requires ./assets/components/events Component responsible for rendering the event list
+ * @requires ./assets/components/stars Animated starry background
+ * @requires ./assets/components/visibily Sky visibility indicator
+ * @requires ./assets/components/info Additional information displayed on the page
  *
  * @description
- * O componente **App** é a página inicial da aplicação astronômica.  
- * Ele:
- * - Obtém eventos astronômicos a partir do backend (`/events`)
- * - Armazena eventos em `localStorage`
- * - Verifica acesso à geolocalização (necessário para visibilidade do céu)
- * - Renderiza os componentes principais da interface
+ * The **App** component is the home page of the astronomical application.
+ * It:
+ * - Retrieves astronomical events from the backend (`/events`)
+ * - Stores events in `localStorage`
+ * - Checks access to geolocation (required for sky visibility)
+ * - Renders the main interface components
  *
- * ### Fluxo principal
- * 1. Verificação de permissão de localização  
- * 2. Carregamento dos eventos do backend  
- * 3. Conversão do feed RSS XML → JSON  
- * 4. Salvamento no `localStorage`  
- * 5. Renderização dos componentes (Events, Visibility, StarsBackground, Info)
+ * ### Main flow
+ * 1. Location permission check
+ * 2. Loading events from the backend
+ * 3. Converting the RSS XML feed → JSON
+ * 4. Saving data to `localStorage`
+ * 5. Rendering components (Events, Visibility, StarsBackground, Info)
  *
- * ### Estados do componente
- * - `events`: eventos astronômicos carregados
- * - `loadingEvents`: indica carregamento da API
- * - `eventsError`: mensagem de erro caso a requisição falhe
- * - `locationGranted`: identifica se a permissão de localização foi concedida
+ * ### Component state
+ * - `events`: loaded astronomical events
+ * - `loadingEvents`: indicates API loading
+ * - `eventsError`: error message if the request fails
+ * - `locationGranted`: identifies whether location permission was granted
  *
- * ### Efeitos do componente
- * - Atualiza o `localStorage` sempre que `events` muda
- * - Solicita permissão de geolocalização
- * - Busca o feed XML e converte em JSON
+ * ### Component effects
+ * - Updates `localStorage` every time `events` changes
+ * - Requests geolocation permission
+ * - Fetches the XML feed and converts it to JSON
  *
- * ### Observações
- * - O backend deve fornecer um feed RSS válido em `/events`
- * - O XML é convertido para JSON manualmente via DOMParser
+ * ### Notes
+ * - The backend must provide a valid RSS feed at `/events`
+ * - The XML is manually converted to JSON using DOMParser
  */
 
 import { useEffect, useState } from "react";
@@ -64,8 +64,8 @@ import Info from "./assets/components/info";
 
 function App() {
   /**
-   * Estado que armazena a lista de eventos astronômicos.
-   * Os eventos são carregados do `localStorage` na inicialização.
+   * State that stores the list of astronomical events.
+   * Events are loaded from `localStorage` on initialization.
    * @type {[Array<Object>, Function]}
    */
   const [events, setEvents] = useState(
@@ -73,44 +73,46 @@ function App() {
   );
 
   /**
-   * Indica se os eventos estão sendo carregados do backend.
+   * Indicates whether events are being loaded from the backend.
    * @type {[boolean, Function]}
    */
   const [loadingEvents, setLoadingEvents] = useState(false);
 
   /**
-   * Armazena uma mensagem de erro caso a requisição do feed falhe.
-   * Caso não haja erro, o valor permanece `null`.
+   * Stores an error message if the feed request fails.
+   * If no error occurs, the value remains `null`.
    * @type {[string|null, Function]}
    */
   const [eventsError, setEventsError] = useState(null);
 
   /**
-   * Indica se o usuário concedeu permissão de acesso à localização.
-   * É usado para determinar quando iniciar a busca de eventos.
+   * Indicates whether the user granted location access.
+   * Used to determine when to start fetching events.
    * @type {[boolean, Function]}
    */
   const [locationGranted, setLocationGranted] = useState(false);
 
   /**
-   * Atualiza o `localStorage` sempre que a lista de eventos é modificada.
-   * Este efeito é disparado toda vez que `events` muda.
-   * Garante persistência local entre sessões do usuário.
+   * Updates `localStorage` whenever the event list changes.
+   * This effect runs every time `events` is updated.
+   * Ensures local persistence across user sessions.
    * @effect
    * @returns {void}
    */
+
   useEffect(() => {
     localStorage.setItem("events", JSON.stringify(events));
   }, [events]);
 
   /**
-   * Solicita permissão de geolocalização ao usuário.
-   * Executado apenas na montagem do componente (`[]`).
-   * Define `locationGranted` como verdadeiro independente do sucesso ou falha,
-   * garantindo que a aplicação continue funcionando mesmo sem permissão.
+   * Requests geolocation permission from the user.
+   * Executed only on component mount ([]).
+   * Sets locationGranted to true regardless of success or failure,
+   * ensuring that the application continues working even without permission.
    * @effect
    * @returns {void}
    */
+
   useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -123,14 +125,15 @@ function App() {
   }, []);
 
   /**
-   * Busca os eventos astronômicos do backend (RSS em XML) assim que a
-   * localização for concedida.
-   * Executado sempre que `locationGranted` mudar para `true`.
+   * Fetches astronomical events from the backend (RSS in XML) as soon as
+   * location is granted.
+   * Executed whenever `locationGranted` changes to `true`.
    * @effect
    * @async
-   * @throws {Error} Se ocorrer erro na requisição ou parse do XML.
+   * @throws {Error} If an error occurs during the request or XML parsing.
    * @returns {Promise<void>}
    */
+
   useEffect(() => {
     const fetchEvents = async () => {
       if (!locationGranted) return;
