@@ -39,6 +39,10 @@
  * 2. `/get_icon` — retorna texto alternativo ou legenda do ícone associado;
  * 3. `/get_credits` — retorna o texto de créditos da imagem.
  *
+ * ### Hooks utilizados:
+ * - `useState`: Armazena estados locais como URL da imagem, créditos, estados de loading e erros.
+ * - `useEffect`: Executa as requisições assíncronas sempre que o link do evento muda.
+ * 
  * @remarks
  * - Parâmetros como *title*, *description* e *link* são recebidos via URL.
  * - O texto da descrição pode conter entidades HTML, tratadas por regex.
