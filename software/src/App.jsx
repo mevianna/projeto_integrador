@@ -19,7 +19,7 @@
  * @requires react-router-dom Navegação entre rotas (`useNavigate`)
  * @requires ./assets/components/events Componente responsável por renderizar a lista de eventos
  * @requires ./assets/components/stars Fundo animado de estrelas
- * @requires ./assets/components/visibily Indicador de visibilidade do céu
+ * @requires ./assets/components/visibility Indicador de visibilidade do céu
  * @requires ./assets/components/info Informações adicionais exibidas na página
  *
  * @description
@@ -59,7 +59,7 @@ import { useNavigate } from "react-router-dom";
 import "./index.css";
 import Events from "./assets/components/events";
 import StarsBackground from "./assets/components/stars";
-import Visibility from "./assets/components/visibily";
+import Visibility from "./assets/components/visibility";
 import Info from "./assets/components/info";
 
 function App() {
