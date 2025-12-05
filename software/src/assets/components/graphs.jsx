@@ -18,7 +18,7 @@
  * @requires recharts Chart visualization components for React.
  *
  * @description
- * The **Graphs** component makes a request to the `/dados/historico` endpoint
+ * The **Graphs** component makes a request to the `/data/history` endpoint
  * and transforms the returned data into a suitable structure for display.
  *
  * Two independent charts are rendered:
@@ -174,7 +174,7 @@ function Graphs() {
    * @effect
    */
   useEffect(() => {
-    fetch("http://localhost:4000/dados/historico")
+    fetch("http://localhost:4000/data/history")
       .then((res) => res.json())
       .then((data) => {
         const formattedData = data

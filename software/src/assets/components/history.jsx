@@ -105,7 +105,7 @@ function HistoryTable() {
 
     try {
       const res = await fetch(
-        `http://localhost:4000/dados/historico?limit=${limit}&offset=${offset}`
+        `http://localhost:4000/data/history?limit=${limit}&offset=${offset}`
       );
       const data = await res.json();
 
@@ -132,7 +132,7 @@ function HistoryTable() {
       setLoading(true);
       try {
         const res = await fetch(
-          `http://localhost:4000/dados/historico?limit=${limit}&offset=0`
+          `http://localhost:4000/data/history?limit=${limit}&offset=0`
         );
         const data = await res.json();
         setHistory(data);

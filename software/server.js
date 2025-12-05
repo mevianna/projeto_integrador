@@ -30,9 +30,9 @@
  * ### Main routes
  * - `GET /events` - Returns an RSS feed of astronomical events.
  * - `POST /data` - Receives data from the ESP and triggers an initial forecast.
- * - `POST /dados/refresh` - Forces generation of a new forecast.
- * - `GET /dados/ultimo` - Returns the latest record from the database.
- * - `GET /dados/historico` - Returns the requested number of records.
+ * - `POST /data/refresh` - Forces generation of a new forecast.
+ * - `GET /data/last` - Returns the latest record from the database.
+ * - `GET /data/history` - Returns the requested number of records.
  * - `POST /cloudcover` - Updates current cloud coverage.
  *
  * ### Global variables
@@ -551,7 +551,7 @@ app.post("/data", async (req, res) => {
 });
 
 /**
- * @route POST /dados/refresh
+ * @route POST /data/refresh
  * @summary Generates a new rain prediction based on the current meteorological data from the ESP.
  *
  * This route forces an update of the rain prediction using the most recent *features*
@@ -571,7 +571,7 @@ app.post("/data", async (req, res) => {
  *
  * @example
  * // Request:
- * POST /dados/refresh
+ * POST /data/refresh
  *
  * // Success response (200 OK):
  * {
@@ -592,7 +592,7 @@ app.post("/data", async (req, res) => {
  *   "error": "Error generating prediction or saving data"
  * }
  */
-app.post("/dados/refresh", async (req, res) => {
+app.post("/data/refresh", async (req, res) => {
   try {
     if (app.locals.runningPrediction) {
       return res
@@ -616,7 +616,7 @@ app.post("/dados/refresh", async (req, res) => {
 });
 
 /**
- * @route GET /dados/ultimo
+ * @route GET /data/last
  * @summary Returns the most recent record of meteorological readings stored in the database.
  *
  * This route queries the `dados_estacao_metereologica` table in the SQLite database and returns
@@ -632,7 +632,7 @@ app.post("/dados/refresh", async (req, res) => {
  *
  * @example
  * // Request:
- * GET /dados/ultimo
+ * GET /data/last
  *
  * // Successful response (200 OK):
  * {
@@ -652,7 +652,7 @@ app.post("/dados/refresh", async (req, res) => {
  *   "error": "Error fetching latest data."
  * }
  */
-app.get("/dados/ultimo", (req, res) => {
+app.get("/data/last", (req, res) => {
   try {
     const lastData = db
       .prepare(
@@ -672,7 +672,7 @@ app.get("/dados/ultimo", (req, res) => {
 });
 
 /**
- * @route GET /dados/historico
+ * @route GET /data/history
  * @summary Returns historical records of meteorological readings with pagination support.
  *
  * This route queries the `dados_estacao_metereologica` table in the SQLite database and returns
@@ -696,10 +696,10 @@ app.get("/dados/ultimo", (req, res) => {
  *
  * @example
  * // Simple request:
- * GET /dados/historico
+ * GET /data/history
  *
  * // Equivalent to:
- * GET /dados/historico?limit=50&offset=0
+ * GET /data/history?limit=50&offset=0
  *
  * // Successful response (200 OK):
  * [
@@ -719,14 +719,14 @@ app.get("/dados/ultimo", (req, res) => {
  *
  * @example
  * // Paginated request (20 per page):
- * GET /dados/historico?limit=20&offset=20
+ * GET /data/history?limit=20&offset=20
  *
  * // Error response (500 Internal Server Error):
  * {
  *   "error": "Error fetching history."
  * }
  */
-app.get("/dados/historico", (req, res) => {
+app.get("/data/history", (req, res) => {
   const limit = parseInt(req.query.limit) || 50;
   const offset = parseInt(req.query.offset) || 0;
 

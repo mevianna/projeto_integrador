@@ -130,7 +130,7 @@ function Info() {
 
   const fetchLastData = useCallback(async () => {
     try {
-      const response = await fetch(`${API_URL}/dados/ultimo`);
+      const response = await fetch(`${API_URL}/data/last`);
       const data = await response.json();
 
       setSensorData({
@@ -170,7 +170,7 @@ function Info() {
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
     try {
-      const response = await fetch(`${API_URL}/dados/refresh`, {
+      const response = await fetch(`${API_URL}/data/refresh`, {
         method: "POST",
       });
       if (!response.ok) {
