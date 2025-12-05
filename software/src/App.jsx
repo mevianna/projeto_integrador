@@ -14,15 +14,6 @@
  *
  * @license Proprietary
  *
-<<<<<<< HEAD
- * @requires react Hooks do React (`useState`, `useEffect`)
- * @requires lucide-react Ícone utilizado no botão de informações (`InfoIcon`)
- * @requires react-router-dom Navegação entre rotas (`useNavigate`)
- * @requires ./assets/components/events Componente responsável por renderizar a lista de eventos
- * @requires ./assets/components/stars Fundo animado de estrelas
- * @requires ./assets/components/visibility Indicador de visibilidade do céu
- * @requires ./assets/components/info Informações adicionais exibidas na página
-=======
  * @requires react React Hooks (`useState`, `useEffect`)
  * @requires lucide-react Icon used in the information button (`InfoIcon`)
  * @requires react-router-dom Route navigation (`useNavigate`)
@@ -30,7 +21,6 @@
  * @requires ./assets/components/stars Animated starry background
  * @requires ./assets/components/visibily Sky visibility indicator
  * @requires ./assets/components/info Additional information displayed on the page
->>>>>>> 64db916e9bee08e9c3e94cec7a5852639638cbab
  *
  * @description
  * The **App** component is the home page of the astronomical application.

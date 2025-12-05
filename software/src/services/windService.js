@@ -9,7 +9,7 @@ export async function getWindData() {
 
     lat = pos.coords.latitude;
     lon = pos.coords.longitude;
-  } catch (e) {
+  } catch (err) {
     console.warn("Geolocalização falhou, usando SP como fallback.");
     lat = -23.55;
     lon = -46.63;

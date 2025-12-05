@@ -8,7 +8,7 @@
  *
  * @version 1.0.0
  * @date 2025-09-19
- * @lastmodified 2025-11-11
+ * @lastmodified 2025-11-28
  *
  * @author
  * Rafaela Fernandes Savaris <savarisf.rafaela@gmail.com>
@@ -51,14 +51,14 @@
  * - `deleteColumn(column)`  
  *   Checks if a column exists in the table and, if it exists,
  *   removes it from the database.
- * 
- * - `tableExists(tableName)`
- *   Checks if a table exists in the database. Returns true if it exists,
- *   false otherwise.
  *
  * - `renameColumn(oldName, newName)`
  *   Renames a column from `oldName` to `newName` if it exists and has not
  *   already been renamed.
+ * 
+ * - `renameTableIfExists(oldName, newName)`
+ *    Renames a table from `oldName` to `newName` if it exists and the new name
+ *    is not already taken.
  *
  * ### Runtime behavior
  * - Ensures the creation of the `leituras` table if it does not exist.
@@ -105,6 +105,7 @@ db.pragma("journal_mode = WAL");
  * Adds a column to the "weather_data" table if it does not exist.
  *
  * @function addColumnIfNotExists
+ * 
  * @param {string} column - Column name to be added.
  * @param {string} type - Data type of the column.
  * @param {any} [defaultValue=null] - Default value for the new column (optional).
@@ -129,6 +130,7 @@ function addColumnIfNotExists(column, type, defaultValue = null) {
  * Removes a column from the "weather_data" table if it exists.
  *
  * @function deleteColumn
+ * 
  * @param {string} column - Column name to be removed.
  * 
  * @returns {void} 
@@ -146,8 +148,13 @@ function deleteColumn(column) {
 
 /**
  * Renames a column from oldName to newName if it exists.
+ * 
+ * @function renameColumn
+ * 
  * @param {string} oldName - Existing column name
  * @param {string} newName - New column name
+ * 
+ * @returns {void}
  */
 function renameColumn(oldName, newName) {
   const info = db.prepare(`PRAGMA table_info("weather_data_final");`).all();
@@ -159,6 +166,43 @@ function renameColumn(oldName, newName) {
     db.exec(`ALTER TABLE weather_data_final RENAME COLUMN ${oldName} TO ${newName}`);
   }
 }
+
+/**
+ * Renames a table from oldName to newName if it exists.
+ *
+ * @function renameTableIfExists
+ *
+ * @param {string} oldName - Name of the existing table.
+ * @param {string} newName - Desired new table name.
+ *
+ * @returns {void}
+ */
+function renameTableIfExists(oldName, newName) {
+  // Check if the source table exists
+  const tableExists = db.prepare(`
+    SELECT name FROM sqlite_master
+    WHERE type = 'table' AND name = ?
+  `).get(oldName);
+
+  if (!tableExists) return; // Nothing to rename
+
+  // Check if the target table name already exists
+  const newTableExists = db.prepare(`
+    SELECT name FROM sqlite_master
+    WHERE type = 'table' AND name = ?
+  `).get(newName);
+
+  if (newTableExists) {
+    console.log(`Table '${newName}' already exists. Skipping rename of '${oldName}'.`);
+    return; // Prevents "there is already another table named..." errors
+  }
+
+  // Safely rename the table
+  db.prepare(`ALTER TABLE ${oldName} RENAME TO ${newName}`).run();
+  console.log(`Table '${oldName}' renamed to '${newName}'.`);
+}
+
+// Renames old table from previous versions if it exists
 renameTableIfExists("dados_estacao_metereologica", "weather_data_final");
 
 // Creates "weather_data" table if it does not exist
@@ -175,31 +219,6 @@ db.exec(`
     created_at TEXT
   )
 `);
-
-function renameTableIfExists(oldName, newName) {
-  // Verifica se a tabela original existe
-  const tableExists = db.prepare(`
-    SELECT name FROM sqlite_master
-    WHERE type='table' AND name = ?
-  `).get(oldName);
-
-  if (!tableExists) return; // nada para renomear
-
-  // Verifica se a tabela destino já existe
-  const newTableExists = db.prepare(`
-    SELECT name FROM sqlite_master
-    WHERE type='table' AND name = ?
-  `).get(newName);
-
-  if (newTableExists) {
-    console.log(`Tabela '${newName}' já existe. Ignorando renomeação de '${oldName}'.`);
-    return; // evita o erro "there is already another table..."
-  }
-
-  // Faz o rename com segurança
-  db.prepare(`ALTER TABLE ${oldName} RENAME TO ${newName}`).run();
-  console.log(`Tabela '${oldName}' renomeada para '${newName}'.`);
-}
 
 // Adds missing columns for backward compatibility
 addColumnIfNotExists("cloudCover", "REAL", 0);
