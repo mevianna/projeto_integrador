@@ -1,41 +1,41 @@
 /**
  * @file index.jsx
- * @fileoverview Arquivo de inicialização principal do aplicativo React.
- * Responsável por configurar as rotas da aplicação e renderizar
- * a interface raiz dentro do DOM.
+ * @fileoverview Main initialization file of the React application.
+ * Responsible for configuring the application's routes and rendering
+ * the root interface inside the DOM.
  *
  * @version 1.0.0
  * @date 2025-08-29
  * @lastmodified 2025-11-27
  *
  * @author
- * Beatriz Schulter Tartare <beastartare@gmail.com>
+ * Beatriz Schulter Tartare <beastartareufsc@gmail.com>
  * Rafaela Fernandes Savaris <savarisf.rafaela@gmail.com>
  *
  * @license Proprietary
  *
- * @requires react Biblioteca base para construção de interfaces (StrictMode).
- * @requires react-dom/client Responsável pela renderização da aplicação no DOM (createRoot).
- * @requires react-router-dom Biblioteca de navegação utilizada para gerenciamento das rotas
+ * @requires react Base library for building interfaces (StrictMode).
+ * @requires react-dom/client Responsible for rendering the application in the DOM (createRoot).
+ * @requires react-router-dom Navigation library used for route management
  * (createBrowserRouter, RouterProvider).
- * @requires ./App.jsx Componente principal exibido na rota raiz (/).
- * @requires ./pages/eventpage.jsx Página que exibe a lista de eventos astronômicos.
- * @requires ./pages/aboutpage.jsx Página "About" descrevendo o projeto.
- * @requires ./pages/historypage.jsx Página com o histórico de previsões.
- * @requires ./pages/graphspage.jsx Página com gráficos históricos de temperatura e umidade.
+ * @requires ./App.jsx Main component displayed at the root route (/).
+ * @requires ./pages/eventpage.jsx Page that displays the list of astronomical events.
+ * @requires ./pages/aboutpage.jsx “About” page describing the project.
+ * @requires ./pages/historypage.jsx Page containing the forecast history.
+ * @requires ./pages/graphspage.jsx Page with historical temperature and humidity graphs.
  *
  * @description
- * Este arquivo define toda a estrutura de rotas da aplicação utilizando
- * `createBrowserRouter`, atribuindo a cada caminho um componente específico.
- * Em seguida, renderiza o aplicativo dentro do elemento `#root` usando
- * React 18 e seu modo estrito (StrictMode).
+ * This file defines the entire routing structure of the application using
+ * `createBrowserRouter`, assigning each path to a specific component.
+ * It then renders the application inside the `#root` element using
+ * React 18 and its strict mode (StrictMode).
  *
- * A arquitetura de navegação permite que o usuário explore:
- * - A página inicial (App);
- * - A listagem de eventos astronômicos;
- * - O histórico de previsões meteorológicas;
- * - A página "About";
- * - Os gráficos meteorológicos históricos.
+ * The navigation architecture allows the user to explore:
+ * - The home page (App);
+ * - The listing of astronomical events;
+ * - The history of weather forecasts;
+ * - The “About” page;
+ * - The historical meteorological graphs.
  */
 
 import { StrictMode } from "react";
@@ -52,17 +52,18 @@ import GraphPages from "./pages/graphspage.jsx";
  * @constant router
  * @type {import("react-router-dom").Router}
  * @description
- * Define a estrutura de rotas da aplicação utilizando `createBrowserRouter`.
- * Cada rota corresponde a uma página específica, que é renderizada quando
- * o usuário navega para seu respectivo caminho.
+ * Defines the application's route structure using `createBrowserRouter`.
+ * Each route corresponds to a specific page, which is rendered when
+ * the user navigates to its respective path.
  *
- * ### Rotas definidas
- * - `/`: Renderiza o componente **App**, página inicial.
- * - `/events`: Renderiza **EventsPage**, com lista de eventos astronômicos.
- * - `/history`: Renderiza **HistoryPage**, exibindo o histórico de previsões.
- * - `/about`: Renderiza **AboutPage**, contendo informações sobre o projeto.
- * - `/history/graphs`: Renderiza **GraphPages**, exibindo gráficos históricos.
+ * ### Defined Routes
+ * - `/`: Renders the **App** component, the home page.
+ * - `/events`: Renders **EventsPage**, with a list of astronomical events.
+ * - `/history`: Renders **HistoryPage**, displaying the forecast history.
+ * - `/about`: Renders **AboutPage**, containing information about the project.
+ * - `/history/graphs`: Renders **GraphPages**, displaying historical graphs.
  */
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -91,17 +92,18 @@ const router = createBrowserRouter([
 ]);
 
 /**
- * Renderiza a aplicação React no elemento `#root` do DOM.
+ * Renders the React application into the `#root` DOM element.
  * @function render
  * @description
- * Inicializa o React 18 utilizando `createRoot` e envolve toda a aplicação
- * em `<StrictMode>`, garantindo avisos de práticas inseguras e verificações
- * adicionais durante o desenvolvimento.
- * O componente `RouterProvider` injeta o sistema de navegação definido pelo
- * objeto `router`, permitindo navegação entre páginas sem recarregar o site.
+ * Initializes React 18 using `createRoot` and wraps the entire application
+ * in `<StrictMode>`, ensuring warnings for unsafe practices and additional
+ * checks during development.
+ * The `RouterProvider` component injects the navigation system defined by
+ * the `router` object, allowing page navigation without reloading the site.
  *
- * @returns {void} 
+ * @returns {void}
  */
+
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <RouterProvider router={router} />

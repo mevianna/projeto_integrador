@@ -1,38 +1,38 @@
 /**
  * @file events.jsx
- * @fileoverview Componente responsável por exibir eventos astronômicos filtrados,
- * formatados e organizados em cartões responsivos. Cada evento possui título,
- * descrição tratada, data de publicação e botão para visualizar detalhes.
+ * @fileoverview Component responsible for displaying filtered, formatted, and organized
+ * astronomical events in responsive cards. Each event includes a title, processed
+ * description, publication date, and a button to view details.
  *
- * O componente realiza:
- * - Filtragem de eventos com base em palavras-chave ("today", "tomorrow", "away")
- * - Conversão de entidades HTML comuns (&deg;, &ndash;, etc.)
- * - Navegação para página de detalhes via query params
- * - Tratamento automático de campos nulos
+ * The component performs:
+ * - Filtering of events based on keywords ("today", "tomorrow", "away")
+ * - Conversion of common HTML entities (&deg;, &ndash;, etc.)
+ * - Navigation to the details page via query params
+ * - Automatic handling of null fields
  *
  * @version 1.0.0
  * @date 2025-11-27
  * @lastmodified 2025-11-26
  *
  * @author
- * Beatriz Schulter Tartare <beastartare@gmail.com>
+ * Beatriz Schulter Tartare <beastartareufsc@gmail.com>
  *
  * @license Proprietary
  *
- * @requires react-router-dom Para navegação entre páginas (`useNavigate`).
- * @requires prop-types Para validação das props recebidas pelo componente.
+ * @requires react-router-dom For page navigation (`useNavigate`).
+ * @requires prop-types For validating the props received by the component.
  *
  * @description
- * O componente **Events** recebe uma lista de eventos e exibe apenas aqueles
- * relacionados a datas próximas, usando filtragem por termos como:
+ * The **Events** component receives a list of events and displays only those
+ * related to upcoming dates, using filtering based on terms such as:
  * - "today"
  * - "tomorrow"
  * - "away"
- * Antes da renderização:
- * - O título é limpo, exibindo apenas a parte após ":" (quando existente)
- * - A descrição tem entidades HTML substituídas (° ’ – etc.)
- * - Cada cartão de evento inclui um botão *View details*, que envia os dados
- *   completos do evento via query string para `/events`.
+ * Before rendering:
+ * - The title is cleaned, showing only the part after ":" (when present)
+ * - The description has HTML entities replaced (° ’ – etc.)
+ * - Each event card includes a *View details* button, which sends the complete
+ *   event data via query string to `/events`.
  */
 
 import { useNavigate } from "react-router-dom";
@@ -41,15 +41,15 @@ import PropTypes from "prop-types";
 /**
  * @component Events
  * @description
- * Componente que exibe uma lista de eventos astronômicos filtrados e formatados.
- * @returns {JSX.Element} Interface do componente Events.
+ * Component that displays a list of filtered and formatted astronomical events.
+ * @returns {JSX.Element} The Events component interface.
  */
 function Events({ events = [] }) {
   const navigate = useNavigate();
 
   /**
-   * Mapa de entidades HTML para seus respectivos caracteres Unicode.
-   * Usado para substituir ocorrências codificadas em textos de eventos.
+   * Map of HTML entities to their respective Unicode characters.
+   * Used to replace encoded occurrences in event text.
    * @type {Object.<string, string>}
    */
   const mapa = {
@@ -61,24 +61,25 @@ function Events({ events = [] }) {
   };
 
   /**
-   * Expressão regular gerada dinamicamente contendo todas as entidades
-   * presentes em {@link mapa}. Serve para localizar rapidamente cada uma
-   * delas no texto e substituí-las por seus equivalentes.
+   * Dynamically generated regular expression containing all entities
+   * present in {@link mapa}. Used to quickly find each one in the text
+   * and replace them with their equivalents.
    * @type {RegExp}
    */
   const regex = new RegExp(Object.keys(mapa).join("|"), "g");
 
   /**
-   * Filtra os eventos recebidos, retornando apenas aqueles cujo título
-   * contenha palavras relacionadas a eventos próximos ou recentes.
-   * O filtro considera as strings:
+   * Filters the received events, returning only those whose title
+   * contains words related to upcoming or recent events.
+   * The filter considers the strings:
    * - "away"
    * - "tomorrow"
    * - "today"
    * @type {Array<Object>}
-   * @param {Array<Object>} events Lista de eventos recebidos pelo componente.
-   * @returns {Array} Lista filtrada de eventos.
+   * @param {Array<Object>} events List of events received by the component.
+   * @returns {Array} Filtered list of events.
    */
+
   const filteredEvents = events.filter((event) => {
     const title = (event && event.title) || "";
     const tl = title.toLowerCase();
@@ -145,18 +146,19 @@ function Events({ events = [] }) {
 }
 
 /**
- * Tipagem das propriedades esperadas pelo componente Events.
- * @property {Object[]} events Lista de eventos que serão exibidos.  
- * Cada evento deve possuir a estrutura definida abaixo:
+ * Typing of the properties expected by the Events component.
+ * @property {Object[]} events List of events that will be displayed.
+ * Each event must follow the structure defined below:
  * @property {string} events[].title
- * Título do evento. Pode conter prefixos ou entidades HTML que serão tratados antes da exibição.
+ * Event title. It may contain prefixes or HTML entities that will be processed before display.
  * @property {string} events[].description
- * Descrição do evento vinda do feed. Pode incluir entidades HTML e conteúdos adicionais que serão limpos e formatados.
+ * Event description coming from the feed. It may include HTML entities and additional content that will be cleaned and formatted.
  * @property {string} events[].link
- * URL com mais detalhes sobre o evento.
+ * URL with more details about the event.
  * @property {string} events[].pubDate
- * Data de publicação da notícia/evento, geralmente no formato retornado pelo feed RSS.
+ * Publication date of the news/event, usually in the format returned by the RSS feed.
  */
+
 Events.propTypes = {
   events: PropTypes.arrayOf(
     PropTypes.shape({

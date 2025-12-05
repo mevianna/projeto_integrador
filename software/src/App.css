@@ -1,29 +1,30 @@
 /**
  * @file App.css
- * @fileoverview Estilos principais da interface do aplicativo,
- * incluindo layout base, animações e efeitos visuais.
+ * @fileoverview Main interface styles for the application,
+ * including base layout, animations, and visual effects.
  *
  * @version 1.0.0
  * @date 2025-08-29
  * @lastmodified 2025-11-27
  *
  * @author
- * Beatriz Schulter Tartare <beastartare@gmail.com>
+ * Beatriz Schulter Tartare <beastartareufsc@gmail.com>
  *
  * @license Proprietary
  *
  * @description
- * Este arquivo contém estilos centrais utilizados pela página principal, como:
- * - Layout e centralização do root container;
- * - Estilização da logo e efeitos de hover;
- * - Animações (incluindo rotação automática);
- * - Ajustes responsivos via media queries;
- * - Estilo de cartões e textos secundários.
+ * This file contains core styles used by the main page, such as:
+ * - Layout and centering of the root container;
+ * - Logo styling and hover effects;
+ * - Animations (including automatic rotation);
+ * - Responsive adjustments via media queries;
+ * - Card and secondary text styles.
  */
 
 /**
- * Estilos base para o container raiz.
+ * Base styles for the root container.
  */
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -32,7 +33,7 @@
 }
 
 /**
-  * Estilos e animações da logo.
+  * Logo styles and animations.
 */
 .logo {
   height: 6em;
@@ -42,21 +43,21 @@
 }
 
 /**
- * Efeito de hover na logo.
+ * Hover effect for the logo.
 */
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
 
 /**
- * Efeito de hover na logo do React.
+ * Hover effect for the React logo.
  */
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
 /**
- * Animação de rotação contínua da logo.
+ * Continuous rotation animation for the logo.
  */
 @keyframes logo-spin {
   from {
@@ -68,7 +69,7 @@
 }
 
 /**
- * Aplica a animação de rotação à logo.
+ * Applies the rotation animation to the logo.
  */
 @media (prefers-reduced-motion: no-preference) {
   a:nth-of-type(2) .logo {
@@ -77,14 +78,14 @@
 }
 
 /**
- * Estilos para cartões de conteúdo.
+ * Styles for content cards.
  */
 .card {
   padding: 2em;
 }
 
 /**
- * Estilos para textos secundários.
+ * Styles for secondary text.
  */
 .read-the-docs {
   color: #888;

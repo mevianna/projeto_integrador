@@ -1,35 +1,35 @@
 /**
  * @file infopage.jsx
- * @fileoverview Página principal do site do site, exibindo 
+ * @fileoverview Main page of the site, displaying
  *
  * @version 1.0.0
  * @date 2025-09-26
  * @lastmodified 2025-11-26
  *
  * @author
- * Beatriz Schulter Tartare <beastartare@gmail.com>
+ * Beatriz Schulter Tartare <beastartareufsc@gmail.com>
  * Rafaela Fernandes Savaris <savarisf.rafaela@gmail.com>
  *
  * @license Proprietary
  *
- * @requires lucide-react Biblioteca responsável pela renderização de ícones SVG utilizados na navegação (ChevronLeftIcon).
- * @requires react-router-dom Gerencia a navegação entre rotas e fornece acesso aos parâmetros da URL (useNavigate, useSearchParams).
- * @requires ../assets/components/stars.jsx Componente visual para renderização do fundo animado de estrelas.
- * @requires react Hooks do React (useState, useEffect, useCallback)
+ * @requires lucide-react Library responsible for rendering SVG icons used in navigation (ChevronLeftIcon).
+ * @requires react-router-dom Manages navigation between routes and provides access to URL parameters (useNavigate, useSearchParams).
+ * @requires ../assets/components/stars.jsx Visual component for rendering the animated star background.
+ * @requires react React hooks (useState, useEffect, useCallback)
  *
  * @description
- * A **InfoPage** exibe as últimas leituras meteorológicas registradas no sistema.
- * A interface apresenta:
+ * The **InfoPage** displays the latest meteorological readings recorded in the system.
+ * The interface includes:
  *
- * - Navegação para a página de histórico completo (`/history`)
- * - Consulta automática à API ao montar o componente
- * - Tabela com as 5 leituras mais recentes
- * - Estilização responsiva com TailwindCSS
- * - Fundo visual animado com estrelas
+ * - Navigation to the full history page (`/history`)
+ * - Automatic API fetch when the component is mounted
+ * - Table with the 5 most recent readings
+ * - Responsive styling with TailwindCSS
+ * - Animated starry background
  *
- * ### Hooks utilizados
- * - `useState`: Armazena a lista de leituras retornada pela API.
- * - `useEffect`: Executa a requisição inicial para obter os dados assim que a página é carregada.
+ * ### Hooks used
+ * - `useState`: Stores the list of readings returned by the API.
+ * - `useEffect`: Executes the initial request to obtain data when the page loads.
  */
 
 import { ChevronLeftIcon } from "lucide-react";

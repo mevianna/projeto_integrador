@@ -169,7 +169,7 @@ def train_and_evaluate(X_train, y_train, X_test, y_test,
 # 3) Main Execution
 
 if __name__ == '__main__':
-    print("Carregando dados...")
+    print("Loading data...")
     df = pd.read_csv("final_dataset_rain_binary.csv", parse_dates=["datetime"])
     df = df.sort_values("datetime").reset_index(drop=True)
 
@@ -182,36 +182,36 @@ if __name__ == '__main__':
     X_train, y_train = X.iloc[:train_end], y.iloc[:train_end]
     X_test, y_test = X.iloc[train_end:], y.iloc[train_end:]
 
-    print(f"Treino: {len(X_train)} amostras | Teste: {len(X_test)} amostras")
+    print(f"Training: {len(X_train)} samples | Test: {len(X_test)} samples")
 
     best, metrics, base_curve= train_and_evaluate(
         X_train, y_train, X_test, y_test,
         random_state=42, cv_splits=5, n_iter=40
     )
 
-    print("\nMétricas:")
+    print("\nMetrics:")
     for k, v in metrics.items():
         print(f"{k}: {v}")
 
-    modelo = best.get_booster()
-    json_path = "modelo_sem_vento_xgb.json"
-    modelo.save_model(json_path)
-    print(f"Booster salvo em: {json_path}")
+    model = best.get_booster()
+    json_path = "xgb_windless_model.json"
+    model.save_model(json_path)
+    print(f"Booster saved on: {json_path}")
 
-    features_path = "features_sem_vento.json"
+    features_path = "windless_features.json"
     with open(features_path, 'w') as f:
         json.dump(list(X.columns), f)
-    print(f"Ordem das features salva em: {features_path}")
+    print(f"The order of features is saved in: {features_path}")
 
     plt.figure(figsize=(7,7))
     plt.plot(base_curve[1], base_curve[0], 'o-', label='Base')
 
     plt.plot([0,1], [0,1], '--', color='gray')
-    plt.xlabel("Probabilidade prevista")
-    plt.ylabel("Frequência real")
-    plt.title("Curva de calibração — SEM VENTO")
+    plt.xlabel("Predicted probability")
+    plt.ylabel("Real frequency")
+    plt.title("Calibration curve — WINDLESS")
     plt.legend()
     plt.grid(True)
     plt.show()
 
-    print("\nExecução finalizada.")
+    print("\nExecution completed.")

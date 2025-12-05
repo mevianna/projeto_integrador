@@ -1,7 +1,7 @@
 /**
  * @file graphspage.jsx
- * @fileoverview Página "Graphs" do site, exibindo gráficos responsivos
- * de temperatura e umidade baseados em dados históricos coletados.
+ * @fileoverview "Graphs" page of the site, displaying responsive
+ * temperature and humidity charts based on collected historical data.
  *
  * @version 1.0.0
  * @date 2025-09-26
@@ -12,22 +12,22 @@
  *
  * @license Proprietary
  *
- * @requires lucide-react Biblioteca responsável pela renderização de ícones SVG utilizados na navegação (ChevronLeftIcon).
- * @requires react-router-dom Gerencia a navegação entre rotas e fornece acesso aos parâmetros da URL (useNavigate, useSearchParams).
- * @requires ../assets/components/stars.jsx Componente visual para renderização do fundo animado de estrelas.
- * @requires ../assets/components/graphs.jsx Componente que encapsula a lógica e visualização dos gráficos.
+ * @requires lucide-react Library responsible for rendering SVG icons used in navigation (ChevronLeftIcon).
+ * @requires react-router-dom Manages navigation between routes and provides access to URL parameters (useNavigate, useSearchParams).
+ * @requires ../assets/components/stars.jsx Visual component for rendering the animated starry background.
+ * @requires ../assets/components/graphs.jsx Component that encapsulates all graph logic and visualization.
  *
-  * @description
- * A página **GraphsPage** exibe gráficos interativos e totalmente responsivos que
- * mostram séries temporais de temperatura e umidade.  
- * Ela faz parte da interface principal do sistema e integra:
- * - Navegação via `useNavigate`
- * - Fundo animado de estrelas (`StarsBackground`)
- * - Componente `Graphs`, que encapsula toda a lógica dos gráficos
+ * @description
+ * The **GraphsPage** displays fully responsive and interactive charts that
+ * show time series of temperature and humidity.
+ * It is part of the main system interface and integrates:
+ * - Navigation via `useNavigate`
+ * - Animated starry background (`StarsBackground`)
+ * - The `Graphs` component, which encapsulates all graph-related logic
  *
  * @remarks
- * - Esta página não realiza chamadas diretas à API. Os dados são carregados
- *   internamente pelo componente <Graphs />, mantendo a responsabilidade isolada.
+ * - This page does not make direct API calls.
+ *   Data is loaded internally by the <Graphs /> component, keeping responsibility isolated.
  */
 
 import { ChevronLeftIcon } from "lucide-react";
@@ -38,10 +38,11 @@ import Graphs from "../assets/components/graphs.jsx";
 /**
  * @component GraphsPage
  * @description
- * Componente da página "Graphs".
- * Exibe gráficos interativos de temperatura e umidade.
- * @returns {JSX.Element} Estrutura visual completa da página Graphs.
+ * "Graphs" page component.
+ * Displays interactive temperature and humidity charts.
+ * @returns {JSX.Element} Complete visual structure of the Graphs page.
  */
+
 function GraphsPage() {
   const navigate = useNavigate();
 
