@@ -10,6 +10,7 @@
  *
  * @author
  * Maria Eduarda Vianna <mewmvianna@gmail.com>
+ * Beatriz Schulter Tartare <beastartareufsc@gmail.com>
  *
  * @license Proprietary
  *
