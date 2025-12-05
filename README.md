@@ -40,22 +40,6 @@ Essa integração entre sensores, análise de dados e astronomia busca oferecer 
 
 ---
 
-## Configuração do Ambiente
-
-- Versões de IDE/toolchain  
-- Dependências e bibliotecas  
-- Passo a passo de configuração  
-
----
-
-## Como Usar
-
-- Instruções de upload  
-- Configurações necessárias  
-- Exemplos de uso  
-
----
-
 ## Estrutura do Projeto
 
 ### Estrutura do Projeto — Pasta *hardware*
@@ -127,16 +111,13 @@ Essa integração entre sensores, análise de dados e astronomia busca oferecer 
 ```
 ---
 
-## Troubleshooting
-
-- Problemas comuns e soluções  
-
----
-
 ## Contribuidores
 Beatriz Schuelter Tartare (24103805) - Desenvolvimento Web
+
 Eduardo Takayama - Machine Learning
+
 Maria Eduarda Winkel de Mello Vianna (24102073) - Machine Learning
+
 Rafaela Fernandes Savaris (24102078) - Hardware
 ---
 
@@ -175,30 +156,6 @@ This integration of sensors, data analysis, and astronomy provides a complete to
 - IDE: Arduino IDE, Visual Studio Code  
 - Database: MongoDB  
 - Specific library versions and documentation links  
-
----
-
-## Wiring Scheme
-
-- Connection diagram (Fritzing/KiCad)  
-- Pinout table  
-- Photos of actual assembly  
-
----
-
-## Environment Setup
-
-- IDE/toolchain versions  
-- Dependencies and libraries  
-- Step-by-step configuration guide  
-
----
-
-## How to Use
-
-- Upload instructions  
-- Required settings  
-- Usage examples  
 
 ---
 
@@ -273,16 +230,11 @@ This integration of sensors, data analysis, and astronomy provides a complete to
 ```
 ---
 
----
-
-## Troubleshooting
-
-- Common problems and solutions  
-
----
-
 ## Contributors
 Beatriz Schuelter Tartare (24103805) - Desenvolvimento Web
+
 Eduardo Takayama - Machine Learning
+
 Maria Eduarda Winkel de Mello Vianna (24102073) - Machine Learning
+
 Rafaela Fernandes Savaris (24102078) - Hardware
