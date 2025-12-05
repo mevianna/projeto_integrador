@@ -18,12 +18,10 @@ Essa integração entre sensores, análise de dados e astronomia busca oferecer 
 
 ## Requisitos de Hardware
 
-- Sensores: DHT11, BMP280, Anemômetro, Pluviômetro, Sensor de Direção do vento  
-- Microcontrolador: ESP32  
-- Jumpers  
-- Versões específicas de placas/módulos  
-- Links para datasheets  
-- Links para compra (opcional)  
+- Sensores: BMP280, UVM30A, DHT22, Encoder LM393
+- Microcontrolador: ESP32
+
+- Todos os detalhes específicos de hardware (datasheets, versões dos módulos, conexões de jumpers etc.) estão disponíveis na pasta hardware.
 
 ---
 
@@ -42,46 +40,84 @@ Essa integração entre sensores, análise de dados e astronomia busca oferecer 
 
 ---
 
-## Esquema de Conexões
-
-- Diagrama de conexões (Fritzing/KiCad)  
-- Tabela de pinagem  
-- Fotos da montagem real  
-
----
-
-## Configuração do Ambiente
-
-- Versões de IDE/toolchain  
-- Dependências e bibliotecas  
-- Passo a passo de configuração  
-
----
-
-## Como Usar
-
-- Instruções de upload  
-- Configurações necessárias  
-- Exemplos de uso  
-
----
-
 ## Estrutura do Projeto
 
-- Explicação da organização dos arquivos  
+### Estrutura do Projeto — Pasta *hardware*
 
----
+```
+📁 hardware
+├── 📁 bmp280
+│   ├── 2.sensor_BMP280.md
+│   └── teste_BMP.ino
+│
+├── 📁 dht22
+│   ├── 1.sensor_DHT22.md
+│   └── teste_DHT.ino
+│
+├── 📁 esp
+│   ├── 0.ESPs.md
+│   └── cod_esp.ino
+│
+├── 📁 indicador_dir_vento
+│   ├── 4.indicador_dir_vento.md
+│   └── teste_dir_vento.ino
+│
+├── 📁 pluviometro
+│   ├── encoder
+│   ├── 5.pluviometro.md
+│   └── (arquivos dentro de "encoder")
+│
+├── 📁 sensor_intensidade_luz
+│   ├── 7.sensor_intensidade_luz.md
+│   └── teste_gy30.ino
+│
+├── 📁 sensor_UV
+│   ├── 6.sensor_UV.md
+│   └── teste_UVM30A.ino
+│
+├── 🖼️ ESP32.png
+├── 🖼️ bmp280.png
+├── 🖼️ dht22.png
+├── 🖼️ encoder_lm393.png
+└── 🖼️ uv30ma.png
+```
 
-## Troubleshooting
-
-- Problemas comuns e soluções  
-
+### Estrutura do Projeto — Pasta *sofware*
+```
+📁 software
+├── 📁 data
+│
+├── 📁 docs
+│
+├── 📁 machine_learning_2
+│
+├── 📁 node_modules
+│
+├── 📁 public
+│
+├── 📁 src
+│
+├── .gitignore
+├── eslint.config.js
+├── index.html
+├── jsdoc.json
+├── package-lock.json
+├── package.json
+├── postcss.config.js
+├── README.md
+├── server.js
+├── tailwind.config.js
+└── vite.config.js
+```
 ---
 
 ## Contribuidores
 Beatriz Schuelter Tartare (24103805) - Desenvolvimento Web
-Eduardo - Machine Learning
+
+Eduardo Takayama - Machine Learning
+
 Maria Eduarda Winkel de Mello Vianna (24102073) - Machine Learning
+
 Rafaela Fernandes Savaris (24102078) - Hardware
 ---
 
@@ -101,12 +137,10 @@ This integration of sensors, data analysis, and astronomy provides a complete to
 
 ## Hardware Requirements
 
-- Sensors: DHT11, BMP280, Anemometer, Rain Gauge, Wind Direction Sensor  
+- Sensors: BMP280, UVM30A, DHT22, LM393 encoder  
 - Microcontroller: ESP32  
-- Jumpers  
-- Specific board/module versions  
-- Datasheet links  
-- Purchase links (optional)  
+- 
+- All hardware-specific details (datasheets, module versions, jumper connections, etc.) are available in the hardware folder.
 
 ---
 
@@ -125,44 +159,82 @@ This integration of sensors, data analysis, and astronomy provides a complete to
 
 ---
 
-## Wiring Scheme
-
-- Connection diagram (Fritzing/KiCad)  
-- Pinout table  
-- Photos of actual assembly  
-
----
-
-## Environment Setup
-
-- IDE/toolchain versions  
-- Dependencies and libraries  
-- Step-by-step configuration guide  
-
----
-
-## How to Use
-
-- Upload instructions  
-- Required settings  
-- Usage examples  
-
----
-
 ## Project Structure
 
-- Explanation of file organization  
+### Hardware Folder
 
----
+```
+📁 hardware
+├── 📁 bmp280
+│   ├── 2.sensor_BMP280.md
+│   └── teste_BMP.ino
+│
+├── 📁 dht22
+│   ├── 1.sensor_DHT22.md
+│   └── teste_DHT.ino
+│
+├── 📁 esp
+│   ├── 0.ESPs.md
+│   └── cod_esp.ino
+│
+├── 📁 indicador_dir_vento
+│   ├── 4.indicador_dir_vento.md
+│   └── teste_dir_vento.ino
+│
+├── 📁 pluviometro
+│   ├── encoder
+│   ├── 5.pluviometro.md
+│   └── (arquivos dentro de "encoder")
+│
+├── 📁 sensor_intensidade_luz
+│   ├── 7.sensor_intensidade_luz.md
+│   └── teste_gy30.ino
+│
+├── 📁 sensor_UV
+│   ├── 6.sensor_UV.md
+│   └── teste_UVM30A.ino
+│
+├── 🖼️ ESP32.png
+├── 🖼️ bmp280.png
+├── 🖼️ dht22.png
+├── 🖼️ encoder_lm393.png
+└── 🖼️ uv30ma.png
+```
 
-## Troubleshooting
-
-- Common problems and solutions  
-
+### Software Folder
+```
+📁 software
+├── 📁 data
+│
+├── 📁 docs
+│
+├── 📁 machine_learning_2
+│
+├── 📁 node_modules
+│
+├── 📁 public
+│
+├── 📁 src
+│
+├── .gitignore
+├── eslint.config.js
+├── index.html
+├── jsdoc.json
+├── package-lock.json
+├── package.json
+├── postcss.config.js
+├── README.md
+├── server.js
+├── tailwind.config.js
+└── vite.config.js
+```
 ---
 
 ## Contributors
 Beatriz Schuelter Tartare (24103805) - Desenvolvimento Web
+
 Eduardo Takayama - Machine Learning
+
 Maria Eduarda Winkel de Mello Vianna (24102073) - Machine Learning
+
 Rafaela Fernandes Savaris (24102078) - Hardware
