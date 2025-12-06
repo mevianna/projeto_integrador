@@ -38,8 +38,7 @@ Essa integração entre sensores, análise de dados e astronomia busca oferecer 
   - Python (3.12.7);
   - Javascript (Node.js v22.18.0);
   - HTML;
-  - C/C++
-  - C#;
+  - Arduino (C/C++) - https://docs.arduino.cc/language-reference/pt/;
   - CSS.
 
 - Frameworks:
@@ -56,6 +55,7 @@ Essa integração entre sensores, análise de dados e astronomia busca oferecer 
     - Flask-CORS (6.0.1) - https://flask-cors.readthedocs.io
     - Requests (2.32.3) - https://requests.readthedocs.io
     - BeautifulSoup4 / bs4 (4.12.3) - https://www.crummy.com/software/BeautifulSoup/bs4/doc/
+    - Xgboost (3.1.1) - https://xgboost.readthedocs.io/en/stable/python/python_intro.html
 
 - Sensores:
     - Wire.h - https://www.arduino.cc/en/reference/wire
@@ -64,16 +64,18 @@ Essa integração entre sensores, análise de dados e astronomia busca oferecer 
     - DHT.h / DHT_U.h - https://github.com/adafruit/DHT-sensor-library
 
 - Comunicação:
-  - WiFi.h;
-  - HTTPClient.h.
+  - WiFi.h - https://docs.arduino.cc/libraries/wifi/;
+  - HTTPClient.h - https://docs.arduino.cc/libraries/httpclient/.
 
 - IDE:
-  - Arduino IDE;
-  - Visual Studio Code.
+  - Arduino IDE - https://www.arduino.cc/en/software/;
+  - Visual Studio Code (VS Code) - https://code.visualstudio.com/.
+
+- Microcontrolador ESP32:
+  - ESP32 - https://dl.espressif.com/dl/package_esp32_index.json
 
 - Banco de dados:
   - SQLite - https://www.sqlite.org/docs.html
-
 
 - Versões específicas de bibliotecas e links para documentação  
 
@@ -94,7 +96,7 @@ npm install
 ```
 
 ### ESP
-Instalar bibliotecas listadas nos sensores
+No Arduino IDE, acesse Arquivos > Preferências , cole o link mencionado anteriormente em "URLs Adicionais para Gerenciador de Placa" e instale o pacote da placa ESP32. Em seguida, instale também as bibliotecas necessárias listadas anteriormente.
 
 ## Como executar localmente
 Para rodar o projeto completo, você precisará de 3 terminais abertos simultaneamente.
@@ -120,6 +122,8 @@ cd src
 cd python
 python scraping.py
 ```
+
+Além disso, carregue o código do sistema principal no ESP32 e garanta que o endereço IP do computador esteja corretamente configurado no código do ESP32, bem como que ambos estejam conectados à mesma rede Wi-Fi. O microcontrolador precisa permanecer conectado ao computador.
 
 ## Estrutura do Projeto
 
