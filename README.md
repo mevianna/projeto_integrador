@@ -100,6 +100,13 @@ cd software
 npm install
 ```
 
+### Machine Learning
+```bash
+cd software
+cd machine_learning_2
+pip install -r requirements.txt
+```
+
 ### ESP
 No Arduino IDE, acesse Arquivos > Preferências , cole o link mencionado anteriormente em "URLs Adicionais para Gerenciador de Placa" e instale o pacote da placa ESP32. Em seguida, instale também as bibliotecas necessárias listadas anteriormente.
 
