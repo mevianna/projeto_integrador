@@ -79,6 +79,23 @@ Essa integração entre sensores, análise de dados e astronomia busca oferecer 
 
 ---
 
+## Configuração do Ambiente
+### Backend Python
+
+```bash
+cd software
+pip install -r requirements.txt
+```
+
+### Frontend
+```bash
+cd software
+npm install
+```
+
+### ESP
+Instalar bibliotecas listadas nos sensores
+
 ## Como executar localmente
 Para rodar o projeto completo, você precisará de 3 terminais abertos simultaneamente.
 
@@ -248,6 +265,7 @@ This integration between sensors, data analysis, and astronomy aims to provide a
 - Specific library versions and documentation links  
 
 ---
+
 
 ## Running Locally
 This project requires 3 terminals running simultaneously.
