@@ -55,7 +55,14 @@ Essa integração entre sensores, análise de dados e astronomia busca oferecer 
     - Flask-CORS (6.0.1) - https://flask-cors.readthedocs.io
     - Requests (2.32.3) - https://requests.readthedocs.io
     - BeautifulSoup4 / bs4 (4.12.3) - https://www.crummy.com/software/BeautifulSoup/bs4/doc/
-    - Xgboost (3.1.1) - https://xgboost.readthedocs.io/en/stable/python/python_intro.html
+
+- Machine Learning
+    - Pandas (2.2.2) – https://pandas.pydata.org/docs/
+    - NumPy (1.26.4) – https://numpy.org/doc/
+    - Scikit-learn (1.6.1) – https://scikit-learn.org/stable/
+    - XGBoost (3.1.1) – https://xgboost.readthedocs.io/en/stable/python/python_intro.html
+    - Matplotlib (3.9.2) – https://matplotlib.org/stable/users/index.html
+    - Requests (2.32.3) - https://requests.readthedocs.io
 
 - Sensores:
     - Wire.h - https://www.arduino.cc/en/reference/wire
@@ -76,8 +83,6 @@ Essa integração entre sensores, análise de dados e astronomia busca oferecer 
 
 - Banco de dados:
   - SQLite - https://www.sqlite.org/docs.html
-
-- Versões específicas de bibliotecas e links para documentação  
 
 ---
 
