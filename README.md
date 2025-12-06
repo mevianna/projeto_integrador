@@ -168,8 +168,9 @@ Eduardo Abrahao Malateaux Takayama (24102084) - Machine Learning
 
 Maria Eduarda Winkel de Mello Vianna (24102073) - Machine Learning
 
-Rafaela Fernandes Savaris (24102078) - Hardware
----
+Rafaela Fernandes Savaris (24102078) - Hardware e Back-End
+
+--- 
 
 # Weather Station
 
