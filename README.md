@@ -18,223 +18,320 @@ Essa integração entre sensores, análise de dados e astronomia busca oferecer 
 
 ## Requisitos de Hardware
 
-- Sensores: BMP280, UVM30A, DHT22, Encoder LM393
-- Microcontrolador: ESP32
+- Sensores:
+  - DHT22;
+  - BMP280;
+  - LM393;
+  - UVM30A;
+  - Pluviômetro.
+- Microcontrolador:
+  - ESP32.
+- Jumpers.
 
-- Todos os detalhes específicos de hardware (datasheets, versões dos módulos, conexões de jumpers etc.) estão disponíveis na pasta hardware.
+- Todos os detalhes específicos de hardware (datasheets, versões dos módulos, conexões de jumpers etc.) estão disponíveis na pasta `hardware` ([clique aqui](hardware/)).
 
 ---
 
 ## Requisitos de Software
 
-- Linguagens de programação: Python, Javascript, HTML, C/C++/C#, CSS  
-- Frameworks: Tailwind  
-- Bibliotecas:  
-  - Site: React, Flask, Flask-CORS, BeautifulSoup, Requests, React Router DOM  
-  - Sensores: Wire.h, Adafruit_Sensor.h, Adafruit_BMP280.h, DHT.h  
-  - Comunicação: WiFi.h, HTTPClient.h  
-  - Outras ferramentas: Vite  
-- IDE: Arduino IDE, Visual Studio Code  
-- Banco de dados: MongoDB  
+- Linguagens de programação:
+  - Python (3.12.7);
+  - Javascript (Node.js v22.18.0);
+  - HTML;
+  - C/C++
+  - C#;
+  - CSS.
+
+- Frameworks:
+  - Tailwind (3.4.17) - https://tailwindcss.com/docs/installation/using-vite
+
+- Site (Frontend & Backend):
+  - Frontend
+    - React (18.3.1) - https://react.dev
+    - React Router DOM (6.30.1) - https://reactrouter.com/en/main
+    - Vite (5.4.19) - https://vitejs.dev/guide/
+
+  - Backend
+    - Flask (3.0.3) - https://flask.palletsprojects.com
+    - Flask-CORS (6.0.1) - https://flask-cors.readthedocs.io
+    - Requests (2.32.3) - https://requests.readthedocs.io
+    - BeautifulSoup4 / bs4 (4.12.3) - https://www.crummy.com/software/BeautifulSoup/bs4/doc/
+
+- Sensores:
+    - Wire.h - https://www.arduino.cc/en/reference/wire
+    - Adafruit_Sensor.h - https://github.com/adafruit/Adafruit_Sensor
+    - Adafruit_BMP280.h - https://github.com/adafruit/Adafruit_BMP280_Library
+    - DHT.h / DHT_U.h - https://github.com/adafruit/DHT-sensor-library
+
+- Comunicação:
+  - WiFi.h;
+  - HTTPClient.h.
+
+- IDE:
+  - Arduino IDE;
+  - Visual Studio Code.
+
+- Banco de dados:
+  - SQLite - https://www.sqlite.org/docs.html
+
+
 - Versões específicas de bibliotecas e links para documentação  
 
 ---
 
+## Como executar localmente
+Para rodar o projeto completo, você precisará de 3 terminais abertos simultaneamente.
+
+Siga a ordem:
+
+Terminal 1: Frontend (Vite)
+```bash
+cd software
+npm run dev
+```
+
+Terminal 2: Backend (Server)
+```bash
+cd software
+node server.js
+```
+
+Terminal 3: Script Python
+```bash
+cd software
+cd src
+cd python
+python scraping.py
+```
+
 ## Estrutura do Projeto
 
-### Estrutura do Projeto — Pasta *hardware*
+```
+projeto_integrador/
+├── .gitignore                
+├── README.md                 # Visão geral do projeto completo
+│
+├── 📂 hardware/              # (Tudo relacionado à parte física e firmware)
+│   ├── 📂 bmp280/
+│   │   ├── 2.sensor_BMP280.md
+│   │   └── teste_BMP.ino
+│   ├── 📂 dht22/
+│   │   ├── 1.sensor_DHT22.md
+│   │   └── teste_DHT.ino
+│   ├── 📂 esp/
+│   │   ├── 0.ESPs.md
+│   │   └── cod_esp.ino
+│   ├── 📂 indicador_dir_vento/
+│   │   ├── 4.indicador_dir_vento.md
+│   │   └── teste_dir_vento.ino
+│   ├── 📂 pluviometro/
+│   │   ├── 📂 encoder/
+│   │   └── 5.pluviometro.md
+│   ├── 📂 sensor_intensidade_luz/
+│   │   ├── 7.sensor_intensidade_luz.md
+│   │   └── teste_gy30.ino
+│   ├── 📂 sensor_UV/
+│   │   ├── 6.sensor_UV.md
+│   │   └── teste_UVM30A.ino
+│   ├── 🖼️ ESP32.png
+│   ├── 🖼️ bmp280.png
+│   ├── 🖼️ dht22.png
+│   ├── 🖼️ encoder_lm393.png
+│   └── 🖼️ uv30ma.png
+│
+└── 📂 software/              # (Aplicação Web, Backend e ML)
+    ├── 📂 data/
+    ├── 📂 docs/              
+    ├── 📂 machine_learning_2/
+    ├── 📂 public/
+    ├── 📂 src/               
+    ├── .gitignore            
+    ├── eslint.config.js
+    ├── index.html
+    ├── jsdoc.json
+    ├── package.json
+    ├── package-lock.json
+    ├── postcss.config.cjs
+    ├── README.md             
+    ├── server.js
+    ├── tailwind.config.js
+    └── vite.config.js
+```
 
-```
-📁 hardware
-├── 📁 bmp280
-│   ├── 2.sensor_BMP280.md
-│   └── teste_BMP.ino
-│
-├── 📁 dht22
-│   ├── 1.sensor_DHT22.md
-│   └── teste_DHT.ino
-│
-├── 📁 esp
-│   ├── 0.ESPs.md
-│   └── cod_esp.ino
-│
-├── 📁 indicador_dir_vento
-│   ├── 4.indicador_dir_vento.md
-│   └── teste_dir_vento.ino
-│
-├── 📁 pluviometro
-│   ├── encoder
-│   ├── 5.pluviometro.md
-│   └── (arquivos dentro de "encoder")
-│
-├── 📁 sensor_intensidade_luz
-│   ├── 7.sensor_intensidade_luz.md
-│   └── teste_gy30.ino
-│
-├── 📁 sensor_UV
-│   ├── 6.sensor_UV.md
-│   └── teste_UVM30A.ino
-│
-├── 🖼️ ESP32.png
-├── 🖼️ bmp280.png
-├── 🖼️ dht22.png
-├── 🖼️ encoder_lm393.png
-└── 🖼️ uv30ma.png
-```
 
-### Estrutura do Projeto — Pasta *sofware*
-```
-📁 software
-├── 📁 data
-│
-├── 📁 docs
-│
-├── 📁 machine_learning_2
-│
-├── 📁 node_modules
-│
-├── 📁 public
-│
-├── 📁 src
-│
-├── .gitignore
-├── eslint.config.js
-├── index.html
-├── jsdoc.json
-├── package-lock.json
-├── package.json
-├── postcss.config.js
-├── README.md
-├── server.js
-├── tailwind.config.js
-└── vite.config.js
-```
 ---
 
 ## Contribuidores
 Beatriz Schuelter Tartare (24103805) - Desenvolvimento Web
 
-Eduardo Takayama - Machine Learning
+Eduardo Abrahao Malateaux Takayama (24102084) - Machine Learning
 
 Maria Eduarda Winkel de Mello Vianna (24102073) - Machine Learning
 
 Rafaela Fernandes Savaris (24102078) - Hardware
 ---
 
+# Weather Station
+
 ## EN – Overview
 
-This project aims to develop an intelligent weather station capable of collecting, processing, and presenting climate information in an accessible and integrated way. The system combines physical sensors and data processing to provide a comprehensive view of local atmospheric conditions.
+This project aims to develop an intelligent weather station capable of collecting, processing, and presenting climate information in an accessible and integrated way. The system combines physical sensors and data processing to provide a complete view of local atmospheric conditions.
 
 The project is divided into three main modules:
 
-- **Rain forecast:** uses historical data collected by the hardware to analyze weather trends and predict precipitation probability.  
-- **Sky visibility analysis:** assesses cloud coverage and provides an estimate of how clear the sky will be, ideal for astronomical observations.  
-- **Astronomical events:** shows relevant celestial phenomena and their dates, allowing users to plan observations.  
+- **Rain Forecast:** uses historical data collected by the hardware to analyze climate trends and predict the probability of precipitation.  
+- **Sky Visibility Analysis:** evaluates cloud coverage and provides an estimate of how clear the sky will be, ideal for astronomical observations.  
+- **Astronomical Events:** displays relevant celestial phenomena and their dates, allowing users to plan observations.  
 
-This integration of sensors, data analysis, and astronomy provides a complete tool for enthusiasts and researchers interested in monitoring weather and the sky in a practical and accurate way.
+This integration between sensors, data analysis, and astronomy aims to provide a complete tool for enthusiasts and researchers interested in monitoring the weather and the sky in a practical and precise way.
 
 ---
 
 ## Hardware Requirements
 
-- Sensors: BMP280, UVM30A, DHT22, LM393 encoder  
-- Microcontroller: ESP32  
-- 
-- All hardware-specific details (datasheets, module versions, jumper connections, etc.) are available in the hardware folder.
+- Sensors:
+  - DHT22
+  - BMP280
+  - LM393
+  - UVM30A
+  - Rain Gauge
+- Microcontroller:
+  - ESP32
+- Jumpers
+
+- All specific hardware details (datasheets, module versions, jumper connections, etc.) are available in the `hardware` folder ([click here](hardware/)).
 
 ---
 
 ## Software Requirements
 
-- Programming languages: Python, Javascript, HTML, C/C++/C#, CSS  
-- Frameworks: Tailwind  
-- Libraries:  
-  - Website: React, Flask, Flask-CORS, BeautifulSoup, Requests, React Router DOM  
-  - Sensors: Wire.h, Adafruit_Sensor.h, Adafruit_BMP280.h, DHT.h  
-  - Communication: WiFi.h, HTTPClient.h  
-  - Other tools: Vite  
-- IDE: Arduino IDE, Visual Studio Code  
-- Database: MongoDB  
+- Programming Languages:
+  - Python (3.12.7)
+  - Javascript (Node.js v22.18.0)
+  - HTML
+  - C/C++
+  - C#
+  - CSS
+
+- Frameworks:
+  - Tailwind (3.4.17) - https://tailwindcss.com/docs/installation/using-vite
+
+- Site (Frontend & Backend):
+  - Frontend
+    - React (18.3.1) - https://react.dev
+    - React Router DOM (6.30.1) - https://reactrouter.com/en/main
+    - Vite (5.4.19) - https://vitejs.dev/guide/
+  - Backend
+    - Flask (3.0.3) - https://flask.palletsprojects.com
+    - Flask-CORS (6.0.1) - https://flask-cors.readthedocs.io
+    - Requests (2.32.3) - https://requests.readthedocs.io
+    - BeautifulSoup4 / bs4 (4.12.3) - https://www.crummy.com/software/BeautifulSoup/bs4/doc/
+
+- Sensors:
+  - Wire.h - https://www.arduino.cc/en/reference/wire
+  - Adafruit_Sensor.h - https://github.com/adafruit/Adafruit_Sensor
+  - Adafruit_BMP280.h - https://github.com/adafruit/Adafruit_BMP280_Library
+  - DHT.h / DHT_U.h - https://github.com/adafruit/DHT-sensor-library
+
+- Communication:
+  - WiFi.h
+  - HTTPClient.h
+
+- IDE:
+  - Arduino IDE
+  - Visual Studio Code
+
+- Database:
+  - SQLite - https://www.sqlite.org/docs.html
+
 - Specific library versions and documentation links  
 
 ---
 
-## Project Structure
+## Running Locally
+This project requires 3 terminals running simultaneously.
 
-### Hardware Folder
+Follow the steps below:
 
-```
-📁 hardware
-├── 📁 bmp280
-│   ├── 2.sensor_BMP280.md
-│   └── teste_BMP.ino
-│
-├── 📁 dht22
-│   ├── 1.sensor_DHT22.md
-│   └── teste_DHT.ino
-│
-├── 📁 esp
-│   ├── 0.ESPs.md
-│   └── cod_esp.ino
-│
-├── 📁 indicador_dir_vento
-│   ├── 4.indicador_dir_vento.md
-│   └── teste_dir_vento.ino
-│
-├── 📁 pluviometro
-│   ├── encoder
-│   ├── 5.pluviometro.md
-│   └── (arquivos dentro de "encoder")
-│
-├── 📁 sensor_intensidade_luz
-│   ├── 7.sensor_intensidade_luz.md
-│   └── teste_gy30.ino
-│
-├── 📁 sensor_UV
-│   ├── 6.sensor_UV.md
-│   └── teste_UVM30A.ino
-│
-├── 🖼️ ESP32.png
-├── 🖼️ bmp280.png
-├── 🖼️ dht22.png
-├── 🖼️ encoder_lm393.png
-└── 🖼️ uv30ma.png
+**Terminal 1: Frontend (Vite)**
+```bash
+cd software
+npm run dev
 ```
 
-### Software Folder
+**Terminal 2: Backend (Server)**
+
+```bash
+cd software
+node server.js
 ```
-📁 software
-├── 📁 data
-│
-├── 📁 docs
-│
-├── 📁 machine_learning_2
-│
-├── 📁 node_modules
-│
-├── 📁 public
-│
-├── 📁 src
-│
-├── .gitignore
-├── eslint.config.js
-├── index.html
-├── jsdoc.json
-├── package-lock.json
-├── package.json
-├── postcss.config.js
-├── README.md
-├── server.js
-├── tailwind.config.js
-└── vite.config.js
+
+**Terminal 3: Python Script**
+```bash
+cd software/src/python
+python scraping.py
 ```
----
+
+## Project Structure 
+```bash
+project_integrator/
+├── .gitignore                
+├── README.md                 # Full project overview
+│
+├── 📂 hardware/              # (Everything related to physical hardware and firmware)
+│   ├── 📂 bmp280/
+│   │   ├── 2.sensor_BMP280.md
+│   │   └── teste_BMP.ino
+│   ├── 📂 dht22/
+│   │   ├── 1.sensor_DHT22.md
+│   │   └── teste_DHT.ino
+│   ├── 📂 esp/
+│   │   ├── 0.ESPs.md
+│   │   └── cod_esp.ino
+│   ├── 📂 indicador_dir_vento/
+│   │   ├── 4.indicador_dir_vento.md
+│   │   └── teste_dir_vento.ino
+│   ├── 📂 pluviometro/
+│   │   ├── 📂 encoder/
+│   │   └── 5.pluviometro.md
+│   ├── 📂 sensor_intensidade_luz/
+│   │   ├── 7.sensor_intensidade_luz.md
+│   │   └── teste_gy30.ino
+│   ├── 📂 sensor_UV/
+│   │   ├── 6.sensor_UV.md
+│   │   └── teste_UVM30A.ino
+│   ├── 🖼️ ESP32.png
+│   ├── 🖼️ bmp280.png
+│   ├── 🖼️ dht22.png
+│   ├── 🖼️ encoder_lm393.png
+│   └── 🖼️ uv30ma.png
+│
+└── 📂 software/              # (Web app, Backend, and ML)
+    ├── 📂 data/
+    ├── 📂 docs/              
+    ├── 📂 machine_learning_2/
+    ├── 📂 public/
+    ├── 📂 src/               
+    ├── .gitignore            
+    ├── eslint.config.js
+    ├── index.html
+    ├── jsdoc.json
+    ├── package.json
+    ├── package-lock.json
+    ├── postcss.config.cjs
+    ├── README.md             
+    ├── server.js
+    ├── tailwind.config.js
+    └── vite.config.js
+
+```
 
 ## Contributors
-Beatriz Schuelter Tartare (24103805) - Desenvolvimento Web
 
-Eduardo Takayama - Machine Learning
+Beatriz Schuelter Tartare (24103805) - Web Development
+
+Eduardo Abrahao Malateaux Takayama (24102084) - Machine Learning
 
 Maria Eduarda Winkel de Mello Vianna (24102073) - Machine Learning
 
-Rafaela Fernandes Savaris (24102078) - Hardware
+Rafaela Fernandes Savaris (24102078) - Hardware and Back-End
