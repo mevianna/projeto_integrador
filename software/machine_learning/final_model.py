@@ -1,0 +1,217 @@
+"""
+ ****************************************************************************
+ * File name: final_model.py
+ * Description: Final rain prediction model.
+ * Author: Eduardo Abrahão Malateaux Takayama
+ * Creation date: 11/14/2025
+ * Last modified: 11/14/2025
+ * Contact: edumtk@gmail.com
+ * ***************************************************************************
+ * Description:
+ * This script uses climate data provided by databases and APIs
+ * to build an XGBoost predictive model for rain probability.
+ * After that, the model is saved in a JSON file.
+ *
+ * Workflow:
+ * 1. Receives and interprets the model features, and also computes engineered features.
+ * 2. Starts the training through adaptive thresholds and multiple decision-tree iterations.
+ * 3. Returns the model statistics and saves the model to a JSON file.
+ *
+ * Inputs:
+ *     - Feature data used in the model.
+ *
+ * Outputs:
+ *     - Trained model in JSON format
+ *     - Statistical plots of the model
+ *
+ * Requirements:
+ *    
+ *    - Interpreter:
+ *        - Python 3.13.1
+ *    - Python libraries:
+ *        - pandas >= 1.5
+ *        - numpy >= 1.24
+ *        - xgboost >= 1.8
+ *        - scikit-learn >= 1.2
+ *        - matplotlib >= 3.7
+ *    - Submodules / functions used:
+ *        - sklearn.calibration.calibration_curve
+ *        - sklearn.metrics: brier_score_loss, roc_auc_score, average_precision_score, f1_score
+ *        - sklearn.model_selection: TimeSeriesSplit, RandomizedSearchCV
+ ***************************************************************************
+"""
+import pandas as pd
+import numpy as np
+import xgboost as xgb
+from sklearn.calibration import calibration_curve
+from sklearn.metrics import (
+    brier_score_loss,
+    roc_auc_score,
+    average_precision_score,
+    f1_score
+)
+import matplotlib.pyplot as plt
+from sklearn.model_selection import TimeSeriesSplit, RandomizedSearchCV
+import json
+
+# 1) Features Engineering
+
+def create_features(df):
+    df = df.copy()
+
+    # Verify Datetime
+    if not np.issubdtype(df['datetime'].dtype, np.datetime64):
+        df['datetime'] = pd.to_datetime(df['datetime'])
+
+    # Time Components
+    df['hour'] = df['datetime'].dt.hour
+    df['dayofweek'] = df['datetime'].dt.dayofweek
+    df['month'] = df['datetime'].dt.month
+    df['hour_sin'] = np.sin(2 * np.pi * df['hour'] / 24)
+    df['hour_cos'] = np.cos(2 * np.pi * df['hour'] / 24)
+
+    # Artificial Features 
+    # Dew Point
+    a = 17.27
+    b = 237.7
+    gamma = (a * df['temp_C']) / (b + df['temp_C']) + np.log(df['rh_pct'] / 100)
+    df['dew_point_C'] = (b * gamma) / (a - gamma)
+
+    # Heat Index (simplified)
+    df['heat_index_C'] = df['temp_C'] + 0.33 * df['rh_pct'] - 0.70 * df['pressure_mB']/100 + 4
+
+    # Binary Flags (Physical Thresholds)
+    df['is_overcast'] = (df['cloudcover'] > 80).astype(int)
+    df['is_clear'] = (df['cloudcover'] < 20).astype(int)
+    df['is_hot'] = (df['temp_C'] > 30).astype(int)
+    df['is_cold'] = (df['temp_C'] < 10).astype(int)
+    df['is_humid'] = (df['rh_pct'] > 80).astype(int)
+    df['is_dry'] = (df['rh_pct'] < 30).astype(int)
+    df['low_pressure'] = (df['pressure_mB'] < 1010).astype(int)
+
+    # Filling empty data 
+    df = df.ffill().bfill()
+
+    return df
+
+
+# 2) Train and Evaluation
+
+def train_and_evaluate(X_train, y_train, X_test, y_test,
+                       random_state=42, cv_splits=5, n_iter=40):
+
+    tscv = TimeSeriesSplit(n_splits=cv_splits)
+
+    xgb_clf = xgb.XGBClassifier(
+        n_estimators=250,
+        n_jobs=-1,
+        random_state=random_state,
+        eval_metric='logloss'
+    )
+
+    param_dist = {
+        'max_depth': [3,4,5,6],
+        'learning_rate': [0.01, 0.03, 0.05, 0.1],
+        'subsample': [0.6, 0.8, 1.0],
+        'colsample_bytree': [0.6, 0.8, 1.0],
+        'min_child_weight': [1,3,5,10],
+        'reg_alpha': [0, 0.1, 1],
+        'reg_lambda': [1, 2, 5]
+    }
+
+    rs = RandomizedSearchCV(
+        xgb_clf,
+        param_dist,
+        n_iter=n_iter,
+        cv=tscv,
+        scoring='average_precision',
+        n_jobs=-1,
+        verbose=0,
+        random_state=random_state
+    )
+
+    rs.fit(X_train, y_train)
+
+    best = rs.best_estimator_
+    print("Best params:", rs.best_params_)
+
+    y_proba_base = best.predict_proba(X_test)[:, 1]
+
+    metrics = {
+        'brier_base': brier_score_loss(y_test, y_proba_base),
+        'aucroc_base': roc_auc_score(y_test, y_proba_base),
+        'aucpr_base': average_precision_score(y_test, y_proba_base),
+    }
+
+    def find_best_threshold(y_true, y_probs, grid=np.linspace(0.05, 0.9, 12), min_preds=3):
+        best_t = 0.5
+        best_f1 = -1
+        for t in grid:
+            p = (y_probs >= t).astype(int)
+            if p.sum() < min_preds:
+                continue
+            f1 = f1_score(y_true, p, zero_division=0)
+            if f1 > best_f1:
+                best_f1 = f1
+                best_t = t
+        return best_t, best_f1
+
+    best_t, best_f1 = find_best_threshold(y_test.values, y_proba_base)
+    metrics['best_threshold'] = best_t
+    metrics['f1_best'] = best_f1
+    metrics['f1_05'] = f1_score(y_test, (y_proba_base >= 0.5).astype(int), zero_division=0)
+
+    t_base, p_base = calibration_curve(y_test, y_proba_base, n_bins=10)
+
+    return best, metrics, (t_base, p_base)
+
+
+# 3) Main Execution
+
+if __name__ == '__main__':
+    print("Loading data...")
+    df = pd.read_csv("final_dataset_rain_binary.csv", parse_dates=["datetime"])
+    df = df.sort_values("datetime").reset_index(drop=True)
+
+    df_proc = create_features(df)
+
+    X = df_proc.drop(columns=['datetime', 'precip_mm', 'rain'], errors='ignore')
+    y = df_proc['rain']
+
+    train_end = int(len(X) * 0.85)
+    X_train, y_train = X.iloc[:train_end], y.iloc[:train_end]
+    X_test, y_test = X.iloc[train_end:], y.iloc[train_end:]
+
+    print(f"Training: {len(X_train)} samples | Test: {len(X_test)} samples")
+
+    best, metrics, base_curve= train_and_evaluate(
+        X_train, y_train, X_test, y_test,
+        random_state=42, cv_splits=5, n_iter=40
+    )
+
+    print("\nMetrics:")
+    for k, v in metrics.items():
+        print(f"{k}: {v}")
+
+    model = best.get_booster()
+    json_path = "xgb_windless_model.json"
+    model.save_model(json_path)
+    print(f"Booster saved on: {json_path}")
+
+    features_path = "windless_features.json"
+    with open(features_path, 'w') as f:
+        json.dump(list(X.columns), f)
+    print(f"The order of features is saved in: {features_path}")
+
+    plt.figure(figsize=(7,7))
+    plt.plot(base_curve[1], base_curve[0], 'o-', label='Base')
+
+    plt.plot([0,1], [0,1], '--', color='gray')
+    plt.xlabel("Predicted probability")
+    plt.ylabel("Real frequency")
+    plt.title("Calibration curve — WINDLESS")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+    print("\nExecution completed.")
