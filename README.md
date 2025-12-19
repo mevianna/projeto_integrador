@@ -28,7 +28,7 @@ Essa integração entre sensores, análise de dados e astronomia busca oferecer 
   - ESP32.
 - Jumpers.
 
-- Todos os detalhes específicos de hardware (datasheets, versões dos módulos, conexões de jumpers etc.) estão disponíveis na pasta `hardware` ([clique aqui](hardware/)).
+- Todos os detalhes específicos de hardware (datasheets, versões dos módulos, conexões de jumpers etc.) estão disponíveis na pasta `hardware`: ([Hardware](hardware/)).
 
 ---
 
@@ -37,9 +37,9 @@ Essa integração entre sensores, análise de dados e astronomia busca oferecer 
 - Linguagens de programação:
   - Python (3.12.7);
   - Javascript (Node.js v22.18.0);
-  - HTML;
+  - HTML (HTML5) - https://www.w3schools.com/html/;
   - Arduino (C/C++) - https://docs.arduino.cc/language-reference/pt/;
-  - CSS.
+  - CSS (CSS3+) - https://www.w3schools.com/css/.
 
 - Frameworks:
   - Tailwind (3.4.17) - https://tailwindcss.com/docs/installation/using-vite
@@ -86,7 +86,14 @@ Essa integração entre sensores, análise de dados e astronomia busca oferecer 
 
 ---
 
+## Acesso do projeto pelo link
+
+Pode-se acessar o projeto pelo link abaixo ou, alternativamente, seguir os próximos tópicos para efetuar sua execução local.
+
+https://projeto-integrador-qzrn.vercel.app/
+
 ## Configuração do Ambiente
+
 ### Backend Python
 
 ```bash
@@ -95,22 +102,26 @@ pip install -r requirements.txt
 ```
 
 ### Frontend
+
 ```bash
 cd software
 npm install
 ```
 
 ### Machine Learning
+
 ```bash
 cd software
-cd machine_learning_2
+cd machine_learning
 pip install -r requirements.txt
 ```
 
 ### ESP
+
 No Arduino IDE, acesse Arquivos > Preferências , cole o link mencionado anteriormente em "URLs Adicionais para Gerenciador de Placa" e instale o pacote da placa ESP32. Em seguida, instale também as bibliotecas necessárias listadas anteriormente.
 
 ## Como executar localmente
+
 Para rodar o projeto completo, você precisará de 3 terminais abertos simultaneamente.
 
 Siga a ordem:
@@ -135,47 +146,53 @@ cd python
 python scraping.py
 ```
 
-Além disso, carregue o código do sistema principal no ESP32 e garanta que o endereço IP do computador esteja corretamente configurado no código do ESP32, bem como que ambos estejam conectados à mesma rede Wi-Fi. O microcontrolador precisa permanecer conectado ao computador.
+Além disso, carregue o código do sistema principal no ESP32 e garanta que o endereço IP do computador esteja corretamente configurado no código do ESP32, bem como que ambos estejam conectados à mesma rede Wi-Fi. O microcontrolador precisa permanecer conectado ao computador. Para mais informações, acesse: [Sistema Principal](./hardware/main/README.md)
 
 ## Estrutura do Projeto
 
-```
-projeto_integrador/
+```bash
+2025.2_DEC0013_ESTACAO-METEREOLOGICA/
 ├── .gitignore                
-├── README.md                 # Visão geral do projeto completo
-│
-├── 📂 hardware/              # (Tudo relacionado à parte física e firmware)
-│   ├── 📂 bmp280/
-│   │   ├── 2.sensor_BMP280.md
-│   │   └── teste_BMP.ino
-│   ├── 📂 dht22/
-│   │   ├── 1.sensor_DHT22.md
-│   │   └── teste_DHT.ino
-│   ├── 📂 esp/
-│   │   ├── 0.ESPs.md
-│   │   └── cod_esp.ino
-│   ├── 📂 indicador_dir_vento/
-│   │   ├── 4.indicador_dir_vento.md
-│   │   └── teste_dir_vento.ino
-│   ├── 📂 pluviometro/
+├── README.md                         # Visão geral do projeto
+├── 📂 hardware/                     
+|   ├── 📂 main/
+│   │   ├── main_system.ino           # Código principal do sistema
+│   │   └── README.md                 # Documentação do sistema principal
+│   ├── 📂sensors/                   # Documentação explicando todas as conexões dos componentes
+│   │   ├── 📂 bmp280/
+│   │   │   ├── bmp280.ino            # Código de teste do sensor BMP280
+│   │   │   └── README.md             # Documentação sobre o sensor, conexões e uso
+│   │   ├── 📂 dht22/
+│   │   │   ├── dht22.ino             # Código de teste do sensor DHT22
+│   │   │   └── README.md             # Documentação sobre o sensor, conexões e uso
 │   │   ├── 📂 encoder/
-│   │   └── 5.pluviometro.md
-│   ├── 📂 sensor_intensidade_luz/
-│   │   ├── 7.sensor_intensidade_luz.md
-│   │   └── teste_gy30.ino
-│   ├── 📂 sensor_UV/
-│   │   ├── 6.sensor_UV.md
-│   │   └── teste_UVM30A.ino
-│   ├── 🖼️ ESP32.png
-│   ├── 🖼️ bmp280.png
-│   ├── 🖼️ dht22.png
-│   ├── 🖼️ encoder_lm393.png
-│   └── 🖼️ uv30ma.png
-│
-└── 📂 software/              # (Aplicação Web, Backend e ML)
+│   │   │   ├── encoder.ino           # Código de teste do sensor LM393 (encoder)
+│   │   │   └── README.md             # Documentação sobre o sensor, conexões e uso
+│   │   ├── 📂 pluviometer/
+│   │   │   ├── pluviometer.ino       # Código de teste do pluviômetro com encoder
+│   │   │   └── README.md             # Documentação sobre o sensor, conexões e uso
+│   │   └── 📂 uvm30a/
+│   │       ├── test_UVM30A.ino       # Código de teste do sensor UV UVM30A
+│   │       └── README.md             # Documentação sobre o sensor, conexões e uso
+│   └── 📂 schematic/
+│       └── README.md             
+├── 📂 img/
+│   ├── bmp280.png
+│   ├── dht22.png
+│   ├── lm393.png
+│   ├── pluviometer.png
+│   ├── schematic.png
+│   ├── terminal_bmp280.png
+│   ├── terminal_dht22.png
+│   ├── terminal_lm393.png
+│   ├── terminal_main_system.jpeg
+│   ├── terminal_pluviometer.png
+│   ├── terminal_uvm30a.png
+│   └── uvm30a.png
+└── 📂 software/                     # (Aplicação Web, Backend e ML)
     ├── 📂 data/
     ├── 📂 docs/              
-    ├── 📂 machine_learning_2/
+    ├── 📂 machine_learning/
     ├── 📂 public/
     ├── 📂 src/               
     ├── .gitignore            
@@ -184,24 +201,22 @@ projeto_integrador/
     ├── jsdoc.json
     ├── package.json
     ├── package-lock.json
-    ├── postcss.config.cjs
-    ├── README.md             
+    ├── postcss.config.cjs        
     ├── server.js
     ├── tailwind.config.js
     └── vite.config.js
 ```
 
-
 ---
 
 ## Contribuidores
-Beatriz Schuelter Tartare (24103805) - Desenvolvimento Web
 
-Eduardo Abrahao Malateaux Takayama (24102084) - Machine Learning
-
-Maria Eduarda Winkel de Mello Vianna (24102073) - Machine Learning
-
-Rafaela Fernandes Savaris (24102078) - Hardware e Back-End
+| Members |
+| :---: |
+| [<img loading="lazy" src="https://avatars.githubusercontent.com/u/197432407?v=4" width="115"><br><sub>Beatriz Schuelter Tartare (24103805) - Web Development</sub>](https://github.com/beastartare) |
+| [<img loading="lazy" src="https://avatars.githubusercontent.com/u/196859849?v=4" width="115"><br><sub>Eduardo Abrahao Malateaux Takayama (24102084) - Machine Learning</sub>](https://github.com/edumtk) |
+| [<img loading="lazy" src="https://avatars.githubusercontent.com/u/160762179?v=4" width="115"><br><sub>Maria Eduarda Winkel de Mello Vianna (24102073) - Machine Learning</sub>](https://github.com/mevianna) |
+| [<img loading="lazy" src="https://avatars.githubusercontent.com/u/178849007?v=4" width="115"><br><sub>Rafaela Fernandes Savaris (24102078) - Hardware and Back-End</sub>](https://github.com/rafasavaris) |
 
 --- 
 
@@ -240,12 +255,11 @@ This integration between sensors, data analysis, and astronomy aims to provide a
 ## Software Requirements
 
 - Programming Languages:
-  - Python (3.12.7)
-  - Javascript (Node.js v22.18.0)
-  - HTML
-  - C/C++
-  - C#
-  - CSS
+  - Python (3.12.7);
+  - Javascript (Node.js v22.18.0);
+  - HTML (HTML5) - https://www.w3schools.com/html/;
+  - Arduino (C/C++) - https://docs.arduino.cc/language-reference/pt/;
+  - CSS (CSS3+) - https://www.w3schools.com/css/.
 
 - Frameworks:
   - Tailwind (3.4.17) - https://tailwindcss.com/docs/installation/using-vite
@@ -255,11 +269,20 @@ This integration between sensors, data analysis, and astronomy aims to provide a
     - React (18.3.1) - https://react.dev
     - React Router DOM (6.30.1) - https://reactrouter.com/en/main
     - Vite (5.4.19) - https://vitejs.dev/guide/
+
   - Backend
     - Flask (3.0.3) - https://flask.palletsprojects.com
     - Flask-CORS (6.0.1) - https://flask-cors.readthedocs.io
     - Requests (2.32.3) - https://requests.readthedocs.io
     - BeautifulSoup4 / bs4 (4.12.3) - https://www.crummy.com/software/BeautifulSoup/bs4/doc/
+
+- Machine Learning
+    - Pandas (2.2.2) – https://pandas.pydata.org/docs/
+    - NumPy (1.26.4) – https://numpy.org/doc/
+    - Scikit-learn (1.6.1) – https://scikit-learn.org/stable/
+    - XGBoost (3.1.1) – https://xgboost.readthedocs.io/en/stable/python/python_intro.html
+    - Matplotlib (3.9.2) – https://matplotlib.org/stable/users/index.html
+    - Requests (2.32.3) - https://requests.readthedocs.io
 
 - Sensors:
   - Wire.h - https://www.arduino.cc/en/reference/wire
@@ -268,22 +291,57 @@ This integration between sensors, data analysis, and astronomy aims to provide a
   - DHT.h / DHT_U.h - https://github.com/adafruit/DHT-sensor-library
 
 - Communication:
-  - WiFi.h
-  - HTTPClient.h
+  - WiFi.h - https://docs.arduino.cc/libraries/wifi/;
+  - HTTPClient.h - https://docs.arduino.cc/libraries/httpclient/.
 
 - IDE:
-  - Arduino IDE
-  - Visual Studio Code
+  - Arduino IDE - https://www.arduino.cc/en/software/;
+  - Visual Studio Code (VS Code) - https://code.visualstudio.com/.
+
+- Microcontroller ESP32:
+  - ESP32 - https://dl.espressif.com/dl/package_esp32_index.json
 
 - Database:
   - SQLite - https://www.sqlite.org/docs.html
 
-- Specific library versions and documentation links  
-
 ---
 
+## Project Access via Link
+
+You can access the project using the link below or, alternatively, follow the next sections to run it locally.
+
+https://projeto-integrador-qzrn.vercel.app/
+
+## Environment Setup
+
+### Backend Python
+
+```bash
+cd software
+pip install -r requirements.txt
+```
+
+### Frontend
+
+```bash
+cd software
+npm install
+```
+
+### Machine Learning
+
+```bash
+cd software
+cd machine_learning
+pip install -r requirements.txt
+```
+
+### ESP
+
+In the Arduino IDE, go to File > Preferences, paste the previously mentioned link into “Additional Board Manager URLs,” and install the ESP32 board package. Then, install all the required libraries listed above. 
 
 ## Running Locally
+
 This project requires 3 terminals running simultaneously.
 
 Follow the steps below:
@@ -307,44 +365,52 @@ cd software/src/python
 python scraping.py
 ```
 
+Additionally, upload the main system code to the ESP32 and ensure that the computer’s IP address is correctly configured in the ESP32 code, and that both devices are connected to the same Wi-Fi network. The microcontroller must remain connected to the computer during operation. For more information, see: [Main System](./hardware/main/README.md)
+
 ## Project Structure 
 ```bash
-project_integrator/
+projeto_integrador/
 ├── .gitignore                
-├── README.md                 # Full project overview
-│
-├── 📂 hardware/              # (Everything related to physical hardware and firmware)
-│   ├── 📂 bmp280/
-│   │   ├── 2.sensor_BMP280.md
-│   │   └── teste_BMP.ino
-│   ├── 📂 dht22/
-│   │   ├── 1.sensor_DHT22.md
-│   │   └── teste_DHT.ino
-│   ├── 📂 esp/
-│   │   ├── 0.ESPs.md
-│   │   └── cod_esp.ino
-│   ├── 📂 indicador_dir_vento/
-│   │   ├── 4.indicador_dir_vento.md
-│   │   └── teste_dir_vento.ino
-│   ├── 📂 pluviometro/
+├── README.md                         # Project overvieW
+├── 📂 hardware/                     
+│   ├── 📂 main/
+│   │   ├── main_system.ino           # Main system code
+│   │   └── README.md                 # Main system documentation
+│   ├── 📂 sensors/                   # Documentation and test code for all sensors
+│   │   ├── 📂 bmp280/
+│   │   │   ├── bmp280.ino            # Test code for BMP280 sensor
+│   │   │   └── README.md             # BMP280 documentation (usage and wiring)
+│   │   ├── 📂 dht22/
+│   │   │   ├── dht22.ino             # Test code for DHT22 sensor
+│   │   │   └── README.md             # DHT22 documentation (usage and wiring)
 │   │   ├── 📂 encoder/
-│   │   └── 5.pluviometro.md
-│   ├── 📂 sensor_intensidade_luz/
-│   │   ├── 7.sensor_intensidade_luz.md
-│   │   └── teste_gy30.ino
-│   ├── 📂 sensor_UV/
-│   │   ├── 6.sensor_UV.md
-│   │   └── teste_UVM30A.ino
-│   ├── 🖼️ ESP32.png
-│   ├── 🖼️ bmp280.png
-│   ├── 🖼️ dht22.png
-│   ├── 🖼️ encoder_lm393.png
-│   └── 🖼️ uv30ma.png
-│
-└── 📂 software/              # (Web app, Backend, and ML)
+│   │   │   ├── encoder.ino           # Test code for LM393 encoder sensor
+│   │   │   └── README.md             # Encoder documentation (usage and wiring)
+│   │   ├── 📂 pluviometer/
+│   │   │   ├── pluviometer.ino       # Test code for the rain gauge with encoder
+│   │   │   └── README.md             # Pluviometer documentation (usage and wiring)
+│   │   └── 📂 uvm30a/
+│   │       ├── test_UVM30A.ino       # Test code for UVM30A UV sensor
+│   │       └── README.md             # UVM30A documentation (usage and wiring)
+│   └── 📂 schematic/
+│       └── README.md                 # Hardware schematic documentation
+├── 📂 img/
+│   ├── bmp280.png
+│   ├── dht22.png
+│   ├── lm393.png
+│   ├── pluviometer.png
+│   ├── schematic.png
+│   ├── terminal_bmp280.png
+│   ├── terminal_dht22.png
+│   ├── terminal_lm393.png
+│   ├── terminal_main_system.jpeg
+│   ├── terminal_pluviometer.png
+│   ├── terminal_uvm30a.png
+│   └── uvm30a.png
+└── 📂 software/                      # (Web App, Backend, and ML)
     ├── 📂 data/
     ├── 📂 docs/              
-    ├── 📂 machine_learning_2/
+    ├── 📂 machine_learning/
     ├── 📂 public/
     ├── 📂 src/               
     ├── .gitignore            
@@ -353,20 +419,17 @@ project_integrator/
     ├── jsdoc.json
     ├── package.json
     ├── package-lock.json
-    ├── postcss.config.cjs
-    ├── README.md             
+    ├── postcss.config.cjs         
     ├── server.js
     ├── tailwind.config.js
     └── vite.config.js
-
 ```
 
 ## Contributors
 
-Beatriz Schuelter Tartare (24103805) - Web Development
-
-Eduardo Abrahao Malateaux Takayama (24102084) - Machine Learning
-
-Maria Eduarda Winkel de Mello Vianna (24102073) - Machine Learning
-
-Rafaela Fernandes Savaris (24102078) - Hardware and Back-End
+| Members |
+| :---: |
+| [<img loading="lazy" src="https://avatars.githubusercontent.com/u/197432407?v=4" width="115"><br><sub>Beatriz Schuelter Tartare (24103805) - Web Development</sub>](https://github.com/beastartare) |
+| [<img loading="lazy" src="https://avatars.githubusercontent.com/u/196859849?v=4" width="115"><br><sub>Eduardo Abrahao Malateaux Takayama (24102084) - Machine Learning</sub>](https://github.com/edumtk) |
+| [<img loading="lazy" src="https://avatars.githubusercontent.com/u/160762179?v=4" width="115"><br><sub>Maria Eduarda Winkel de Mello Vianna (24102073) - Machine Learning</sub>](https://github.com/mevianna) |
+| [<img loading="lazy" src="https://avatars.githubusercontent.com/u/178849007?v=4" width="115"><br><sub>Rafaela Fernandes Savaris (24102078) - Hardware and Back-End</sub>](https://github.com/rafasavaris) |
